@@ -4,6 +4,69 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.3] — 2026-10-05
+
+Lighthouse-driven quality pass (mobile, Moto G Power / Slow 4G baseline): performance
+assets, WCAG contrast to 100, and a real client-side cache layer for repeat visits.
+
+### Added — service worker (static flavor only): repeat-visit cache
+- GitHub Pages serves every asset with `Cache-Control: max-age=600` (Lighthouse:
+  "use efficient cache lifetimes", 821 KiB re-downloaded per revisit). The new
+  `public/sw.js` installs proper immutable-asset semantics:
+  `/_next/static/**` → cache-first (content-hashed, permanently valid);
+  `/games|brand|fonts/**` → stale-while-revalidate; navigations → network-first
+  with offline fallback; `/releases/**` (the 2.2 MB installer) never cached.
+- Registered by `sw-register.tsx` after the window `load` event, **only** when
+  `IS_STATIC_EXPORT` (the SSR/dev flavor never registers it). Bump `VERSION`
+  in `sw.js` whenever public assets change so old caches drop on activate.
+- Verified locally: full offline page load (12 sections render with the network
+  off), 28 entries cached (16 chunks + 6 games + 2 logos + document/manifest/
+  icons), installer always network-only.
+- Fixed a subtle first-draft bug during verification: `staleWhileRevalidate`
+  cloned the response *after* `caches.open()` resolved — by then the consumer
+  had started reading the body, `response.clone()` threw "body already used"
+  silently and the cache never filled. Clones are now taken synchronously
+  before the response is handed to `respondWith`.
+
+### Changed — image diet: −341 KiB (~38 % of page weight)
+- All eight `<Image>` assets converted to WebP via the new one-shot
+  `scripts/optimize-images.ts` (sharp, single encode): six game key-arts
+  ~68–90 KB JPEG → 43–63 KB WebP; hero-emblem logo (the mobile LCP element)
+  62.7 KB → **11.4 KB** (−82 %); navbar/footer logo 11.8 KB → 3.1 KB.
+- `src/app/icon.png` 163.7 KB → 61.0 KB and `apple-icon.png` 28.2 KB → 11.2 KB
+  (palette-compressed in place). Manifest icons stay PNG (spec-safe) — only
+  page-load `<Image>` references moved to `.webp`; the JSON-LD logo stays PNG
+  for scrapers.
+
+### Fixed — accessibility (Lighthouse a11y 95 → 100 target)
+- **Contrast**: every text-bearing `text-muted-foreground/70|80|60` and
+  `text-crimson/70|80` raised to full token contrast (footer platform chips,
+  disclaimer, made-for line, changelog dates/meta, showcase footnote/workflow
+  status, social-proof caption, install-flow counter, section eyebrows/numerals).
+- **Profiles comparison cards**: the inactive card dimmed its whole subtree via
+  `opacity: .55` × per-item `.6` × `text-foreground/80` ≈ 2:1 effective
+  contrast. Inactive state now recedes via scale + losing its accent skin
+  (gradient/border/glow/ACTIVE pill) — text stays at full WCAG contrast.
+- **Color tokens**: light-mode amber `#d4a504` (2.2:1) → `#a16207` (4.9:1);
+  segmented-control active label and the ACTIVE pill now use theme-aware
+  accent classes instead of raw brand fills as text color.
+- **Heading order**: mock-dashboard game-card titles `h5` → `h3` (was the only
+  h2→h5 skip on the page; heading sequence is now strictly descending).
+
+### Investigated, deliberately not changed
+- **Legacy JavaScript (14 KiB)**: the flagged polyfills (`Array.prototype.at`,
+  `flat`, `Object.fromEntries`, …) are bundled *inside* third-party libraries,
+  not injected by Next. An explicit `browserslist` was A/B-tested and made the
+  bundle **22 KiB larger** (Next 16/Turbopack already compiles to a modern
+  baseline) — removed; patching the dependency would be fragile for ~1.5 % of
+  transfer.
+- **Render-blocking CSS (300 ms)** and GitHub Pages' 10-minute TTL are
+  platform constraints; the service worker above addresses the repeat-visit
+  half of the TTL problem.
+- **Non-composited animations**: remaining items are user-triggered (accordion
+  height, theme cross-fade) or decorative SVG paint (flow arrows), all disabled
+  under `prefers-reduced-motion`.
+
 ## [1.2.2] — 2026-10-05
 
 ### Fixed — critical: blank page while scrolling on slow mobile connections

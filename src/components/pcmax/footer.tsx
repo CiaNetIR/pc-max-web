@@ -54,7 +54,7 @@ export function Footer() {
             <a href="#top" className="group flex items-center gap-3.5">
               <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70 transition-all duration-300 group-hover:scale-105 group-hover:ring-crimson/50">
                 <Image
-                  src={asset("/brand/pcmax-logo-96.png")}
+                  src={asset("/brand/pcmax-logo-96.webp")}
                   alt=""
                   width={44}
                   height={44}
@@ -71,11 +71,11 @@ export function Footer() {
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
               {t.footer.tagline}
             </p>
-            <p className="mt-4 flex items-center gap-2 text-xs font-medium text-muted-foreground/80">
+            <p className="mt-4 flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <WindowsIcon className="text-sm text-crimson/70" />
               {t.footer.madeFor}
             </p>
-            <p className="type-eyebrow mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase text-muted-foreground/60">
+            <p className="type-eyebrow mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase text-muted-foreground">
               {t.footer.platformItems.map((item, index) => (
                 <span key={item} className="flex items-center gap-2">
                   {index > 0 && (
@@ -190,7 +190,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-border/60 pb-10 pt-6">
-          <p className="text-xs leading-relaxed text-muted-foreground/70">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             {t.footer.disclaimer}
           </p>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">

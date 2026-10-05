@@ -32,7 +32,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         {/* Digest — the stable error id Next assigns; safe to display in
             production (no raw error.message ever reaches the UI). */}
         {error.digest ? (
-          <p className="mt-3 select-all font-mono text-xs tracking-wide text-muted-foreground/70">
+          <p className="mt-3 select-all font-mono text-xs tracking-wide text-muted-foreground">
             {error.digest}
           </p>
         ) : null}

@@ -18,13 +18,15 @@ type TabKey = "dashboard" | "multiframe" | "windows" | "settings";
 const tabOrder: TabKey[] = ["dashboard", "multiframe", "windows", "settings"];
 const tabIcons = [PerformanceIcon, GpuIcon, ShieldIcon, SettingsIcon];
 
+/* WebP key-arts (Task 23 image diet: ~68–90 KB JPEG → 43–63 KB WebP,
+ * single-encode via scripts/optimize-images.ts). */
 const gameFiles = [
-  "/games/cyberpunk.jpg",
-  "/games/gtav.jpg",
-  "/games/wukong.jpg",
-  "/games/eldenring.jpg",
-  "/games/alanwake2.jpg",
-  "/games/bg3.jpg",
+  "/games/cyberpunk.webp",
+  "/games/gtav.webp",
+  "/games/wukong.webp",
+  "/games/eldenring.webp",
+  "/games/alanwake2.webp",
+  "/games/bg3.webp",
 ].map(asset);
 
 /* ------------------- Panel detail copy (mock UI state) -----------------
@@ -274,7 +276,7 @@ export function AppShowcase() {
                       "flex h-10 w-10 items-center justify-center rounded-xl transition-colors",
                       tabOrder.indexOf(tab) === i
                         ? "border border-crimson/40 bg-crimson/10 text-crimson"
-                        : "text-muted-foreground/60 hover:text-foreground"
+                        : "text-muted-foreground/70 hover:text-foreground"
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -370,9 +372,9 @@ export function AppShowcase() {
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                      <h5 className="truncate font-display text-sm font-bold text-foreground">
+                                      <h3 className="truncate font-display text-sm font-bold text-foreground">
                                         {game.name}
-                                      </h5>
+                                      </h3>
                                       {g.isNew && (
                                         <span className="rounded-full border border-crimson/40 bg-crimson/10 px-2 py-0.5 text-[10px] font-bold text-crimson">
                                           {copy.newOpt}
@@ -442,7 +444,7 @@ export function AppShowcase() {
                                   {wf.name}
                                 </span>
                               </div>
-                              <span className={cn("type-eyebrow text-[10px] font-bold uppercase", wf.ok ? "text-crimson" : "text-muted-foreground/70")}>
+                              <span className={cn("type-eyebrow text-[10px] font-bold uppercase", wf.ok ? "text-crimson" : "text-muted-foreground")}>
                                 {wf.status}
                               </span>
                             </motion.div>
@@ -465,7 +467,7 @@ export function AppShowcase() {
                             <div className="mb-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground">
                               <span>{t.showcase.win.applied}</span>
                               <span className="text-foreground">
-                                6 <span className="text-muted-foreground/60">{t.showcase.win.of}</span> 8 {t.showcase.win.modules}
+                                6 <span className="text-muted-foreground">{t.showcase.win.of}</span> 8 {t.showcase.win.modules}
                               </span>
                             </div>
                             <div className="h-2 overflow-hidden rounded-full bg-border/70">
@@ -626,7 +628,7 @@ export function AppShowcase() {
                     <Check className="h-3 w-3 text-crimson" strokeWidth={3} />
                     {t.library.badges.exe} · {t.library.badges.icon}
                   </span>
-                  <span className="type-eyebrow font-mono text-[10px] font-semibold uppercase text-crimson/80">
+                  <span className="type-eyebrow font-mono text-[10px] font-semibold uppercase text-crimson">
                     {t.library.badges.ready}
                   </span>
                 </div>
@@ -634,7 +636,7 @@ export function AppShowcase() {
             ))}
           </div>
 
-          <p className="mt-5 text-center text-xs text-muted-foreground/80">{t.library.footnote}</p>
+          <p className="mt-5 text-center text-xs text-muted-foreground">{t.library.footnote}</p>
         </div>
 
         {/* disclaimer */}

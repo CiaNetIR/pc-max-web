@@ -156,7 +156,7 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
                     {item.desc}
                   </span>
                   {item.meta && (
-                    <span className="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-crimson/70">
+                    <span className="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-crimson">
                       {item.meta}
                       {hasEvidence && ` · ${t.social.trust.viewReport}`}
                     </span>
@@ -170,7 +170,7 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
 
       {/* artifacts over words — real, checkable things on this very page */}
       <Reveal delay={0.1}>
-        <p className="mt-10 text-center text-xs text-muted-foreground/80">
+        <p className="mt-10 text-center text-xs text-muted-foreground">
           {t.social.artifacts.title}
         </p>
         <div className="mt-3 flex flex-wrap items-center justify-center gap-3">

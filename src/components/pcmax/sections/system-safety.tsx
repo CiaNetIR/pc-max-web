@@ -86,7 +86,7 @@ export function SystemSafety() {
           </div>
 
           {/* reversibility footnote */}
-          <p className="mt-6 flex items-center gap-2 border-t border-border/60 pt-4 text-xs text-muted-foreground/80">
+          <p className="mt-6 flex items-center gap-2 border-t border-border/60 pt-4 text-xs text-muted-foreground">
             <Info className="h-3.5 w-3.5 shrink-0 text-crimson/60" aria-hidden="true" />
             {t.safety.optimizer.note}
           </p>

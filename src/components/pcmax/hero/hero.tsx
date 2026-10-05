@@ -124,7 +124,7 @@ function MobileEmblem() {
         </svg>
         <div className="emblem-float relative h-full w-full">
           <Image
-            src={asset("/brand/pcmax-logo-256.png")}
+            src={asset("/brand/pcmax-logo-256.webp")}
             alt=""
             width={144}
             height={144}

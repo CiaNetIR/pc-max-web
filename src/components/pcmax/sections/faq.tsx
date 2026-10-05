@@ -54,7 +54,7 @@ export function Faq() {
             >
               <AccordionTrigger className="group press py-5 text-start hover:no-underline [&>svg]:hidden">
                 <span className="flex flex-1 items-center gap-4">
-                  <span className="hidden font-mono text-xs font-bold text-crimson/70 sm:inline">
+                  <span className="hidden font-mono text-xs font-bold text-crimson sm:inline">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="font-display text-base font-bold text-foreground transition-colors group-hover:text-crimson sm:text-lg">

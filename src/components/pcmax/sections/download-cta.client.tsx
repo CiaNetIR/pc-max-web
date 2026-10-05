@@ -167,7 +167,7 @@ function ChangelogCard({ state, groups }: { state: DataState; groups: ChangelogG
             <div key={group.version}>
               <div className="flex items-baseline gap-2.5">
                 <span className="font-mono text-sm font-bold text-crimson">v{group.version}</span>
-                <span className="text-xs text-muted-foreground/70">
+                <span className="text-xs text-muted-foreground">
                   {new Date(group.releasedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
@@ -180,7 +180,7 @@ function ChangelogCard({ state, groups }: { state: DataState; groups: ChangelogG
                           ? "type-eyebrow mt-0.5 shrink-0 rounded-full border border-crimson/30 bg-crimson/10 px-2 py-0.5 text-[10px] font-bold uppercase text-crimson"
                           : entry.tag === "fix"
                             ? "type-eyebrow mt-0.5 shrink-0 rounded-full border border-border/70 px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground"
-                            : "type-eyebrow mt-0.5 shrink-0 rounded-full border border-crimson/20 px-2 py-0.5 text-[10px] font-bold uppercase text-crimson/80"
+                            : "type-eyebrow mt-0.5 shrink-0 rounded-full border border-crimson/20 px-2 py-0.5 text-[10px] font-bold uppercase text-crimson"
                       }
                     >
                       {t.cta.changelog.tags[entry.tag as "feature" | "improvement" | "fix"] ?? entry.tag}
@@ -390,7 +390,7 @@ export function DownloadCtaClient({
             aria-hidden="true"
           />
           <Image
-            src={asset("/brand/pcmax-logo-256.png")}
+            src={asset("/brand/pcmax-logo-256.webp")}
             alt="PC MAX"
             width={112}
             height={112}
@@ -448,7 +448,7 @@ export function DownloadCtaClient({
 
         <ReleaseChips state={releaseState} release={release} locale={locale} />
 
-        <p className="mt-4 text-xs text-muted-foreground/80">{t.cta.meta}</p>
+        <p className="mt-4 text-xs text-muted-foreground">{t.cta.meta}</p>
       </div>
 
       {/* detail cards — requirements / changelog / editions / waitlist */}

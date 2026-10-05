@@ -50,7 +50,7 @@ export function Features() {
                     <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-crimson/25 bg-crimson/10 text-crimson">
                       <Icon className="h-6 w-6" />
                     </span>
-                    <span className="font-mono text-xs font-bold text-crimson/70">
+                    <span className="font-mono text-xs font-bold text-crimson">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                   </div>

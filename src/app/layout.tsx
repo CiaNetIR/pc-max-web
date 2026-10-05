@@ -6,6 +6,7 @@ import { Sora, Vazirmatn } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/pcmax/language-context";
 import { HydrationMarker } from "@/components/pcmax/hydration-marker";
+import { ServiceWorkerRegister } from "@/components/pcmax/sw-register";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getLocaleMeta, siteConfig } from "@/lib/seo";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
@@ -278,6 +279,9 @@ export default async function RootLayout({
             `html:not(.hydrated)` override at the end of globals.css so the
             pre-hydration (slow-JS / no-JS) page never renders blank. */}
         <HydrationMarker />
+        {/* Static-flavor-only service worker (repeat-visit cache layer —
+            SSR/dev never registers it). Loaded after window load. */}
+        <ServiceWorkerRegister />
         {/* Skip link — first focusable element, a11y + keyboard users (SXO) */}
         <a
           href="#main-content"

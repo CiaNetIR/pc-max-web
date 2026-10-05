@@ -138,7 +138,7 @@ export function InstallFlow() {
               </span>
               <span className="glass rounded-full px-3 py-1 font-mono text-sm font-bold text-crimson tabular-nums">
                 {String(Math.min(active + 1, t.install.steps.length)).padStart(2, "0")}
-                <span className="text-muted-foreground/70"> / {String(t.install.steps.length).padStart(2, "0")}</span>
+                <span className="text-muted-foreground"> / {String(t.install.steps.length).padStart(2, "0")}</span>
               </span>
             </div>
             <div className="mt-3 h-1 overflow-hidden rounded-full bg-border/70">
@@ -192,7 +192,7 @@ export function InstallFlow() {
               </span>
               <div className="card-ios rounded-2xl bg-card p-4 sm:p-5">
                 <div className="flex items-baseline gap-2.5">
-                  <span className="font-mono text-[10px] font-bold text-crimson/70">
+                  <span className="font-mono text-[10px] font-bold text-crimson">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <h3 className="type-title font-display text-base font-bold text-foreground">{step.title}</h3>

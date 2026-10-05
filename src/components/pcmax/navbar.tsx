@@ -277,7 +277,7 @@ export function Navbar() {
             <a href="#top" className="group flex items-center gap-3">
               <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70 transition-all duration-300 group-hover:scale-105 group-hover:ring-crimson/50 group-hover:shadow-[0_0_18px_rgba(229,9,20,0.35)]">
                 <Image
-                  src={asset("/brand/pcmax-logo-96.png")}
+                  src={asset("/brand/pcmax-logo-96.webp")}
                   alt=""
                   width={40}
                   height={40}

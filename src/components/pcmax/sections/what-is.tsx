@@ -88,7 +88,7 @@ export function WhatIsPcMax() {
                     )}
                   >
                     <div className="flex items-baseline gap-3">
-                      <span className="font-mono text-[11px] font-bold text-crimson/70">
+                      <span className="font-mono text-[11px] font-bold text-crimson">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <h3 className="type-title font-display text-lg font-bold text-foreground sm:text-xl">

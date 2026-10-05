@@ -15,7 +15,9 @@ const themeStyles: Record<
   { accent: string; border: string; bg: string; borderTint: string; glow: string; label: string }
 > = {
   yellow: {
-    accent: "text-[#d4a504] dark:text-[#f5c518]",
+    /* a11y (Task 23): #d4a504 on white ≈ 2.2:1 — light-mode text rides the
+       darker amber cut (yellow-700, 4.9:1); dark mode keeps the bright one. */
+    accent: "text-[#a16207] dark:text-[#f5c518]",
     border: "border-[#eab308]/45",
     bg: "bg-gradient-to-b from-[#eab308]/[0.10] to-transparent",
     borderTint: "rgba(234, 179, 8, 0.45)",
@@ -70,8 +72,11 @@ export function Profiles() {
               aria-selected={active === key}
               onClick={() => setActive(key)}
               whileTap={whileTapPress}
-              className="press relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold sm:px-8"
-              style={{ color: active === key ? themeStyles[key].label : undefined }}
+              className={cn(
+                "press relative z-10 flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold sm:px-8",
+                /* theme-aware accent (label colors fail 4.5:1 as text in light) */
+                active === key && themeStyles[key].accent
+              )}
             >
               {active === key && (
                 <motion.span
@@ -107,8 +112,11 @@ export function Profiles() {
               type="button"
               onClick={() => setActive(key)}
               animate={{
+                /* a11y (Task 23): opacity-dimmed text stacks with text-foreground/80
+                   to ~2:1 effective contrast — the inactive card now recedes via
+                   scale + losing its accent skin (gradient/border/glow/pill)
+                   instead, keeping every string at full WCAG contrast. */
                 scale: isActive ? 1 : 0.965,
-                opacity: isActive ? 1 : 0.55,
               }}
               whileHover={whileHoverLift}
               whileTap={whileTapPress}
@@ -149,8 +157,11 @@ export function Profiles() {
                 </div>
                 {isActive && (
                   <span
-                    className="type-eyebrow flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase"
-                    style={{ borderColor: `${styles.label}66`, color: styles.label, background: `${styles.label}14` }}
+                    className={cn(
+                      "type-eyebrow flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-bold uppercase",
+                      styles.accent
+                    )}
+                    style={{ borderColor: `${styles.label}66`, background: `${styles.label}14` }}
                   >
                     <Check className="h-3 w-3" strokeWidth={3} />
                     {t.profiles.active}
@@ -164,14 +175,15 @@ export function Profiles() {
                   <motion.li
                     key={point}
                     initial={false}
-                    animate={{ opacity: isActive ? 1 : 0.6, x: isActive ? 0 : -4 }}
+                    /* opacity dim removed (Task 23 contrast) — the inactive
+                       indent alone reads as the receded state */
+                    animate={{ x: isActive ? 0 : -4 }}
                     transition={{ ...springFluid, delay: isActive ? i * 0.05 : 0 }}
                     className="flex items-start gap-3 text-sm leading-relaxed text-foreground/80"
                   >
                     <Check
-                      className="mt-0.5 h-4 w-4 shrink-0"
+                      className={cn("mt-0.5 h-4 w-4 shrink-0", styles.accent)}
                       strokeWidth={3}
-                      style={{ color: styles.label }}
                     />
                     {point}
                   </motion.li>
