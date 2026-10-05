@@ -1,6 +1,12 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/seo";
+import { IS_STATIC_EXPORT } from "@/lib/gh-pages";
+
+/* NOTE: `output: 'export'` requires metadata routes to export
+ * `const dynamic = "force-static"` — a literal Next can statically parse.
+ * scripts/gh-pages-build.sh appends that line to this file in the build tree
+ * only, so the SSR flavor keeps its default (per-request) behavior. */
 
 /**
  * robots.txt — explicit crawl policy for search engines AND generative-AI
@@ -22,6 +28,14 @@ import { siteConfig } from "@/lib/seo";
  * JSON facts. AI bots with their own groups below keep full access.
  */
 export default function robots(): MetadataRoute.Robots {
+  /* Static GitHub Pages flavor: there is no /api surface on the static
+   * host, so the API carve-outs below are meaningless — allow everything. */
+  if (IS_STATIC_EXPORT) {
+    return {
+      rules: [{ userAgent: "*", allow: "/" }],
+      sitemap: `${siteConfig.url}/sitemap.xml`,
+    };
+  }
   return {
     rules: [
       {

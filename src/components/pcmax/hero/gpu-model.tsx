@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
+import { BASE_PATH } from "@/lib/gh-pages";
 
 /* ---------------------------------------------------------------------
  * NVIDIA GeForce RTX 5090 Founders Edition — procedural replica
@@ -156,7 +157,7 @@ function loadBrandFont(): Promise<FontFace | null> {
   if (typeof document === "undefined") return Promise.resolve(null);
   if (!brandFont) {
     try {
-      brandFont = new FontFace(BRAND_FONT, "url(/fonts/pcmax-sora-800.ttf)")
+      brandFont = new FontFace(BRAND_FONT, `url(${BASE_PATH}/fonts/pcmax-sora-800.ttf)`)
         .load()
         .then((loaded) => {
           document.fonts.add(loaded);

@@ -12,6 +12,7 @@
  * what lets Google's Knowledge Graph and LLMs resolve "PC MAX" as one entity.
  */
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
+import { IS_STATIC_EXPORT, PAGES_URL } from "@/lib/gh-pages";
 
 export interface SiteConfig {
   name: string;
@@ -54,7 +55,10 @@ export const siteConfig: SiteConfig = {
     "PC MAX intelligently optimizes Windows, installs advanced frame-generation workflows, and prepares your games for maximum performance.",
   longDescription:
     "PC MAX installs and manages multi-frame generation pipelines built on OptiScaler and AI Optical Flow, bringing DLSS-class upscaling and frame multiplication to virtually any GPU. It also fine-tunes Windows for gaming with safe, reversible optimizations, while keeping full backups of every change so your system can be restored in a single click.",
-  url: "https://pcmax.app",
+  /* Static GitHub Pages flavor: the mirror is self-canonical — its OG
+   * images, sitemap and JSON-LD resolve correctly when the Pages URL is
+   * shared. The SSR flavor keeps the brand domain as the canonical entity. */
+  url: IS_STATIC_EXPORT ? PAGES_URL : "https://pcmax.app",
   ogImage: "/og.png",
   /* Matches the real X profile (x.com/pcmaxapp). Must stay identical across
    * site metadata, footer links and Organization.sameAs — entity consistency. */

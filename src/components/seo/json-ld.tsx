@@ -5,6 +5,7 @@ import {
   getLocaleMeta,
   siteConfig,
 } from "@/lib/seo";
+import { IS_STATIC_EXPORT, INSTALLER_FILE } from "@/lib/gh-pages";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
 import { db } from "@/lib/db";
 
@@ -25,15 +26,18 @@ import { db } from "@/lib/db";
  * `softwareVersion` can never drift from the shipped product; on any DB
  * error the field is simply omitted instead of failing the page.
  */
-async function getSoftwareVersion(): Promise<string | null> {
+async function getLatestReleaseInfo(): Promise<{
+  version: string | null;
+  fileName: string | null;
+}> {
   try {
     const latest = await db.release.findFirst({
       orderBy: { releasedAt: "desc" },
-      select: { version: true },
+      select: { version: true, fileName: true },
     });
-    return latest?.version ?? null;
+    return { version: latest?.version ?? null, fileName: latest?.fileName ?? null };
   } catch {
-    return null;
+    return { version: null, fileName: null };
   }
 }
 
@@ -41,7 +45,12 @@ export async function JsonLd({ locale = "en" }: { locale?: Locale }): Promise<Re
   const meta = getLocaleMeta(locale);
   const dict = dictionary[locale];
   const pageUrl = `${siteConfig.url}${meta.path === "/" ? "" : meta.path}`;
-  const softwareVersion = await getSoftwareVersion();
+  const { version: softwareVersion, fileName } = await getLatestReleaseInfo();
+  /* Static GitHub Pages flavor: download/install URLs point at the artifact
+   * deployed with the site; the SSR flavor keeps the API route. */
+  const downloadPath = IS_STATIC_EXPORT
+    ? `/releases/${fileName ?? INSTALLER_FILE}`
+    : "/api/download";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -128,8 +137,8 @@ export async function JsonLd({ locale = "en" }: { locale?: Locale }): Promise<Re
         publisher: { "@id": `${siteConfig.url}/#organization` },
         brand: { "@id": `${siteConfig.url}/#organization` },
         isAccessibleForFree: true,
-        downloadUrl: `${siteConfig.url}/api/download`,
-        installUrl: `${siteConfig.url}/api/download`,
+        downloadUrl: `${siteConfig.url}${downloadPath}`,
+        installUrl: `${siteConfig.url}${downloadPath}`,
         fileSize: siteConfig.app.diskSpace,
         softwareRequirements: siteConfig.app.requirements,
         featureList: getFeatureList(locale),

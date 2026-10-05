@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { db } from "@/lib/db";
+import { INSTALLER_FILE } from "@/lib/gh-pages";
 import {
   DownloadCtaClient,
   type ChangelogGroup,
@@ -36,6 +37,7 @@ const FALLBACK_RELEASE: ReleaseInfo = {
   channel: "stable",
   releasedAt: "2025-11-18T10:00:00.000Z",
   checksum: null,
+  fileName: INSTALLER_FILE,
 };
 
 /* Mirrors /api/release's formatting (kept byte-identical so the SSR chips
@@ -100,6 +102,7 @@ async function fetchLatestRelease(): Promise<ReleaseInfo | null> {
     size,
     releasedAt: release.releasedAt.toISOString(),
     checksum: sha256 ? `sha256:${sha256.slice(0, 16)}…${sha256.slice(-8)}` : null,
+    fileName,
   };
 }
 

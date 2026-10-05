@@ -4,6 +4,41 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-10-05
+
+### Added — the website now lives on GitHub Pages
+- **Live static mirror at <https://dlsdt.github.io/pc-max-web/>** — the full site
+  (both languages, 3D hero, every section) exported as a static build from the
+  same codebase (`output: 'export'` + `basePath: '/pc-max-web'`).
+- `scripts/gh-pages-build.sh` — one command builds the static export in an
+  isolated copy (the dev project and its dev server are never touched): it
+  strips the API/middleware surface, recreates a deterministic seeded SQLite
+  at build time (release, changelog and stats are baked in), rewrites
+  `llms.txt`/`llms-full.txt`/`security.txt` URLs to the Pages deployment, and
+  emits `out/`.
+- **CI auto-deploy** (`.github/workflows/deploy-pages.yml`): every push to
+  `main` rebuilds and republishes the GitHub Pages site automatically — no
+  manual step, ever.
+- `release.sh` now attaches the installer artifact (`public/releases/*.exe`)
+  as a Release asset on every version.
+
+### Changed — static-flavor behavior (byte-identical SSR flavor)
+- Download buttons on the static build link directly to the deployed installer
+  artifact (`/pc-max-web/releases/…`) instead of `/api/download`, which doesn't
+  exist on a static host; the SSR flavor keeps the streaming/counting route.
+- The waitlist card on the static build explains the limitation and links to
+  the GitHub releases instead of POSTing to a nonexistent endpoint; the
+  analytics beacon is disabled there.
+- SEO base URLs (canonical, hreflang, OG/Twitter images, sitemap, robots,
+  JSON-LD `downloadUrl`) resolve to the Pages origin in the static build and
+  stay on `pcmax.app` in the SSR build.
+- Persian on the static build: the page prerenders in English (the canonical
+  document) and restores the visitor's chosen locale — `?lang=fa` links or the
+  stored preference — right after hydration, with no hydration mismatch.
+- All root-absolute asset references are now base-path aware (manifest
+  `id`/`start_url`/icons, the 3D canvas brand font, font preloads), no-ops in
+  the SSR flavor.
+
 ## [1.1.0] — 2026-10-05
 
 ### Performance — the site was "very slow and laggy"; this release attacks every layer

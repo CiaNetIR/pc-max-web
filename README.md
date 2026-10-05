@@ -6,7 +6,7 @@
 
 **Marketing & download site for [PC MAX](https://github.com/DLSDT/pc-max) — the Windows game-optimization platform.**
 
-[![Live Preview](https://img.shields.io/badge/live-preview-C1121F)](https://preview-chat-e0746f12-4236-46ad-847c-c561d32491d8.space-z.ai/)
+[![Live Site](https://img.shields.io/badge/live-site-GitHub_Pages-C1121F)](https://dlsdt.github.io/pc-max-web/)
 [![Product Repo](https://img.shields.io/badge/product-pc--max-111111)](https://github.com/DLSDT/pc-max)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-111111)](CHANGELOG.md)
 
@@ -150,15 +150,36 @@ This repository follows [Semantic Versioning](https://semver.org/). Every versio
 ./scripts/release.sh 1.1.0 "Multi-Frame polish + light-mode shadows"
 ```
 
-The helper bumps `package.json`, commits, tags, pushes, and opens the GitHub Release. It needs `GH_TOKEN` in the environment (or a token embedded in the `origin` remote URL).
+The helper bumps `package.json`, commits, tags, pushes, opens the GitHub Release, and attaches the installer artifact (`public/releases/*.exe`) to it.
 
 ---
+
+## 🌐 Deployment — two flavors, one codebase
+
+| | SSR flavor (default) | Static flavor (GitHub Pages) |
+| --- | --- | --- |
+| Output | `output: "standalone"` (`bun run build`) | `output: "export"` + `basePath: "/pc-max-web"` |
+| Lives at | your server / the live preview | **https://dlsdt.github.io/pc-max-web/** |
+| `/api/*` routes, waitlist, analytics | ✅ | stripped from the build tree (`src/app/api` + `src/proxy.ts`) |
+| Download button | `/api/download` — streams + counts | links directly to the deployed installer artifact |
+| Release / changelog / stats | Prisma per request | baked at build time from a deterministically re-seeded SQLite |
+| SEO base URLs | `pcmax.app` (canonical brand) | the Pages origin (self-canonical mirror) |
+| Persian (`?lang=fa`) | server-rendered via proxy | EN prerender; the visitor's locale is restored client-side right after hydration |
+
+Build & publish the static mirror manually:
+
+```bash
+bash scripts/gh-pages-build.sh        # isolated copy of the project → ./out
+```
+
+CI ([`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)) rebuilds and republishes the `gh-pages` branch on **every push to `main`** — the live site stays current automatically.
 
 ## 🇮🇷 فارسی
 
 **پی‌سی‌مکس وب** — وب‌سایت رسمی محصول [پی‌سی‌مکس](https://github.com/DLSDT/pc-max)، پلتفرم بهینه‌سازی بازی روی ویندوز.
 
 - **دوزبانه و راست‌به‌چپ** — انگلیسی و فارسی با تایپوگرافی فارسی (وزیرمتن، آریوبرزن، استعداد) و جداسازی درست اعداد در متن RTL
+- **نسخهٔ زنده روی GitHub Pages** — [dlsdt.github.io/pc-max-web](https://dlsdt.github.io/pc-max-web/)؛ با هر push به شاخهٔ main به‌صورت خودکار بازسازی و منتشر می‌شود
 - **هیروی سه‌بعدی GPU** — فقط برای دسکتاپ؛ موبایل بدون هیچ کد WebGL محتوا را فوراً نمایش می‌دهد
 - **داشبورد محصول** — تب‌های خانه / مولتی‌فریم / ویندوز بهینه‌شده / تنظیمات، مطابق اپ واقعی
 - **دانلود واقعی** — دکمهٔ دانلود، نصب‌کنندهٔ واقعی را با هش SHA-256 سرو می‌کند و شمارنده را به‌صورت اتمیک افزایش می‌دهد

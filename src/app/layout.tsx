@@ -8,6 +8,7 @@ import { LanguageProvider } from "@/components/pcmax/language-context";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getLocaleMeta, siteConfig } from "@/lib/seo";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
+import { IS_STATIC_EXPORT, BASE_PATH } from "@/lib/gh-pages";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
@@ -87,7 +88,7 @@ const ariobarzanFontFace = [ariobarzanRegular, ariobarzanBold]
       ? [
           "@font-face{",
           `font-family:'Ariobarzan';`,
-          `src:url('/fonts/${face.file}') format('${face.format}');`,
+          `src:url('${BASE_PATH}/fonts/${face.file}') format('${face.format}');`,
           `font-weight:${i === 0 ? 400 : 700};`,
           "font-style:normal;",
           "font-display:swap;",
@@ -126,6 +127,11 @@ const ariobarzanPreload =
  *  3. English default (the canonical document)
  */
 async function resolveLocale(): Promise<Locale> {
+  /* Static GitHub Pages flavor: there is exactly ONE prerendered document
+   * (EN — the canonical one) and no request exists to read headers/cookies
+   * from. Persian visitors get their locale restored client-side right
+   * after hydration (see language-context.tsx). */
+  if (IS_STATIC_EXPORT) return "en";
   const headerStore = await headers();
   const fromParam = headerStore.get("x-pcmax-lang");
   if (fromParam === "fa" || fromParam === "en") return fromParam;
@@ -157,6 +163,9 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: siteConfig.name,
     category: "utilities",
     alternates: {
+      /* NOTE: Next auto-applies basePath to metadata-resolved URLs
+       * (canonical/hreflang/og) in the static flavor — values here must stay
+       * ROOT-relative ("/", "/?lang=fa") or they get double-prefixed. */
       canonical: meta.path,
       languages: {
         en: "/",
@@ -257,7 +266,7 @@ export default async function RootLayout({
           <link
             key={face.file}
             rel="preload"
-            href={`/fonts/${face.file}`}
+            href={`${BASE_PATH}/fonts/${face.file}`}
             as="font"
             type={ARIOBARZAN_MIME[face.format]}
             crossOrigin="anonymous"

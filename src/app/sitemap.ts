@@ -3,6 +3,11 @@ import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 import { siteConfig } from "@/lib/seo";
 
+/* NOTE: `output: 'export'` requires metadata routes to export
+ * `const dynamic = "force-static"` — a literal Next can statically parse.
+ * scripts/gh-pages-build.sh appends that line to this file in the build tree
+ * only, so the SSR flavor keeps its default (per-request) behavior. */
+
 /**
  * sitemap.xml — bilingual single-page site.
  *

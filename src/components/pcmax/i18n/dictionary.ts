@@ -420,6 +420,10 @@ const en = {
       successDesc: "We'll email you the moment PC MAX Pro ships.",
       duplicate: "Already on the list — see you at launch.",
       error: "Couldn't subscribe — check the address and retry.",
+      /* Shown instead of the form on the static GitHub Pages build (no
+       * server to POST to there). */
+      staticNote:
+        "The waitlist runs on the full PC MAX site — this static GitHub Pages build can't take sign-ups. Track releases on GitHub instead.",
     },
     bottomBar: {
       label: "Download PC MAX",
@@ -893,6 +897,9 @@ const fa: Dictionary = {
       successDesc: "به‌محض عرضه‌ی PC MAX Pro به شما ایمیل می‌زنیم.",
       duplicate: "قبلاً در لیست هستید — تا روز عرضه خداحافظ.",
       error: "ثبت‌نام انجام نشد — آدرس را بررسی و دوباره تلاش کنید.",
+      /* در نسخهٔ استاتیک GitHub Pages به‌جای فرم نمایش داده می‌شود. */
+      staticNote:
+        "لیست انتظار در نسخهٔ کامل سایت فعال است — این نسخهٔ استاتیک GitHub Pages ثبت‌نام نمی‌پذیرد. تا آن موقع، نسخه‌ها را در گیت‌هاب دنبال کنید.",
     },
     bottomBar: {
       label: "دانلود PC MAX",

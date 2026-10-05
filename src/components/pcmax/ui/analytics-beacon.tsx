@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { IS_STATIC_EXPORT } from "@/lib/gh-pages";
+
 /**
  * First-party, aggregate-only page-view beacon.
  * Fires once per browser session (sessionStorage guard) to /api/analytics.
@@ -9,6 +11,9 @@ import { useEffect } from "react";
  */
 export function AnalyticsBeacon() {
   useEffect(() => {
+    /* Static GitHub Pages flavor: no /api/analytics exists on the static
+     * host — never even queue a beacon (avoids a guaranteed 404). */
+    if (IS_STATIC_EXPORT) return;
     try {
       if (sessionStorage.getItem("pcmax-pv")) return;
       sessionStorage.setItem("pcmax-pv", "1");

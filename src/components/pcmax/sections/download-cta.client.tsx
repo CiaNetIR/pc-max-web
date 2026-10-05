@@ -10,6 +10,7 @@ import { springFluid } from "@/components/pcmax/ui/motion";
 import { GpuIcon, CpuIcon, WindowsIcon, DownloadIcon, ShieldIcon, PerformanceIcon } from "@/components/pcmax/icons";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { installerHref, IS_STATIC_EXPORT, GITHUB_REPO_URL } from "@/lib/gh-pages";
 
 /* Prop payloads — serialized server → client. The server wrapper
  * (download-cta.tsx) queries the DB directly and seeds these, so no
@@ -20,6 +21,9 @@ export type ReleaseInfo = {
   channel: string;
   releasedAt: string;
   checksum: string | null;
+  /* Installer file name — resolves the download href (API route in the SSR
+   * flavor, deployed artifact in the static GitHub Pages flavor). */
+  fileName: string;
 };
 
 export type ChangelogGroup = {
@@ -192,7 +196,7 @@ function ChangelogCard({ state, groups }: { state: DataState; groups: ChangelogG
   );
 }
 
-function EditionsCard() {
+function EditionsCard({ downloadHref }: { downloadHref: string }) {
   const { t } = useLanguage();
 
   return (
@@ -208,7 +212,7 @@ function EditionsCard() {
           <span className="mt-1 font-display text-3xl font-extrabold text-crimson">{t.cta.editions.free.price}</span>
           <p className="mt-2.5 flex-1 text-sm leading-relaxed text-muted-foreground">{t.cta.editions.free.tagline}</p>
           <a
-            href="/api/download"
+            href={downloadHref}
             className="press mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-crimson px-5 text-sm font-semibold text-white transition-colors hover:bg-crimson-bright"
           >
             <DownloadIcon className="h-4 w-4" />
@@ -298,6 +302,20 @@ function WaitlistCard() {
             <p className="mt-1 text-xs text-muted-foreground">{t.cta.waitlist.successDesc}</p>
           )}
         </motion.div>
+      ) : IS_STATIC_EXPORT ? (
+        /* Static GitHub Pages mirror: there is no server to submit to —
+         * point Pro-curious visitors at the GitHub releases instead. */
+        <div className="mt-6 flex flex-1 flex-col items-center justify-center gap-4 rounded-2xl border border-crimson/25 bg-card px-6 py-8 text-center">
+          <p className="text-sm leading-relaxed text-muted-foreground">{t.cta.waitlist.staticNote}</p>
+          <a
+            href={`${GITHUB_REPO_URL}/releases`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="press inline-flex h-11 items-center justify-center gap-2 rounded-full border border-crimson/40 px-6 text-sm font-semibold text-crimson transition-colors hover:bg-crimson/10"
+          >
+            GitHub <span aria-hidden="true">↗</span>
+          </a>
+        </div>
       ) : (
         <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row" noValidate>
           <label className="sr-only" htmlFor="waitlist-email">
@@ -421,7 +439,7 @@ export function DownloadCtaClient({
             asChild
             className="btn-convex group press h-12 rounded-full px-8 text-base font-semibold text-white"
           >
-            <a href="/api/download" aria-label={t.cta.button}>
+            <a href={installerHref(release.fileName)} aria-label={t.cta.button}>
               <DownloadIcon className="me-2.5 h-5 w-5 transition-transform duration-300 group-hover:translate-y-0.5" />
               {t.cta.button}
             </a>
@@ -437,7 +455,7 @@ export function DownloadCtaClient({
       <div className="relative mx-auto mt-16 grid max-w-6xl gap-5 px-4 sm:px-6 lg:grid-cols-2">
         <RequirementsCard />
         <ChangelogCard state={changelogState} groups={changelog} />
-        <EditionsCard />
+        <EditionsCard downloadHref={installerHref(release.fileName)} />
         <WaitlistCard />
       </div>
     </section>

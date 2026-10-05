@@ -1,15 +1,24 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/seo";
+import { BASE_PATH } from "@/lib/gh-pages";
+
+/* NOTE: `output: 'export'` requires metadata routes to export
+ * `const dynamic = "force-static"` — a literal Next can statically parse.
+ * scripts/gh-pages-build.sh appends that line to this file in the build tree
+ * only, so the SSR flavor keeps its default (per-request) behavior. */
 
 export default function manifest(): MetadataRoute.Manifest {
+  /* Prefix local URLs with the GitHub Pages base path in the static flavor
+   * ("" in the SSR flavor — byte-identical manifest). */
+  const asset = (p: string) => `${BASE_PATH}${p}`;
   return {
     name: siteConfig.name,
     short_name: siteConfig.shortName,
     description: siteConfig.description,
     /* Stable PWA identity — survives URL/scheme changes */
-    id: "/",
-    start_url: "/",
+    id: asset("/"),
+    start_url: asset("/"),
     display: "standalone",
     background_color: "#070707",
     theme_color: "#C1121F",
@@ -26,25 +35,25 @@ export default function manifest(): MetadataRoute.Manifest {
      * referenced — oversized and non-square-declarable. */
     icons: [
       {
-        src: "/brand/pcmax-logo-96.png",
+        src: asset("/brand/pcmax-logo-96.png"),
         sizes: "96x96",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/brand/pcmax-logo-256.png",
+        src: asset("/brand/pcmax-logo-256.png"),
         sizes: "256x256",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icon.png",
+        src: asset("/icon.png"),
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/brand/pcmax-logo-maskable.png",
+        src: asset("/brand/pcmax-logo-maskable.png"),
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

@@ -1,0 +1,47 @@
+name: Deploy website to GitHub Pages
+
+# Rebuilds the static mirror of the site and republishes the gh-pages branch
+# on every push to main (and on manual dispatch). The published site:
+#   https://dlsdt.github.io/pc-max-web/
+# Build pipeline lives in scripts/gh-pages-build.sh --in-place (CI mode).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build static export
+        run: bash scripts/gh-pages-build.sh --in-place
+
+      - name: Deploy to gh-pages branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd out
+          git init -q -b gh-pages
+          git config user.name  "DLSDT"
+          git config user.email "173116772+DLSDT@users.noreply.github.com"
+          touch .nojekyll
+          git add -A
+          git commit -qm "deploy: website @ ${GITHUB_SHA::7}"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages:gh-pages

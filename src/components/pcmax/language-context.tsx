@@ -4,11 +4,13 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { dictionary, type Dictionary, type Locale } from "./i18n/dictionary";
+import { IS_STATIC_EXPORT } from "@/lib/gh-pages";
 
 type LanguageContextValue = {
   locale: Locale;
@@ -61,6 +63,29 @@ export function LanguageProvider({
 
   const toggleLocale = useCallback(() => {
     setLocale(document.documentElement.lang === "fa" ? "en" : "fa");
+  }, [setLocale]);
+
+  /* Static GitHub Pages flavor only: the single prerendered document is EN
+   * (no proxy/cookie SSR on a static host). Restore the visitor's locale
+   * right after hydration — a `?lang=fa|en` URL param wins (shareable links
+   * keep working), then the stored preference. Runs post-hydration as a
+   * plain state update, so there is no hydration mismatch. The SSR flavor
+   * resolves the locale server-side and skips this entirely. */
+  useEffect(() => {
+    if (!IS_STATIC_EXPORT) return;
+    try {
+      const param = new URLSearchParams(window.location.search).get("lang");
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      const next =
+        param === "fa" || param === "en"
+          ? param
+          : stored === "fa" || stored === "en"
+            ? stored
+            : null;
+      if (next && next !== document.documentElement.lang) setLocale(next);
+    } catch {
+      /* storage unavailable — stay on the prerendered locale */
+    }
   }, [setLocale]);
 
   /* Stable identity: the value changes ONLY when the locale actually

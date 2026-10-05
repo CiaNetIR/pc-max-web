@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { DownloadIcon } from "@/components/pcmax/icons";
 import { cn } from "@/lib/utils";
+import { installerHref } from "@/lib/gh-pages";
 
 /*
  * MobileCtaBar — fixed bottom conversion bar, phones only (< 640px).
@@ -124,7 +125,7 @@ export function MobileCtaBar() {
           </div>
 
           <a
-            href="/api/download"
+            href={installerHref()}
             aria-label={t.cta.bottomBar.label}
             className="btn-convex press inline-flex h-11 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white"
           >

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { IS_STATIC_EXPORT } from "@/lib/gh-pages";
 import { dictionary } from "@/components/pcmax/i18n/dictionary";
 import { ArrowLeft } from "lucide-react";
 
@@ -9,8 +10,13 @@ import { ArrowLeft } from "lucide-react";
  * page speaks the visitor's language with zero client JS.
  */
 export default async function NotFound() {
-  const cookieStore = await cookies();
-  const locale = cookieStore.get("pcmax-lang")?.value === "fa" ? "fa" : "en";
+  /* Static GitHub Pages flavor: one prerendered 404 document (EN). The SSR
+   * flavor reads the locale cookie as before. */
+  let locale: "en" | "fa" = "en";
+  if (!IS_STATIC_EXPORT) {
+    const cookieStore = await cookies();
+    if (cookieStore.get("pcmax-lang")?.value === "fa") locale = "fa";
+  }
   const t = dictionary[locale].error404;
 
   return (
