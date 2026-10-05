@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, Cloud, Lock, Minus, Square, X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -18,16 +17,28 @@ type TabKey = "dashboard" | "multiframe" | "windows" | "settings";
 const tabOrder: TabKey[] = ["dashboard", "multiframe", "windows", "settings"];
 const tabIcons = [PerformanceIcon, GpuIcon, ShieldIcon, SettingsIcon];
 
-/* WebP key-arts (Task 23 image diet: ~68–90 KB JPEG → 43–63 KB WebP,
- * single-encode via scripts/optimize-images.ts). */
+/* Responsive WebP key-arts (Task 24, Lighthouse "Improve image delivery":
+ * −123 KiB mobile). The Pages export runs images unoptimized, so next/image
+ * emits a bare src with NO srcset — every device downloaded the full 840px
+ * art. The gallery now hand-rolls a srcSet (plain <img>): 480w serves DPR-1
+ * desktop cards + the mock's thumbnails, 672w serves DPR-1.75 mobile
+ * (~380 CSS × 1.75 = 662 px), 840w stays for high-DPR. Variants are
+ * single-encoded from the git-tracked JPEGs by scripts/responsive-images.ts. */
 const gameFiles = [
-  "/games/cyberpunk.webp",
-  "/games/gtav.webp",
-  "/games/wukong.webp",
-  "/games/eldenring.webp",
-  "/games/alanwake2.webp",
-  "/games/bg3.webp",
-].map(asset);
+  "cyberpunk",
+  "gtav",
+  "wukong",
+  "eldenring",
+  "alanwake2",
+  "bg3",
+].map((name) => {
+  const master = asset(`/games/${name}.webp`);
+  return {
+    thumb: asset(`/games/${name}-480.webp`),
+    src: master,
+    srcSet: `${asset(`/games/${name}-480.webp`)} 480w, ${asset(`/games/${name}-672.webp`)} 672w, ${master} 840w`,
+  };
+});
 
 /* ------------------- Panel detail copy (mock UI state) -----------------
  * Illustrative values shown inside the product mock — deliberately kept
@@ -368,7 +379,14 @@ export function AppShowcase() {
                               >
                                 <div className="flex items-center gap-3.5">
                                   <div className="relative h-[52px] w-[92px] shrink-0 overflow-hidden rounded-lg">
-                                    <Image src={g.art} alt="" fill sizes="92px" className="object-cover" />
+                                    {/* 480w variant — the full 840px master is 5× oversized for a 92px thumb */}
+                                    <img
+                                      src={g.art.thumb}
+                                      alt=""
+                                      loading="lazy"
+                                      decoding="async"
+                                      className="absolute inset-0 h-full w-full object-cover"
+                                    />
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -608,12 +626,19 @@ export function AppShowcase() {
                   aria-hidden="true"
                 />
                 <div className="relative aspect-[16/9] overflow-hidden">
-                  <Image
-                    src={gameFiles[i]}
+                  {/* plain <img>: unoptimized export strips next/image's
+                      srcset pipeline — srcSet is hand-rolled here instead.
+                      sizes mirrors the grid exactly: 1-col (100vw − 2×px-4),
+                      2-col capped by the max-w-4xl block (27.5rem), 3-col is
+                      a constant ~285px card inside max-w-4xl. */}
+                  <img
+                    src={gameFiles[i].src}
+                    srcSet={gameFiles[i].srcSet}
+                    sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) min(calc(50vw - 2rem), 27.5rem), 286px"
                     alt={`${game.name} — key art`}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" aria-hidden="true" />
                   <div className="absolute inset-x-0 bottom-0 p-4">

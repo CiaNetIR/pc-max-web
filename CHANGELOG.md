@@ -4,6 +4,37 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.4] — 2026-10-05
+
+Lighthouse follow-up: responsive image delivery. The remaining flagged finding
+("Improve image delivery", 123 KiB est. savings) is resolved — plus a desktop win
+the report couldn't see.
+
+### Changed — responsive game key-arts (srcset)
+- The static Pages export runs `next/image` with `unoptimized`, which emits a
+  bare `src` and **no srcset** — every device downloaded the full 840px key-art
+  even when the gallery card renders at ~380 CSS px (Lighthouse's Moto G Power
+  @ DPR 1.75 needs 662 device px). The six gallery cards are now plain `<img>`
+  with a hand-rolled srcSet, and the dashboard mock's 92px thumbnails use the
+  small variant directly instead of the full master.
+- New WebP variants, single-encoded from the git-tracked JPEG originals by
+  `scripts/responsive-images.ts` (no generation loss on the existing masters):
+  `480w` (~20–30 KiB) and `672w` (~31–48 KiB) alongside the 840px masters
+  (~43–64 KiB). `sizes` mirrors the real grid — 1-col mobile `calc(100vw - 2rem)`,
+  2-col capped at `27.5rem`, and the 3-col desktop card is a constant ~285px
+  inside the `max-w-4xl` block (not `33vw` — the grid is narrower than the
+  section shell).
+- Verified end-to-end (local static build, agent-browser): mobile 412px picks
+  `480w` for all six cards, desktop 1280/DPR-1 picks `480w`, DPR-2 desktop
+  resolves to `672w` (candidate 572), high-DPR phones keep the 840px master.
+  Zero broken images, no horizontal overflow, all 12 sections render through a
+  full scroll.
+- Byte deltas per device class: mobile −54% (55.5 → 25.7 KiB avg), DPR-1.75
+  mobile & DPR-2 desktop −26% (55.5 → 41.1 KiB avg), thumbnails −58%
+  (55.5 → ~23 KiB).
+- Service-worker cache version bumped `v1.2.3 → v1.2.4` (public/ assets
+  changed); new variant URLs are picked up by the `/games/**` SWR bucket.
+
 ## [1.2.3] — 2026-10-05
 
 Lighthouse-driven quality pass (mobile, Moto G Power / Slow 4G baseline): performance
