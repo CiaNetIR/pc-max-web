@@ -1,0 +1,225 @@
+import type { Metadata, Viewport } from "next";
+import { cookies, headers } from "next/headers";
+import fs from "node:fs";
+import path from "node:path";
+import { Sora, Vazirmatn } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import { LanguageProvider } from "@/components/pcmax/language-context";
+import { JsonLd } from "@/components/seo/json-ld";
+import { getLocaleMeta, siteConfig } from "@/lib/seo";
+import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
+import { Toaster } from "@/components/ui/toaster";
+import "./globals.css";
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  display: "swap",
+});
+
+const vazirmatn = Vazirmatn({
+  subsets: ["arabic"],
+  variable: "--font-vazirmatn",
+  display: "swap",
+});
+
+/* ---------------------------------------------------------------------
+ * Ariobarzan — local Persian typeface (designer: Saeid Poonki, source:
+ * spacedesign.ir — commercial font, must be purchased).
+ *
+ * Drop-in contract: place the purchased files in `public/fonts/` as
+ *   ariobarzan-regular.woff2  (body text, weight 400)
+ *   ariobarzan-bold.woff2     (display/titles, weight 700)
+ * (.woff / .ttf variants are auto-detected too; convert with any
+ *  ttf→woff2 tool — e.g. `fonttools ttLib.woff2 compress`.)
+ *
+ * The files are detected once at module scope (cached — never per-request;
+ * zero fs cost on the hot path) — the <style> below is injected ONLY when
+ * they exist, so the site never fires a 404 font request. Vazirmatn stays
+ * as the interim fallback until then. font-display: swap keeps Persian
+ * text paintable while the local file streams in. Arabic-script
+ * unicode-range keeps Latin text on the system stack in both directions.
+ * ------------------------------------------------------------------- */
+const ARIOBARZAN_DIR = path.join(process.cwd(), "public", "fonts");
+const ARIOBARZAN_RANGE =
+  "U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F, U+2010-2011";
+
+function findAriobarzan(base: string): { file: string; format: string } | null {
+  for (const [ext, format] of [
+    ["woff2", "woff2"],
+    ["woff", "woff"],
+    ["ttf", "truetype"],
+  ] as const) {
+    const file = `${base}.${ext}`;
+    if (fs.existsSync(path.join(ARIOBARZAN_DIR, file))) return { file, format };
+  }
+  return null;
+}
+
+const ariobarzanRegular = findAriobarzan("ariobarzan-regular");
+const ariobarzanBold = findAriobarzan("ariobarzan-bold");
+/* "full" = regular + bold present → body text may use it too (readable
+ * 400 weight). "display-only" = just the Bold cut → titles only, body
+ * text stays on Vazirmatn so long-form Persian is never forced bold. */
+const ariobarzanMode =
+  ariobarzanRegular && ariobarzanBold ? "full" : ariobarzanBold ? "display-only" : null;
+
+const ariobarzanFontFace = [ariobarzanRegular, ariobarzanBold]
+  .flatMap((face, i) =>
+    face
+      ? [
+          "@font-face{",
+          `font-family:'Ariobarzan';`,
+          `src:url('/fonts/${face.file}') format('${face.format}');`,
+          `font-weight:${i === 0 ? 400 : 700};`,
+          "font-style:normal;",
+          "font-display:swap;",
+          `unicode-range:${ARIOBARZAN_RANGE};`,
+          "}",
+        ].join("")
+      : []
+  )
+  .join("");
+
+/**
+ * Locale resolution order:
+ *  1. `x-pcmax-lang` request header — set by proxy from the `?lang=` URL param
+ *     (makes `/?lang=fa` a real, crawlable Persian document)
+ *  2. `pcmax-lang` cookie — set by the in-page language toggle
+ *  3. English default (the canonical document)
+ */
+async function resolveLocale(): Promise<Locale> {
+  const headerStore = await headers();
+  const fromParam = headerStore.get("x-pcmax-lang");
+  if (fromParam === "fa" || fromParam === "en") return fromParam;
+  const cookieStore = await cookies();
+  return cookieStore.get("pcmax-lang")?.value === "fa" ? "fa" : "en";
+}
+
+/**
+ * Locale-aware metadata. EN is the canonical document at `/`; the Persian
+ * variant self-canonicals at `/?lang=fa`. hreflang + x-default tell every
+ * engine (and AI crawler) that this one page serves two language documents.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await resolveLocale();
+  const meta = getLocaleMeta(locale);
+  const isFa = locale === "fa";
+
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: {
+      default: meta.title,
+      template: "%s | PC MAX",
+    },
+    description: meta.description,
+    keywords: [...siteConfig.keywords],
+    authors: [{ name: "PC MAX Team", url: siteConfig.url }],
+    creator: "PC MAX",
+    publisher: "PC MAX",
+    applicationName: siteConfig.name,
+    category: "utilities",
+    alternates: {
+      canonical: meta.path,
+      languages: {
+        en: "/",
+        fa: "/?lang=fa",
+        "x-default": "/",
+      },
+    },
+    openGraph: {
+      type: "website",
+      locale: meta.ogLocale,
+      alternateLocale: isFa ? ["en_US"] : ["fa_IR"],
+      url: meta.path,
+      siteName: siteConfig.name,
+      title: meta.ogTitle,
+      description: meta.description,
+      images: [
+        {
+          url: siteConfig.ogImage,
+          width: 1200,
+          height: 630,
+          alt: isFa
+            ? "پی‌سی‌مکس — پلتفرم بهینه‌سازی بازی روی ویندوز"
+            : "PC MAX — Windows Gaming Optimization Platform",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: siteConfig.twitterHandle,
+      creator: siteConfig.twitterHandle,
+      title: meta.ogTitle,
+      description: meta.description,
+      images: [
+        {
+          url: siteConfig.ogImage,
+          alt: isFa
+            ? "پی‌سی‌مکس — پلتفرم بهینه‌سازی بازی روی ویندوز"
+            : "PC MAX — Windows Gaming Optimization Platform",
+        },
+      ],
+    },
+    // Icons come from file conventions: src/app/icon.png + src/app/apple-icon.png
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+      },
+    },
+  };
+}
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f7f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#070707" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const locale = await resolveLocale();
+  const dir = locale === "fa" ? "rtl" : "ltr";
+
+  return (
+    // CRITICAL: font variables live on <html> so Tailwind 4's @theme (:root)
+    // can resolve var(--font-sora)/var(--font-vazirmatn). Body text uses the
+    // native system stack (SF Pro / Segoe UI) — Apple-style, zero download.
+    <html
+      lang={locale}
+      dir={dir}
+      data-ariobarzan={ariobarzanMode ?? undefined}
+      suppressHydrationWarning
+      className={`${sora.variable} ${vazirmatn.variable}`}
+    >
+      {/* Local Ariobarzan @font-face — injected only when the purchased
+          files exist in public/fonts (see the contract above). */}
+      {ariobarzanMode && <style dangerouslySetInnerHTML={{ __html: ariobarzanFontFace }} />}
+      <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
+        {/* Skip link — first focusable element, a11y + keyboard users (SXO) */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:start-4 focus:z-[200] focus:rounded-full focus:bg-crimson focus:px-5 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg focus:outline-none"
+        >
+          {dictionary[locale].common.skipToContent}
+        </a>
+        <ThemeProvider>
+          <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
+        </ThemeProvider>
+        <JsonLd locale={locale} />
+        <Toaster />
+      </body>
+    </html>
+  );
+}

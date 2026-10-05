@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/* Latest PC MAX desktop releases — consumed by /api/release, /api/download,
+ * /api/changelog and /api/stats. */
+model Release {
+  id         String   @id @default(cuid())
+  version    String   @unique
+  channel    String   @default("stable")
+  fileName   String
+  notes      String?
+  releasedAt DateTime @default(now())
+  downloads  Int      @default(0)
+
+  @@index([releasedAt])
+}
+
+/* One row per changelog line, grouped by version in the API. */
+model ChangelogEntry {
+  id      String @id @default(cuid())
+  version String
+  tag     String // "feature" | "improvement" | "fix"
+  text    String
+  sort    Int    @default(0)
+
+  @@index([version])
+}
+
+/* Newsletter / beta waitlist captured in the download CTA. */
+model WaitlistSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+/* First-party, aggregate-only event log (no PII). */
+model EventLog {
+  id        String   @id @default(cuid())
+  type      String
+  meta      String?
+  createdAt DateTime @default(now())
+
+  @@index([type])
+}
