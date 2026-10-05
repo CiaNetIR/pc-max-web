@@ -4,6 +4,23 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] — 2026-10-05
+
+### Fixed — critical: images did not load on the GitHub Pages build
+- **Every user-visible image 404'd on the live Pages site** (navbar/footer/hero/
+  download-CTA logos and all six game key-arts). Root cause: `next/image` with
+  `images.unoptimized` — mandatory for `output: 'export'` — does **not** apply
+  `basePath` to the `src` prop (unlike `<Link>`, metadata URLs and the `/_next`
+  asset prefix), so all eight references emitted root-absolute URLs
+  (`/brand/…`, `/games/…`) that 404 under `/pc-max-web`.
+- Added a shared `asset()` helper to `src/lib/gh-pages.ts` (identity in the SSR
+  flavor — that build stays byte-identical) and routed every `<Image src>`
+  through it (navbar, footer, hero, download-CTA, app-showcase `gameFiles`);
+  `manifest.ts` now uses the same helper instead of a local duplicate.
+- Verified on the live deployment: 12/12 images load across desktop/mobile and
+  EN/FA, zero console/page errors, zero failed network requests; the SSR/dev
+  flavor still serves images through the `/_next/image` optimizer as before.
+
 ## [1.2.0] — 2026-10-05
 
 ### Added — the website now lives on GitHub Pages
