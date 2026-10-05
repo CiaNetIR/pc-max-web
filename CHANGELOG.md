@@ -4,6 +4,42 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.5] — 2026-10-05
+
+Persian-language design review follow-up ("a line crosses these items — bug;
+white turned pink; the site feels dead"). All three traced to real defects and
+fixed, plus one site-wide animation bug discovered on the way.
+
+### Fixed — reveal animations never fired near screen edges (site-wide)
+- Every `whileInView` viewport margin was written as a single value
+  (`margin: "-80px"` → rootMargin shrinks ALL four sides). On a 412px phone
+  the effective IntersectionObserver root is only ~212–332px wide, so any
+  animated element within ~40–100px of the LEFT/RIGHT edge sat outside the
+  root forever — `isIntersecting` never turned true and the element stayed at
+  its initial `opacity: 0` / `scale: 0`. All 26 usages now use vertical-only
+  margins (`"0px 0px -Npx 0px"`), which preserves the reveal-early intent
+  while including edge elements. Swept the whole page after a full scroll:
+  zero stuck-invisible elements remain.
+- In the same section, `initial={{ scale: 0 }}` collapsed the element's
+  IntersectionObserver rect to a zero-area point — Chrome reports
+  `isIntersecting: false` for it, so those nodes could never reveal even in
+  mid-screen. Initials are now non-degenerate (0.55 / 0.08 / 0.06) with the
+  same spring targets.
+
+### Fixed — "What is PC MAX" timeline (the line + the pink)
+- The only timeline element that actually animated was the continuous
+  scroll-drawn spine (`useScroll`, immune to the IO bug): a full-height hot
+  line crossing all five cards — with the node chips and connectors
+  permanently invisible around it, it read as a strikethrough bug. The spine
+  is replaced by short per-gap connector segments (crimson 35%→10%) that
+  spring in with the scroll; the frosted-glass node chips now pop in, and
+  the destination node carries a soft infinite pulse ring (skipped for
+  reduced-motion users).
+- Dark-mode crimson text tokens lifted to `#ff2d3d` (hue 353°) read as
+  PINK, not crimson. Re-lifted to `#ff3b30` (hue 3°, true red) at the same
+  luminance — still 5.7:1 on `#070707`, so the 4.5:1 pass is kept. Hardcoded
+  dark hover pinks in error/not-found follow it.
+
 ## [1.2.4] — 2026-10-05
 
 Lighthouse follow-up: responsive image delivery. The remaining flagged finding

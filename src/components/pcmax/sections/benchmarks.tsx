@@ -44,7 +44,7 @@ function Bar({
       className={className}
       initial={{ width: "0%" }}
       whileInView={{ width: pct }}
-      viewport={{ once: true, margin: "-40px" }}
+      viewport={{ once: true, margin: "0px 0px -40px 0px" }}
       transition={{ ...springFluid, delay }}
       aria-hidden="true"
     />

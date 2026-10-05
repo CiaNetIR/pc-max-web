@@ -183,7 +183,7 @@ export function InstallFlow() {
               key={step.title}
               initial={{ opacity: 0, y: 28 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
+              viewport={{ once: true, margin: "0px 0px -40px 0px" }}
               transition={{ ...springFluid, delay: i * 0.05 }}
               className="relative ps-14"
             >

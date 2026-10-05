@@ -37,7 +37,7 @@ export function Faq() {
       <motion.div
         initial={{ opacity: 0, y: 36 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
+        viewport={{ once: true, margin: "0px 0px -60px 0px" }}
         transition={springFluid}
         className="mx-auto max-w-3xl"
       >
@@ -140,7 +140,7 @@ export function Faq() {
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
+        viewport={{ once: true, margin: "0px 0px -60px 0px" }}
         transition={{ ...springFluid, delay: 0.12 }}
         className="mx-auto mt-10 max-w-2xl rounded-3xl border border-crimson/25 bg-crimson/[0.05] px-6 py-8 text-center sm:px-10 sm:py-10"
       >

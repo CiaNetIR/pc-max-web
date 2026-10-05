@@ -244,7 +244,7 @@ export function AppShowcase() {
             className="card-ios relative rounded-[28px] bg-card dark:bg-[#0d0d0e]"
             initial={{ opacity: 0, y: 60 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
+            viewport={{ once: true, margin: "0px 0px -80px 0px" }}
             transition={springFluid}
           >
             {/* glass reflection sweep */}
@@ -613,7 +613,7 @@ export function AppShowcase() {
                 key={game.name}
                 initial={{ opacity: 0, y: 26 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
+                viewport={{ once: true, margin: "0px 0px -40px 0px" }}
                 transition={{ ...springFluid, delay: (i % 3) * 0.08 }}
                 whileHover={whileHoverLift}
                 whileTap={whileTapPress}

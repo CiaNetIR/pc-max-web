@@ -381,7 +381,7 @@ export function DownloadCtaClient({
         <motion.div
           initial={reduce ? false : { opacity: 0, scale: 0.82, filter: "blur(10px)" }}
           whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-60px" }}
+          viewport={{ once: true, margin: "0px 0px -60px 0px" }}
           transition={springFluid}
           className="relative mx-auto mb-9 h-24 w-24 sm:h-28 sm:w-28"
         >
@@ -401,7 +401,7 @@ export function DownloadCtaClient({
         <motion.h2
           initial={reduce ? false : { opacity: 0, y: 32, filter: "blur(8px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={springFluid}
           className="type-display font-display text-4xl font-extrabold text-foreground sm:text-6xl"
         >
@@ -418,7 +418,7 @@ export function DownloadCtaClient({
         <motion.p
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={{ ...springFluid, delay: 0.12 }}
           className="type-lead mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg"
         >
@@ -429,7 +429,7 @@ export function DownloadCtaClient({
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={{ ...springFluid, delay: 0.2 }}
           className="mt-10"
         >

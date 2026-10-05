@@ -17,7 +17,7 @@ export function AnimatedCounter({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const inView = useInView(ref, { once: true, margin: "0px 0px -40px 0px" });
   const reduce = useReducedMotion();
   /* Initial state = final value: SSR + no-JS + pre-hydration all show the
    * real number (SEO/no-JS never see "0"). The count-up only starts once

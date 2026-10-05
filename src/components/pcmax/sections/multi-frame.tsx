@@ -61,7 +61,7 @@ export function MultiFrame() {
               variants={cardEnter[i]}
               initial="hidden"
               whileInView="show"
-              viewport={{ once: true, margin: "-60px" }}
+              viewport={{ once: true, margin: "0px 0px -60px 0px" }}
               transition={{ ...springFluid, delay: 0.1 + i * 0.1 }}
               className={cn(
                 "card-ios group relative flex flex-col rounded-3xl bg-card p-6 sm:p-7",

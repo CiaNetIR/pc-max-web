@@ -123,11 +123,14 @@
 
   /* A11y contrast lift (Task 18-i finding): crimson TEXT tokens on the
      near-black background. #c1121f ≈ 3.2:1 and #e50914 ≈ 4.2:1 both miss
-     4.5:1 for the 11–12px uppercase eyebrows/labels; #ff2d3d ≈ 5.5:1 on
-     #070707 while hue stays brand crimson (~355° — crimson, not pink).
-     Light theme keeps the canonical hues: only this block changes. */
-  --color-crimson: #ff2d3d;
-  --color-crimson-bright: #ff2d3d;
+     4.5:1 for the 11–12px uppercase eyebrows/labels; #ff3b30 ≈ 5.7:1 on
+     #070707. Task 25 hue correction: the first lift used #ff2d3d (hue 353°)
+     which Persian-language review read as PINK (صورتی), not crimson —
+     #ff3b30 sits at hue 3° (true red) at the same luminance, keeping the
+     4.5:1 pass while restoring the brand crimson. Light theme keeps the
+     canonical hues: only this block changes. */
+  --color-crimson: #ff3b30;
+  --color-crimson-bright: #ff3b30;
 }
 
 /* Dark-mode fill guard — Tailwind utilities resolve the lifted vars above,

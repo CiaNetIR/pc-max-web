@@ -47,7 +47,7 @@ export function SystemSafety() {
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
+          viewport={{ once: true, margin: "0px 0px -60px 0px" }}
           transition={springFluid}
           className="card-ios rounded-3xl bg-card p-6 sm:p-8 lg:p-10"
         >
@@ -96,7 +96,7 @@ export function SystemSafety() {
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
+          viewport={{ once: true, margin: "0px 0px -60px 0px" }}
           transition={{ ...springFluid, delay: 0.1 }}
           className="card-ios rounded-3xl bg-card p-6 sm:p-8 lg:p-10"
         >
@@ -128,7 +128,7 @@ export function SystemSafety() {
                 key={step.title}
                 initial={reduce ? false : { opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
+                viewport={{ once: true, margin: "0px 0px -40px 0px" }}
                 transition={{ ...springFluid, delay: 0.18 + i * 0.08 }}
                 className="relative ps-8"
               >

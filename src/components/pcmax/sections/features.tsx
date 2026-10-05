@@ -36,7 +36,7 @@ export function Features() {
               key={group.title}
               initial={{ opacity: 0, y: 28 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
+              viewport={{ once: true, margin: "0px 0px -60px 0px" }}
               transition={{ ...springFluid, delay: 0.04 }}
               className={cn(
                 "relative py-10 sm:py-14",
@@ -69,7 +69,7 @@ export function Features() {
                       key={item}
                       initial={{ opacity: 0, x: flip ? -12 : 12 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: "-40px" }}
+                      viewport={{ once: true, margin: "0px 0px -40px 0px" }}
                       transition={{ ...springFluid, delay: 0.08 + j * 0.06 }}
                       className="flex items-start gap-3.5 text-sm leading-relaxed text-foreground/85 sm:text-[15px]"
                     >

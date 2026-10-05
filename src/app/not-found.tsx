@@ -40,7 +40,7 @@ export default async function NotFound() {
 
         <Link
           href="/"
-          className="mt-10 inline-flex h-13 items-center gap-2.5 rounded-xl bg-crimson px-7 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-crimson/25 transition-colors hover:bg-crimson-bright dark:bg-crimson-bright dark:hover:bg-[#ff2b34]"
+          className="mt-10 inline-flex h-13 items-center gap-2.5 rounded-xl bg-crimson px-7 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-crimson/25 transition-colors hover:bg-crimson-bright dark:bg-crimson-bright dark:hover:bg-[#ff4a3e]"
         >
           <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
           {t.cta}

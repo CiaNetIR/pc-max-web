@@ -40,7 +40,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
         <button
           type="button"
           onClick={reset}
-          className="mt-10 inline-flex h-13 items-center gap-2.5 rounded-xl bg-crimson px-7 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-crimson/25 transition-colors hover:bg-crimson-bright dark:bg-crimson-bright dark:hover:bg-[#ff2b34]"
+          className="mt-10 inline-flex h-13 items-center gap-2.5 rounded-xl bg-crimson px-7 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-crimson/25 transition-colors hover:bg-crimson-bright dark:bg-crimson-bright dark:hover:bg-[#ff4a3e]"
         >
           <RotateCcw className="h-5 w-5" />
           {t.retry}

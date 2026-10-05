@@ -50,7 +50,7 @@ export function SectionHeading({
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
+        viewport={{ once: true, margin: "0px 0px -80px 0px" }}
         transition={springFluid}
         className={cn(
           "type-eyebrow mb-4 inline-flex items-center gap-2.5 text-xs font-semibold uppercase text-crimson",
@@ -64,7 +64,7 @@ export function SectionHeading({
       <motion.h2
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
+        viewport={{ once: true, margin: "0px 0px -80px 0px" }}
         transition={{ ...springFluid, delay: 0.05 }}
         className="type-display font-display text-3xl font-bold text-foreground sm:text-4xl lg:text-5xl"
       >
@@ -74,7 +74,7 @@ export function SectionHeading({
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
+          viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={{ ...springFluid, delay: 0.1 }}
           className={cn("type-lead mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg", align === "center" && "mx-auto")}
         >
@@ -152,7 +152,7 @@ export function Reveal({
     <motion.div
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, margin: "-60px" }}
+      viewport={{ once, margin: "0px 0px -60px 0px" }}
       transition={{ ...springFluid, delay }}
       className={className}
     >
