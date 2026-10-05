@@ -14,7 +14,10 @@ import { springFluid } from "@/components/pcmax/ui/motion";
  * Progressive-enhancement contract (performance first):
  *
  *   Every viewport : hero copy + CTAs render in the initial HTML.
- *   ≥ 640px        : the WebGL GPU initializes after hydration.
+ *   ≥ 640px        : the WebGL GPU starts loading only once the browser is
+ *                    idle AFTER first paint (requestIdleCallback, ~1.1s
+ *                    worst-case timeout) — the ~860KB three.js chunk never
+ *                    competes with hydration or the first paints.
  *   ≥ 1024px       : the constellation field initializes behind it.
  *   < 640px (phone): NO GPU 3D, NO constellation — the dynamic import is
  *                    never triggered, no canvas exists, no rAF runs. The
@@ -26,9 +29,11 @@ import { springFluid } from "@/components/pcmax/ui/motion";
  */
 
 /* Progressive enhancement: no fake loading skeleton — the hero copy and
- * CTAs are already fully rendered while the (desktop-only) scene chunk
- * streams in; the canvas then fades in at its steady-state pose (see the
- * motion.div wrapper below), so loading never reads as a blink or jump. */
+ * CTAs are already fully rendered while the (desktop-only, idle-deferred)
+ * scene chunk streams in; the canvas then fades in at its steady-state pose
+ * (see the motion.div wrapper below), so loading never reads as a blink or
+ * jump. The import below is only *triggered* when `deferred3d` flips (idle
+ * callback) AND the ≥640px tier gate passes — see the effect in Hero(). */
 const GpuScene = dynamic(() => import("./gpu-scene").then((m) => m.GpuScene), {
   ssr: false,
   loading: () => null,
@@ -161,6 +166,36 @@ export function Hero() {
    * is never triggered, so three.js is never downloaded or initialized. */
   const showGpu = tier === "wide";
 
+  /* Idle-deferred 3D (performance contract): the three.js stack is ~862KB of
+   * JS and must never start downloading during hydration or the first
+   * paints — copy, CTAs and the (cheap canvas-2D) constellation are the
+   * critical path. `deferred3d` flips once the browser reports itself idle
+   * after paint; the hard timeout (~1.1s) guarantees slow or busy machines
+   * still get the card reasonably fast, and Safari (no requestIdleCallback)
+   * falls back to a ~900ms timer. The dynamic import is only triggered when
+   * this is true AND the ≥640px tier gate passes — on phones the flip is a
+   * harmless no-op state change (nothing renders from it). */
+  const [deferred3d, setDeferred3d] = useState(false);
+  useEffect(() => {
+    const kick = () => setDeferred3d(true);
+    let idleHandle: number | null = null;
+    let timerHandle: ReturnType<typeof setTimeout> | null = null;
+    if (typeof window.requestIdleCallback === "function") {
+      idleHandle = window.requestIdleCallback(kick, { timeout: 1100 });
+    } else {
+      timerHandle = setTimeout(kick, 900);
+    }
+    return () => {
+      if (idleHandle !== null) window.cancelIdleCallback(idleHandle);
+      if (timerHandle !== null) clearTimeout(timerHandle);
+    };
+  }, []);
+
+  /* The heavy chunk + canvas mount only after BOTH the tier gate and the
+   * idle deferral pass. Timing change only — layer stack, fade-in wrapper
+   * and fallback chain are identical to the pre-deferral behavior. */
+  const mountGpu = showGpu && deferred3d;
+
   /* Attention order (premium restraint): headline → value proposition →
    * primary CTA → GPU → background. No badge, no metadata chips — the
    * hero carries one message and two actions. */
@@ -183,10 +218,10 @@ export function Hero() {
        * GPU so the card is never veiled; only the constellation is calmed) */}
       <div className="hero-scrim pointer-events-none absolute inset-0 z-[2]" aria-hidden="true" />
 
-      {/* L3 — WebGL GPU (≥640px). Transparent canvas over the constellation;
-       * never mounted on phones. Falls back to a branded glyph if WebGL
-       * is unavailable. */}
-      {showGpu && (
+      {/* L3 — WebGL GPU (≥640px, idle-deferred). Transparent canvas over the
+       * constellation; never mounted on phones, never fetched during
+       * hydration. Falls back to a branded glyph if WebGL is unavailable. */}
+      {mountGpu && (
         /* Smooth loading→ready handoff: opacity-only fade (never transform,
          * so it cannot compound with the scene's single transform source in
          * useFrame). Once complete it stays at 1 forever — the GPU can only
@@ -209,8 +244,9 @@ export function Hero() {
           </SceneErrorBoundary>
         </motion.div>
       )}
-      {/* accessible description of the decorative 3D product view */}
-      {showGpu && <p className="sr-only">{t.hero.gpuAlt}</p>}
+      {/* accessible description of the decorative 3D product view — kept
+       * in sync with the card itself (absent until it mounts) */}
+      {mountGpu && <p className="sr-only">{t.hero.gpuAlt}</p>}
 
       {/* phone hero — pure-CSS emblem, mounted after hydration on phones */}
       {tier === "phone" && <MobileEmblem />}

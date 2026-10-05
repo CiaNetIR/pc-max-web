@@ -6,6 +6,7 @@ import {
   siteConfig,
 } from "@/lib/seo";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
+import { db } from "@/lib/db";
 
 /**
  * Schema.org structured data for PC MAX — one connected @graph.
@@ -19,12 +20,28 @@ import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
  * and fa-IR language tags; the EN canonical ships English. Both mirror the
  * on-page copy verbatim (pulled from the same dictionary the UI renders).
  *
- * Pure render, no hooks or browser APIs — safe on the server and client.
+ * Pure render, no hooks or browser APIs. Async only to read the live
+ * release version from the database (same source as /api/release), so
+ * `softwareVersion` can never drift from the shipped product; on any DB
+ * error the field is simply omitted instead of failing the page.
  */
-export function JsonLd({ locale = "en" }: { locale?: Locale }): ReactNode {
+async function getSoftwareVersion(): Promise<string | null> {
+  try {
+    const latest = await db.release.findFirst({
+      orderBy: { releasedAt: "desc" },
+      select: { version: true },
+    });
+    return latest?.version ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function JsonLd({ locale = "en" }: { locale?: Locale }): Promise<ReactNode> {
   const meta = getLocaleMeta(locale);
   const dict = dictionary[locale];
   const pageUrl = `${siteConfig.url}${meta.path === "/" ? "" : meta.path}`;
+  const softwareVersion = await getSoftwareVersion();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -116,6 +133,7 @@ export function JsonLd({ locale = "en" }: { locale?: Locale }): ReactNode {
         fileSize: siteConfig.app.diskSpace,
         softwareRequirements: siteConfig.app.requirements,
         featureList: getFeatureList(locale),
+        softwareVersion: softwareVersion ?? undefined,
         screenshot: `${siteConfig.url}${siteConfig.ogImage}`,
         offers: {
           "@type": "Offer",

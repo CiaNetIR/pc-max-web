@@ -178,13 +178,16 @@ export function Profiles() {
                 ))}
               </ul>
 
-              {/* bottom meter — visual load indicator */}
+              {/* bottom meter — visual load indicator.
+                  Plain CSS fill: width is a layout property and must never be
+                  animated (20-k). The previous motion.div was inert anyway —
+                  no `initial` and a constant target meant zero animation ever
+                  ran — so this is pixel-identical with zero layout-anim risk. */}
               <div className="mt-7 h-1 overflow-hidden rounded-full bg-border/70" aria-hidden="true">
-                <motion.div
+                <div
                   className="h-full rounded-full"
-                  animate={{ width: key === "yellow" ? "38%" : "86%" }}
-                  transition={springFluid}
                   style={{
+                    width: key === "yellow" ? "38%" : "86%",
                     background: `linear-gradient(90deg, ${styles.label}55, ${styles.label})`,
                   }}
                 />

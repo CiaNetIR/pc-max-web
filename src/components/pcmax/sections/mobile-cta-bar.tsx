@@ -62,7 +62,11 @@ export function MobileCtaBar() {
 
     /* Redundant next to the real download section — hide while it (or the
      * footer) is on screen. One observer, both targets, disconnected on
-     * unmount — no leaked observers. */
+     * unmount — no leaked observers.
+     * threshold 0 + rootMargin: the bottom 110px of the viewport count as
+     * "occupied" — the bar slides away BEFORE #download or the footer can
+     * slide under it, so the last FAQ card / footer content are never
+     * covered (110px ≈ bar height incl. safe-area inset on notch phones). */
     const downloadEl = document.getElementById("download");
     const footerEl = document.querySelector("footer");
     let io: IntersectionObserver | null = null;
@@ -75,7 +79,7 @@ export function MobileCtaBar() {
           }
           evaluate();
         },
-        { threshold: 0.15 }
+        { threshold: 0, rootMargin: "0px 0px 110px 0px" }
       );
       if (downloadEl) io.observe(downloadEl);
       if (footerEl) io.observe(footerEl);

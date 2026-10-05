@@ -7,6 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     name: siteConfig.name,
     short_name: siteConfig.shortName,
     description: siteConfig.description,
+    /* Stable PWA identity — survives URL/scheme changes */
+    id: "/",
     start_url: "/",
     display: "standalone",
     background_color: "#070707",

@@ -155,7 +155,17 @@ export function getLocaleMeta(locale: Locale): LocaleMeta {
   };
 }
 
-/** Feature list for SoftwareApplication.featureList (locale-aware). */
+/**
+ * Feature list for SoftwareApplication.featureList (locale-aware).
+ *
+ * Mirrors the on-page Features section exactly — the three group titles
+ * ("Detect / Optimize / Protect") plus every item line under them — so the
+ * structured data always matches the visible copy (Google's consistency
+ * requirement) while staying descriptive enough to be useful on its own.
+ */
 export function getFeatureList(locale: Locale): string[] {
-  return dictionary[locale].features.groups.map((group) => group.title);
+  return dictionary[locale].features.groups.flatMap((group) => [
+    group.title,
+    ...group.items,
+  ]);
 }

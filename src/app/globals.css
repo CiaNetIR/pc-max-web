@@ -1,5 +1,14 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @import "tw-animate-css";
+
+/* Explicit content sources — `source(none)` above DISABLES Tailwind 4's
+   automatic project-wide source detection. That scan stats every
+   candidate directory (including `<dir>/.git` repo-boundary probes on
+   gitignored trees like the IM gateway's /upload mount); on a degraded
+   FUSE mount such a statx never returns and wedges the postcss worker —
+   hanging the whole page compile. All class-bearing code lives in src/,
+   which the @source below covers explicitly. */
+@source "../../src/**/*.{ts,tsx,mdx}";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -111,6 +120,28 @@
   --border: rgba(255, 255, 255, 0.09);
   --input: rgba(255, 255, 255, 0.12);
   --ring: #e50914;
+
+  /* A11y contrast lift (Task 18-i finding): crimson TEXT tokens on the
+     near-black background. #c1121f ≈ 3.2:1 and #e50914 ≈ 4.2:1 both miss
+     4.5:1 for the 11–12px uppercase eyebrows/labels; #ff2d3d ≈ 5.5:1 on
+     #070707 while hue stays brand crimson (~355° — crimson, not pink).
+     Light theme keeps the canonical hues: only this block changes. */
+  --color-crimson: #ff2d3d;
+  --color-crimson-bright: #ff2d3d;
+}
+
+/* Dark-mode fill guard — Tailwind utilities resolve the lifted vars above,
+   so exact-class solid crimson fills are pinned back to the dark primary
+   (#e50914, the value --primary already uses in dark): white label text
+   keeps 4.8:1 and buttons stay brand crimson instead of the brighter text
+   hue. Tints (bg-crimson/10 …), borders and gradient stops intentionally
+   ride the lifted token — they never carry white text and gain visibility
+   on #070707. Unlayered rules win over the utilities layer by design. */
+.dark .bg-crimson {
+  background-color: #e50914;
+}
+.dark .group-hover\:bg-crimson:is(:where(.group):hover *) {
+  background-color: #e50914;
 }
 
 /* Persian font switching — Vazirmatn takes over in RTL.
@@ -435,28 +466,19 @@ html[lang="fa"] h4 {
   background: #c1121f;
 }
 
-/* Marquee ticker for game library */
-@keyframes marquee-x {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.marquee-track {
-  animation: marquee-x 40s linear infinite;
-}
-[dir="rtl"] .marquee-track {
-  animation-direction: reverse;
-}
-.marquee-paused:hover .marquee-track {
-  animation-play-state: paused;
-}
-@media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
+/* content-visibility — per-section opt-in (LEAD DECISION, do not blanket-apply).
+   Skips layout/paint of far-below-fold sections until they approach the
+   viewport. ALWAYS pair with a contain-intrinsic-size close to the real
+   section height, e.g. on the section element:
+     class="cv-auto" style="contain-intrinsic-size: auto 720px"
+   (the `auto` keyword keeps the last-rendered size after first layout, so a
+   wrong guess only affects the very first scroll pass). Caveats: wrong sizes
+   cause scrollbar jumping; anchor links (#features, #benchmarks …) and
+   whileInView reveals depend on sections being laid out — apply only to
+   long below-fold sections WITHOUT anchors, then re-verify scroll offsets. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
 }
 
 /* Hero readability scrim — deterministic logical direction */

@@ -4,6 +4,81 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] — 2026-10-05
+
+### Performance — the site was "very slow and laggy"; this release attacks every layer
+- **GPU scene render cost cut dramatically** (the dominant per-frame cost):
+  - Postprocessing `multisampling` 4× → 0 (4× fragment work on every pass removed;
+    the soft materials + bloom mask the aliasing it was fixing).
+  - DPR caps 2.0/1.6 → 1.5/1.35 (desktop/tablet) — up to ~56% fewer pixels rasterized
+    on retina-class displays.
+  - **Adaptive DPR**: the hero's manual render loop now measures real frame cost (EMA)
+    and self-tunes the pixel ratio down a ladder (cap → 1.25 → 1.0) on sustained
+    slowness and back up on sustained fastness — the scene degrades gracefully on
+    weak GPUs instead of lagging. Applied through r3f's `setDpr` with composer
+    render-target resize sync; hysteresis-locked so it never oscillates.
+  - Canvas `antialias: false` (the composer bypasses the default framebuffer — the
+    canvas AA flag was pure config waste).
+  - Shadow filtering set explicitly to plain PCF (removes the three.js 0.186
+    PCFSoftShadowMap deprecation warning; identical output).
+- **The ~862 KB three.js chunk no longer competes with first paint**: the GPU scene's
+  dynamic import now starts only when the browser reports itself idle after hydration
+  (`requestIdleCallback`, 1.1 s worst-case timeout, Safari timer fallback). Verified:
+  chunk requests begin ~1 s after `load`, FCP/hydration untouched; phones still
+  download zero WebGL code.
+- **Constellation canvas at ~30 fps** (rAF ticks that arrive sooner than 33 ms are
+  skipped — the slow star-field drift is visually identical), DPR capped at 1.5,
+  per-frame color-string allocations eliminated (pre-baked theme palettes, ~5 alpha
+  buckets, strokes batched per bucket), `hypot` → `sqrt` in the hot path.
+- **Client fetch waterfall eliminated**: download-cta and social-proof are now server
+  components that query Prisma directly and seed their client halves as props —
+  `/api/release`, `/api/changelog` and `/api/stats` are no longer requested by the
+  browser at all (verified: zero API XHRs after load; release data present in the
+  SSR HTML). The API routes remain for the download button and external consumers.
+- **Font diet**: Vazirmatn no longer force-preloaded on English first paint
+  (usage-gated via `[dir=rtl]` stacks + unicode-range; EN verified to download zero
+  Persian fonts); FA-only local cuts get correctly-typed CORS preloads on FA only;
+  `color-scheme: light dark` meta added.
+- **Static asset diet**: deleted verified-unreferenced `brand/pcmax-logo.png` (836 KB),
+  `brand/pcmax-emblem.jpg`, `fonts/estedad-vf.woff2` (118 KB), `logo.svg`.
+- **Navbar chrome**: scroll handler does zero work unless the threshold is crossed
+  (ref-guarded boolean flip), always-on `backdrop-blur` surfaces replaced with solid
+  `bg-card/80` (each blurred pill was a persistent composite layer), IO-based
+  scroll-spy with proper cleanup, timer-leak fix on unmount.
+- **Dead CSS removed**: the marquee keyframe block (orphaned since the game-library
+  deletion) is gone; added a documented `.cv-auto` (content-visibility) utility for
+  future opt-in.
+- **Motion hygiene verified**: every `whileInView` carries `viewport={{ once: true }}`
+  (no re-animation on scroll-back); the profiles meter's dead width-animation
+  replaced with plain CSS (pixel-identical); mobile CTA bar observer gets a proper
+  rootMargin instead of a late threshold.
+
+### Accessibility
+- Dark-mode crimson small-text contrast lifted to ≈5.5:1 (`--color-crimson(-bright)`
+  → `#ff2d3d` in `.dark` only; light theme untouched) with a fill-guard so solid
+  crimson fills keep the canonical brand hue; reported by the 18-j audit, fixed here.
+
+### SEO
+- robots.txt now explicitly allows `/api/release` + `/api/changelog` (real content
+  endpoints) while disallowing the rest of `/api/`; manifest gains `id: "/"`;
+  JSON-LD `SoftwareApplication` now carries the live version number (async db read);
+  llms.txt/llms-full.txt fact-sync pass; feature list for SEO now includes group items.
+
+### Infrastructure / tooling (sandbox hardening)
+- Tailwind 4 content scanning pinned to explicit sources
+  (`@import "tailwindcss" source(none)` + `@source "../../src/**/*.{ts,tsx,mdx}"`)
+  so the scanner never stats non-source trees — on degraded FUSE mounts a stray
+  `<dir>/.git` probe could wedge the postcss worker and hang the whole page compile
+  (diagnosed via `/proc/<pid>/syscall` + process-memory path extraction).
+- tsconfig include scoped to real source roots; ESLint ignores hardened
+  (`tool-results/`, `upload/`, `.poison/`).
+
+### Notes
+- tsc `--noEmit` clean project-wide; ESLint clean on every changed file; verified
+  E2E on port 3002 (desktop dark/light EN, FA RTL, mobile 390 FA: zero canvases,
+  zero horizontal overflow, SSR release data, working FAQ accordion, theme toggle,
+  real `/api/download` href).
+
 ## [1.0.0] — 2026-10-05
 
 ### Added — the site

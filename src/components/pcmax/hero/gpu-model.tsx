@@ -428,6 +428,13 @@ function markInteraction() {
   lastInteraction = performance.now();
 }
 
+/* fan speed targets (module constants — the idle-damp useFrame below runs
+ * every rendered frame and must not allocate). Values are the calibrated
+ * idle/active pairs; reduced-motion parks the fans. */
+const FAN_TARGET_ACTIVE: readonly [number, number] = [3.4, 2.9];
+const FAN_TARGET_IDLE: readonly [number, number] = [1.0, 0.85];
+const FAN_TARGET_PARKED: readonly [number, number] = [0, 0];
+
 export function GpuModel({ quality = "high" }: { quality?: Quality }) {
   /* respect OS reduced-motion — fans park instead of spinning */
   const [reducedMotion] = useState(
@@ -446,7 +453,7 @@ export function GpuModel({ quality = "high" }: { quality?: Quality }) {
   useFrame((_, delta) => {
     const dt = Math.min(Math.max(delta, 0), 0.05);
     const idle = performance.now() - lastInteraction > 4500;
-    const target: [number, number] = reducedMotion ? [0, 0] : idle ? [1.0, 0.85] : [3.4, 2.9];
+    const target = reducedMotion ? FAN_TARGET_PARKED : idle ? FAN_TARGET_IDLE : FAN_TARGET_ACTIVE;
     fanSpeeds.current[0] = THREE.MathUtils.damp(fanSpeeds.current[0], target[0], 1.1, dt);
     fanSpeeds.current[1] = THREE.MathUtils.damp(fanSpeeds.current[1], target[1], 1.1, dt);
   });

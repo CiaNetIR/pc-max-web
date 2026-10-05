@@ -14,18 +14,38 @@ import { springBounce, springFluid } from "@/components/pcmax/ui/motion";
    with the menu container so assistive tech can associate them. */
 const MENU_ID = "pcmax-mobile-menu";
 
+/* Sections watched by the scroll-spy (hero + the four nav targets) —
+   mirrors the `links` list below. Module-level: the observer effect can
+   keep an empty dep array and never resubscribes on re-renders. */
+const SPY_IDS = ["top", "features", "install", "benchmarks", "faq"] as const;
+
 /* ------------------------------ Theme toggle ------------------------- */
 
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const { t } = useLanguage();
+  const timerRef = useRef<number | null>(null);
+
+  /* The theme-anim class is dropped by a timer — clear it when the toggle
+   * is hit again (no mid-animation snap from a stale timer) and on
+   * unmount (no dangling callback on a dead root). */
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    },
+    []
+  );
 
   const toggle = () => {
     const next = resolvedTheme === "dark" ? "light" : "dark";
     const root = document.documentElement;
     root.classList.add("theme-anim");
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
     setTheme(next);
-    window.setTimeout(() => root.classList.remove("theme-anim"), 460);
+    timerRef.current = window.setTimeout(
+      () => root.classList.remove("theme-anim"),
+      460
+    );
   };
 
   return (
@@ -33,8 +53,10 @@ function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={`${t.common.themeLight} / ${t.common.themeDark}`}
-      /* 44px on touch, 36px from sm up — a11y touch-target rule */
-      className="press flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-card/60 text-muted-foreground backdrop-blur-sm transition-colors hover:border-crimson/40 hover:text-crimson sm:h-9 sm:w-9"
+      /* 44px on touch, 36px from sm up — a11y touch-target rule.
+         Solid pill (no backdrop-filter): tiny always-mounted blur
+         surfaces cost a composite layer each on weak GPUs. */
+      className="press flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-card/80 text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson sm:h-9 sm:w-9"
     >
       <motion.span
         key="theme-icon"
@@ -60,7 +82,7 @@ function LanguageToggle({ compact = false }: { compact?: boolean }) {
       onClick={toggleLocale}
       aria-label={t.common.switchTo}
       className={cn(
-        "press flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/60 text-foreground/80 backdrop-blur-sm transition-colors hover:border-crimson/40 hover:text-crimson",
+        "press flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 text-foreground/80 transition-colors hover:border-crimson/40 hover:text-crimson",
         /* 44px hit area on touch, compact from sm up (a11y touch target) */
         compact ? "h-11 w-11 sm:h-9 sm:w-9" : "h-11 px-4 text-xs font-bold sm:h-9"
       )}
@@ -76,7 +98,9 @@ function LanguageToggle({ compact = false }: { compact?: boolean }) {
 export function Navbar() {
   const { t, isRTL } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const scrolledRef = useRef(false);
   const headerRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const wasOpen = useRef(false);
@@ -85,10 +109,44 @@ export function Navbar() {
   const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.4 });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    /* Near-zero work per scroll event: one boolean compare against the
+     * last known state — setState (and with it a React render) fires only
+     * when the threshold is actually crossed, never per event. */
+    const onScroll = () => {
+      const next = window.scrollY > 24;
+      if (next !== scrolledRef.current) {
+        scrolledRef.current = next;
+        setScrolled(next);
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* Scroll-spy (UX polish): ONE IntersectionObserver over the hero + the
+   * four nav-target sections. The highlight follows the last section that
+   * crossed the focus band and clears again at the hero. Zero scroll
+   * listeners, zero layout reads; state flips only when the active
+   * section actually changes. Presentation-only — never touches the
+   * anchor/go() logic. */
+  useEffect(() => {
+    const sections = SPY_IDS.map((id) => document.getElementById(id)).filter(
+      (el): el is HTMLElement => el !== null
+    );
+    if (sections.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id === "top" ? null : entry.target.id);
+          }
+        }
+      },
+      { rootMargin: "-40% 0px -55% 0px" }
+    );
+    for (const section of sections) observer.observe(section);
+    return () => observer.disconnect();
   }, []);
 
   /* Scroll-lock with scrollbar compensation: hiding the viewport scrollbar
@@ -134,12 +192,12 @@ export function Navbar() {
       if (focusables.length === 0) return;
       const first = focusables[0];
       const last = focusables[focusables.length - 1];
-      const active = document.activeElement;
-      const inside = active instanceof Node && headerRef.current.contains(active);
-      if (event.shiftKey && (!inside || active === first)) {
+      const activeEl = document.activeElement;
+      const inside = activeEl instanceof Node && headerRef.current.contains(activeEl);
+      if (event.shiftKey && (!inside || activeEl === first)) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && (!inside || active === last)) {
+      } else if (!event.shiftKey && (!inside || activeEl === last)) {
         event.preventDefault();
         first.focus();
       }
@@ -201,8 +259,14 @@ export function Navbar() {
             aria-label="PC MAX"
             className={cn(
               "flex items-center justify-between gap-4 rounded-2xl px-4 py-2.5 transition-all duration-500 sm:px-5",
+              /* Scrolled: solid "lit material" chrome — card-ios hairline
+               * border + specular top edge + soft shadow over a 95%-opaque
+               * card. backdrop-filter on a full-width always-mounted bar is
+               * a per-frame composite cost on weak GPUs; this keeps the
+               * dark-chrome aesthetic for free. Top of page: fully
+               * transparent over the hero, exactly as before. */
               scrolled
-                ? "glass-chrome"
+                ? "card-ios bg-card/95"
                 : "border border-transparent bg-transparent"
             )}
           >
@@ -227,17 +291,26 @@ export function Navbar() {
 
             {/* desktop links */}
             <ul className="hidden items-center gap-1 lg:flex">
-              {links.map((link) => (
-                <li key={link.id}>
-                  <button
-                    type="button"
-                    onClick={() => go(link.id)}
-                    className="press relative rounded-full px-3.5 py-2 text-sm font-medium text-foreground/80 transition-colors hover:text-foreground after:absolute after:bottom-0.5 after:start-3.5 after:h-px after:w-0 after:bg-crimson after:transition-all after:duration-300 hover:after:w-[calc(100%-1.75rem)]"
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
+              {links.map((link) => {
+                const isActive = active === link.id;
+                return (
+                  <li key={link.id}>
+                    <button
+                      type="button"
+                      onClick={() => go(link.id)}
+                      aria-current={isActive ? "true" : undefined}
+                      className={cn(
+                        "press relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors after:absolute after:bottom-0.5 after:start-3.5 after:h-px after:bg-crimson after:transition-all after:duration-300",
+                        isActive
+                          ? "text-crimson after:w-[calc(100%-1.75rem)]"
+                          : "text-foreground/80 hover:text-foreground hover:after:w-[calc(100%-1.75rem)]"
+                      )}
+                    >
+                      {link.label}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
 
             {/* actions */}
@@ -258,7 +331,7 @@ export function Navbar() {
                 aria-expanded={open}
                 aria-controls={MENU_ID}
                 aria-label={t.nav.menu}
-                className="press flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-card/60 text-foreground backdrop-blur-sm transition-colors hover:border-crimson/40 hover:text-crimson lg:hidden"
+                className="press flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-card/80 text-foreground transition-colors hover:border-crimson/40 hover:text-crimson lg:hidden"
               >
                 {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </button>
@@ -279,23 +352,36 @@ export function Navbar() {
             >
               <div className="glass overflow-hidden rounded-3xl">
                 <ul className="flex flex-col p-3">
-                  {links.map((link, i) => (
-                    <motion.li
-                      key={link.id}
-                      initial={{ opacity: 0, x: isRTL ? 16 : -16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ ...springFluid, delay: 0.03 * i }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => go(link.id)}
-                        className="press flex w-full items-center justify-between rounded-2xl px-4 py-3.5 text-base font-semibold text-foreground/85 transition-colors hover:bg-accent hover:text-foreground"
+                  {links.map((link, i) => {
+                    const isActive = active === link.id;
+                    return (
+                      <motion.li
+                        key={link.id}
+                        initial={{ opacity: 0, x: isRTL ? 16 : -16 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ ...springFluid, delay: 0.03 * i }}
                       >
-                        {link.label}
-                        <span className="h-1.5 w-1.5 rounded-full bg-crimson/60" aria-hidden="true" />
-                      </button>
-                    </motion.li>
-                  ))}
+                        <button
+                          type="button"
+                          onClick={() => go(link.id)}
+                          aria-current={isActive ? "true" : undefined}
+                          className={cn(
+                            "press flex w-full items-center justify-between rounded-2xl px-4 py-3.5 text-base font-semibold transition-colors hover:bg-accent hover:text-foreground",
+                            isActive ? "text-crimson" : "text-foreground/85"
+                          )}
+                        >
+                          {link.label}
+                          <span
+                            aria-hidden="true"
+                            className={cn(
+                              "h-1.5 w-1.5 rounded-full",
+                              isActive ? "bg-crimson" : "bg-crimson/60"
+                            )}
+                          />
+                        </button>
+                      </motion.li>
+                    );
+                  })}
                   <li className="mt-2 border-t border-border/60 pt-3">
                     <Button
                       onClick={() => go("download")}

@@ -7,11 +7,11 @@ PC MAX is a desktop application for Windows 10 and 11 (64-bit) built by the PC M
 Key facts:
 
 - Product name: PC MAX (brand of the PC MAX team; pcmax.app)
-- Price: Free core edition. A free account (email + password) signs you in and syncs the catalogue; premium features are gated server-side (Pro edition coming soon)
+- Price: Free core edition. A free account (email + password) signs you in and syncs your catalogue; premium extras are subscription-gated and enforced server-side (Pro edition coming soon)
 - Platforms: Windows 10 and Windows 11, 64-bit (x64)
 - Size: 220 MB on disk
 - Requirements: 4 GB RAM minimum (8 GB recommended), DirectX 12 compatible GPU
-- Offline-first: core optimization and profiles work fully offline; internet only for updates and optional package downloads
+- Offline-first: works from your last synced catalogue and profiles, re-syncs automatically when back online; internet only for the first sync, updates and optional package downloads
 - Privacy: zero telemetry in the app; the website logs anonymous aggregate events only
 - Safety model: snapshot → apply (one transaction, all or nothing) → rollback on failure → restore (one-click, anytime). 235 automated tests in CI (151 API · 48 desktop · 36 Rust engine)
 - Official website: https://pcmax.app
@@ -34,5 +34,5 @@ The complete, citation-ready reference (full FAQ in English and Persian, workflo
 ## Optional
 
 - [Benchmarks methodology](https://pcmax.app/#benchmarks): How PC MAX measures FPS gains (median of 3 runs, 1440p, results vary by system)
-- [Privacy policy](https://pcmax.app/#footer): Offline-first, no personal data collection
-- [Terms of use](https://pcmax.app/#footer): Free of charge, as-is; disclaims affiliation with NVIDIA, Microsoft and game publishers
+- [Privacy policy](https://pcmax.app/llms-full.txt): Offline-first, no personal data collection (full text in the complete reference)
+- [Terms of use](https://pcmax.app/llms-full.txt): Free of charge, as-is; disclaims affiliation with NVIDIA, Microsoft and game publishers (full text in the complete reference)

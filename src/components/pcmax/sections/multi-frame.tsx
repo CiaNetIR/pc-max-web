@@ -176,7 +176,7 @@ export function MultiFrame() {
       <motion.p
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
+        viewport={{ once: true, margin: "0px 0px -10%" }}
         transition={{ delay: 0.4, duration: 0.8 }}
         className="mt-8 text-center text-xs text-muted-foreground"
       >

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading } from "@/components/pcmax/ui/primitives";
 import { GamepadIcon, GpuIcon, WindowsIcon, LogoMark, PerformanceIcon } from "@/components/pcmax/icons";
@@ -13,6 +13,9 @@ const nodeIcons = [GamepadIcon, GpuIcon, WindowsIcon, LogoMark, PerformanceIcon]
 export function WhatIsPcMax() {
   const { t } = useLanguage();
   const timelineRef = useRef<HTMLDivElement>(null);
+  /* Motion-sensitive users get a fully drawn spine — the scroll-linked
+   * draw is skipped instead of fighting the preference. */
+  const reduce = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: timelineRef,
@@ -30,7 +33,7 @@ export function WhatIsPcMax() {
         <div className="absolute inset-y-0 start-[26px] w-px lg:start-1/2" aria-hidden="true">
           <div className="absolute inset-0 bg-border" />
           <motion.div
-            style={{ scaleY: spineScale }}
+            style={{ scaleY: reduce ? 1 : spineScale }}
             className="absolute inset-0 origin-top bg-gradient-to-b from-crimson-bright via-crimson to-crimson-deep"
           />
         </div>
@@ -42,7 +45,7 @@ export function WhatIsPcMax() {
             const desktopSide = i % 2 === 0 ? "start" : "end"; // alternating on lg+
 
             return (
-              <li key={node.label} className="relative ps-16 lg:ps-0">
+              <li key={`pipeline-node-${i}`} className="relative ps-16 lg:ps-0">
                 {/* spine node — pulses when reached */}
                 <motion.span
                   initial={{ scale: 0, opacity: 0 }}

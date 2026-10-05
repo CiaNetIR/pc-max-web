@@ -46,10 +46,12 @@ export function Footer() {
     <footer className="relative mt-auto border-t border-border/70 bg-card/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
-          {/* Brand */}
+          {/* Brand — real anchor to #top (CSS scroll-behavior + its own
+              reduced-motion override), mirroring the navbar brand link;
+              the visible wordmark is the accessible name, logo decorative. */}
           <div>
-            <div className="flex items-center gap-3.5">
-              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70">
+            <a href="#top" className="group flex items-center gap-3.5">
+              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70 transition-all duration-300 group-hover:scale-105 group-hover:ring-crimson/50">
                 <Image
                   src="/brand/pcmax-logo-96.png"
                   alt=""
@@ -64,7 +66,7 @@ export function Footer() {
               >
                 PC&nbsp;<span className="text-crimson">MAX</span>
               </span>
-            </div>
+            </a>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
               {t.footer.tagline}
             </p>

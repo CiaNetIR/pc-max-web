@@ -14,15 +14,20 @@ import { siteConfig } from "@/lib/seo";
  * meta-externalagent, Amazonbot, DuckAssistBot, cohere-ai, MistralAI-User,
  * Bytespider.
  *
- * The `/api/release` and `/api/changelog` JSON endpoints stay crawlable on
- * purpose — machine-readable facts AI systems can cite directly.
+ * `/api/` is disallowed for conventional crawlers (POST-only endpoints like
+ * waitlist/analytics, the ~2 MB installer download, internal counters).
+ * The two machine-readable fact endpoints are carved back out with explicit
+ * `Allow` lines — Google/Bing resolve robots by longest-match, so
+ * `/api/release` and `/api/changelog` stay crawlable on purpose as citable
+ * JSON facts. AI bots with their own groups below keep full access.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/api/release", "/api/changelog"],
+        disallow: ["/api/"],
       },
       {
         userAgent: ["GPTBot", "OAI-SearchBot", "ChatGPT-User"],
@@ -37,7 +42,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
       {
-        userAgent: ["Google-Extended", "Googlebot"],
+        userAgent: ["Google-Extended"],
         allow: "/",
       },
       {

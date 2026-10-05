@@ -15,12 +15,29 @@ const sora = Sora({
   subsets: ["latin"],
   variable: "--font-sora",
   display: "swap",
+  /* Preloaded (default): the ONLY webfont that renders above the fold on
+   * the canonical EN document (h1/headings via --font-display). On FA it
+   * rides along (~34 KB, preloaded but rarely paints a glyph — the navbar
+   * wordmark is an image and the RTL display stack resolves Latin through
+   * Vazirmatn's latin subset first); next/font preload links are emitted at
+   * build time, so per-locale switching is impossible — EN wins the tie. */
 });
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic"],
   variable: "--font-vazirmatn",
   display: "swap",
+  /* FA-only above the fold — NEVER preloaded (was: default preload forced
+   * the 46 KB arabic cut onto every EN first paint, verified in the network
+   * log; EN renders zero Persian glyphs). Loading is fully usage-gated two
+   * ways: globals.css wires --font-vazirmatn into font stacks ONLY under
+   * html[dir="rtl"], and every @font-face carries a subset unicode-range —
+   * so the file is fetched exactly when RTL Persian text is styled, at
+   * stylesheet-resolution time (font-display:swap covers the gap; the
+   * metric-matched "Vazirmatn Fallback" face keeps CLS at zero). subsets
+   * is ignored while preload:false but kept as the correct default if
+   * preload is ever re-enabled. */
+  preload: false,
 });
 
 /* ---------------------------------------------------------------------
@@ -80,6 +97,26 @@ const ariobarzanFontFace = [ariobarzanRegular, ariobarzanBold]
       : []
   )
   .join("");
+
+/* MIME for the <link rel="preload"> hints below (font preloads must carry
+ * the exact type so the browser can skip incompatible cuts, and must be
+ * CORS-mode — crossOrigin — or the preload misses and the font fetches twice). */
+const ARIOBARZAN_MIME: Record<string, string> = {
+  woff2: "font/woff2",
+  woff: "font/woff",
+  ttf: "font/ttf",
+};
+/* FA-first-paint preloads for the local cut(s): Bold always (display/titles
+ * are the above-the-fold unit), Regular only in "full" mode (body text).
+ * EN never references these URLs — the @font-face unicode-range plus the
+ * [dir="rtl"]-gated font stacks keep them fully dormant in LTR. */
+const ariobarzanPreload =
+  ariobarzanMode && ariobarzanBold
+    ? [
+        ariobarzanBold,
+        ...(ariobarzanMode === "full" && ariobarzanRegular ? [ariobarzanRegular] : []),
+      ]
+    : [];
 
 /**
  * Locale resolution order:
@@ -182,6 +219,12 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
+  /* Emits <meta name="color-scheme" content="light dark"> — tells the UA
+   * up-front (before globals.css parses) that this document supports both
+   * schemes, so native scrollbars/form controls + the canvas background
+   * render in the active scheme with no flash. The CSS-level color-scheme
+   * (html/.dark in globals.css) stays the per-theme source of truth. */
+  colorScheme: "light dark",
 };
 
 export default async function RootLayout({
@@ -206,6 +249,20 @@ export default async function RootLayout({
       {/* Local Ariobarzan @font-face — injected only when the purchased
           files exist in public/fonts (see the contract above). */}
       {ariobarzanMode && <style dangerouslySetInnerHTML={{ __html: ariobarzanFontFace }} />}
+      {/* FA-only critical-font preloads (same files as the @font-face
+          above, so EN requests nothing and FA skips the CSS+glyph round
+          trip for the display cut). React hoists these into <head>. */}
+      {locale === "fa" &&
+        ariobarzanPreload.map((face) => (
+          <link
+            key={face.file}
+            rel="preload"
+            href={`/fonts/${face.file}`}
+            as="font"
+            type={ARIOBARZAN_MIME[face.format]}
+            crossOrigin="anonymous"
+          />
+        ))}
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
         {/* Skip link — first focusable element, a11y + keyboard users (SXO) */}
         <a

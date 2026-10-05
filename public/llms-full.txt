@@ -1,6 +1,6 @@
 # PC MAX — Complete Product Reference
 
-> This file is the canonical, citation-ready description of PC MAX for language models, answer engines and AI systems. It mirrors the official website (https://pcmax.app) and is kept in sync with the live product. Last updated: 2026-10-04.
+> This file is the canonical, citation-ready description of PC MAX for language models, answer engines and AI systems. It mirrors the official website (https://pcmax.app) and is kept in sync with the live product. Last updated: 2026-10-05.
 
 ## About PC MAX
 
@@ -11,7 +11,7 @@ PC MAX is a Windows gaming optimization platform — per-game graphics settings 
 3. Installs and manages per-game frame-generation workflows built on OptiScaler, AI Optical Flow and the Streamline framework.
 4. Protects the system with a snapshot-first safety model: a restore snapshot is created before any change, integrity is verified after, and everything can be rolled back with one click at any time.
 
-The core edition of PC MAX is free. Signing in with a free account (email + password) syncs the catalogue; premium features are gated server-side and re-checked on every call. A Pro edition is coming soon. Once synced, the application works offline and contains zero telemetry.
+The core edition of PC MAX is free. Signing in with a free account (email + password) syncs the catalogue; premium extras are subscription-gated, enforced server-side and re-checked on every call. A Pro edition is coming soon. Once synced, the application works offline and contains zero telemetry.
 
 - Brand: PC MAX
 - Website: https://pcmax.app
@@ -53,7 +53,7 @@ Independent product statement: PC MAX is an independent product. It is not affil
 
 ### Optimization Profiles (per game)
 
-- Named profiles per game — Maximum FPS, Balanced, High Quality, Ultra Quality — each with a Target FPS, a hardware tier (Low-end to Ultra) and semver-versioned updates
+- Named profiles per game — Maximum FPS, Balanced, High Quality, Ultra Quality — each with a Target FPS, a hardware tier (Mid-range to Ultra) and semver-versioned updates
 - Settings are grouped by category (Graphics, Performance, Ray Tracing, Display) and delivered from the server
 - Two directions: Image first (High Quality — sharper reconstruction, ideal for single-player) and Frames first (Maximum FPS — high frame rates, latency kept in check, ideal for competitive play)
 - Profile updates are flagged with a “New optimization” badge; new games and profiles go live on your next sync, without an app rebuild
@@ -115,11 +115,14 @@ Frame-generation workflows plus Windows tuning, measured before and after PC MAX
 
 ### General
 
+Q: Does PC MAX actually improve FPS?
+A: Yes — through two mechanisms: Windows tuning (startup, memory, power, services) and per-game frame-generation workflows. The combined average on our test bench is +34%, median of 3 measured runs. Results vary by system.
+
 Q: Is there a subscription?
-A: The core edition is free — download it and use it. A free account (email + password) signs you in and syncs your catalogue; premium features are gated server-side, and a Pro edition is coming soon.
+A: The core app is free to download and use. An account (email and password) syncs your catalogue; premium extras are subscription-gated and enforced server-side.
 
 Q: Does it work offline?
-A: Yes — core optimization and profiles work fully offline. Internet is only needed for updates and optional package downloads.
+A: Yes — the app is offline-first: it keeps working from your last synced catalogue and profiles and re-syncs automatically when you're back online. Internet is only needed for the first sync, updates and package downloads.
 
 Q: Which Windows versions are supported?
 A: Windows 10 (64-bit) and Windows 11. Some optimizations are version-specific; PC MAX detects your build and adapts automatically.
@@ -128,6 +131,9 @@ Q: How does Backup & Restore work?
 A: Before any change, PC MAX creates a snapshot of the affected files and settings. After optimizing, it verifies integrity. You can roll back everything with one click, at any time.
 
 ### Technical
+
+Q: What exactly does PC MAX modify?
+A: Windows settings (startup, power plan, services, memory management) and — only when you install a workflow for a game — that game's upscaling and frame-generation files, always after an automatic backup. No kernel hacks, no driver replacements.
 
 Q: What is OptiScaler?
 A: OptiScaler is an open-source integration layer that lets games use modern upscalers — such as DLSS, FSR and XeSS — more flexibly across different GPUs. PC MAX installs and maintains it for you, per game, with automatic backups.
@@ -141,15 +147,21 @@ A: Only when you install a frame-generation workflow for that game — and alway
 Q: What hardware do I need?
 A: Any DirectX 12 GPU works for optimization. Frame-generation workflows are GPU-aware: OptiScaler is broad, AI Optical Flow needs RTX 20+, and Streamline needs RTX 40/50. The installer only offers what your hardware supports.
 
+Q: What about anti-cheat?
+A: PC MAX never injects anything into games and never touches anti-cheat systems. It optimizes Windows and installs documented, per-game upscaling files — the same files Steam verification can restore. We still recommend testing in unranked matches first; policies are set by each game's publisher.
+
 ## FAQ — فارسی (Persian)
 
 ### عمومی
 
+س: پی‌سی‌مکس واقعاً فریم را بهتر می‌کند؟
+ج: بله — از دو مسیر: تنظیم ویندوز (استارت‌آپ، حافظه، انرژی، سرویس‌ها) و جریان‌های کاری فریم‌ساخت به‌ازای هر بازی. میانگین ترکیبی روی میز آزمون ما +۳۴٪ است — میانه‌ی ۳ اجرای اندازه‌گیری‌شده. نتایج به سیستم شما بستگی دارد.
+
 س: اشتراک ماهانه دارد؟
-ج: نسخه‌ی اصلی رایگان است — دانلود کنید و استفاده کنید. یک حساب کاربری رایگان (ایمیل و رمز عبور) شما را وارد می‌کند و کاتالوگ را همگام می‌سازد؛ قابلیت‌های پرمیوم سمت سرور کنترل می‌شوند و نسخه‌ی Pro به‌زودی می‌آید.
+ج: اپ اصلی رایگان است. ورود با ایمیل و رمز عبور، کاتالوگ شما را همگام نگه می‌دارد؛ برخی قابلیت‌های ویژه اشتراکی‌اند و سمت سرور کنترل می‌شوند.
 
 س: آیا آفلاین کار می‌کند؟
-ج: بله — بهینه‌سازی اصلی و پروفایل‌ها کاملاً آفلاین کار می‌کنند. اینترنت فقط برای به‌روزرسانی‌ها و دانلود بسته‌های اختیاری لازم است.
+ج: بله — اپ آفلاین-محور است: با آخرین کاتالوگ و پروفایل‌های همگام‌شده کار می‌کند و با آنلاین شدن، خودکار دوباره همگام می‌شود. اینترنت فقط برای اولین همگام‌سازی، به‌روزرسانی‌ها و دانلود بسته‌ها لازم است.
 
 س: کدام نسخه‌های ویندوز پشتیبانی می‌شوند؟
 ج: ویندوز ۱۰ (۶۴-بیتی) و ویندوز ۱۱. برخی بهینه‌سازی‌ها نسخه-اختصاصی‌اند؛ PC MAX نسخه‌ی شما را تشخیص می‌دهد و خودکار تنظیم می‌شود.
@@ -158,6 +170,9 @@ A: Any DirectX 12 GPU works for optimization. Frame-generation workflows are GPU
 ج: پیش از هر تغییر، PC MAX از فایل‌ها و تنظیمات تحت‌تأثیر یک snapshot می‌سازد. پس از بهینه‌سازی، صحت‌سنجی می‌کند. می‌توانید همه‌چیز را هر زمان با یک کلیک به حالت قبل برگردانید.
 
 ### فنی
+
+س: پی‌سی‌مکس دقیقاً چه چیزهایی را تغییر می‌دهد؟
+ج: تنظیمات ویندوز (استارت‌آپ، طرح انرژی، سرویس‌ها، مدیریت حافظه) و — فقط وقتی برای بازی‌ای جریان کاری نصب کنید — فایل‌های مقیاس‌بندی و فریم‌ساخت همان بازی، همیشه پس از پشتیبان‌گیری خودکار. بدون هک هسته، بدون جایگزینی درایور.
 
 س: OptiScaler چیست؟
 ج: OptiScaler یک لایه‌ی یکپارچه‌سازی متن‌باز است که به بازی‌ها اجازه می‌دهد از مقیاس‌بندهای مدرن — مانند DLSS، FSR و XeSS — انعطاف‌پذیرتر روی GPUهای مختلف استفاده کنند. PC MAX آن را برای شما، به‌ازای هر بازی، با پشتیبان‌گیری خودکار نصب و نگه‌داری می‌کند.
@@ -170,6 +185,9 @@ A: Any DirectX 12 GPU works for optimization. Frame-generation workflows are GPU
 
 س: چه سخت‌افزاری لازم دارم؟
 ج: هر GPU سازگار با DirectX 12 برای بهینه‌سازی کافی است. جریان‌های فریم‌ساخت آگاه از GPU هستند: OptiScaler گسترده است، AI Optical Flow به RTX 20+ و Streamline به RTX 40/50 نیاز دارد. نصب‌کننده فقط چیزی را که سخت‌افزار شما پشتیبانی می‌کند پیشنهاد می‌دهد.
+
+س: بحث ضدچیت چیست؟
+ج: پی‌سی‌مکس هیچ چیزی داخل بازی تزریق نمی‌کند و به سیستم‌های ضدچیت دست نمی‌زند. ویندوز را بهینه می‌کند و فایل‌های مستند مقیاس‌بندی را به‌ازای هر بازی نصب می‌کند — همان فایل‌هایی که راستی‌آزمایی فایل Steam می‌تواند بازیابی کند. با این حال توصیه می‌کنیم ابتدا در مسابقات غیررتبه‌ای آزمایش کنید؛ سیاست‌ها را ناشر هر بازی تعیین می‌کند.
 
 ## Policies
 

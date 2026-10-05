@@ -1,9 +1,10 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
-import { Canvas, useFrame, advance } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, advance } from "@react-three/fiber";
 import { Environment, Lightformer, Sparkles } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import type { EffectComposer as PostprocessingComposer } from "postprocessing";
 import { useTheme } from "next-themes";
 import * as THREE from "three";
 import { GpuModel } from "./gpu-model";
@@ -16,10 +17,12 @@ import { GpuModel } from "./gpu-model";
  *   floats above them. Nothing hides the card, and the card hides nothing.
  * - The scene mounts only at ≥640px (hero gate) — tier is tablet/desktop.
  * - Multi-layer physical shadow: a real directional shadow map (key light,
- *   PCF-soft) PLUS a height-driven soft penumbra pair. Every layer
+ *   plain PCF — PCFSoftShadowMap was removed in three 0.186) PLUS a
+ *   height-driven soft penumbra pair. Every layer
  *   repositions/rescales/fades with the card's live height above the
  *   ground, so the shadow reads as physics, not paint.
- * - Render loop pauses when the hero is offscreen.
+ * - Render loop pauses when the hero is offscreen, and the effective pixel
+ *   ratio self-tunes to the measured frame cost (adaptive DPR, below).
  */
 
 type Tier = "tablet" | "desktop";
@@ -52,6 +55,23 @@ const TIER_CAMERA: Record<Tier, { position: [number, number, number]; fov: numbe
   tablet: { position: [0.25, 0.9, 9.2], fov: 42 },
   desktop: { position: [0.25, 1.0, 8.6], fov: 39 },
 };
+
+/* Per-tier pixel-ratio CAPS — the upper bound r3f resolves the system
+ * devicePixelRatio into. Cut from 2 / 1.6: on retina-class displays the
+ * scene was rasterizing up to 4× the CSS pixels through every composer
+ * pass; 1.5× / 1.35× keeps the crispness that matters (metal edges, LED
+ * strip) at ~56% / ~29% of that fragment cost. The adaptive ladder below
+ * can only step DOWN from this cap (and back up, never past it). */
+const TIER_DPR_CAP: Record<Tier, number> = {
+  tablet: 1.35,
+  desktop: 1.5,
+};
+
+/* Plain PCF shadow filtering, set explicitly: r3f's `shadows` boolean maps
+ * to PCFSoftShadowMap, which three 0.186 removed (it warns and falls back
+ * to PCF anyway) — this is the same visual output without the warning.
+ * Stable module identity so configure() re-runs stay idempotent. */
+const SHADOWS_PCF: Partial<THREE.WebGLShadowMap> = { type: THREE.PCFShadowMap };
 
 /* Full-page pointer tracking (works with pointer-events: none canvas) */
 function usePointerRef() {
@@ -404,6 +424,90 @@ function TierCamera({ tier }: { tier: Tier }) {
   return null;
 }
 
+/* ------------------------ Adaptive DPR ------------------------------ */
+
+/* The scene self-tunes its resolution on weak GPUs instead of lagging:
+ * the manual render loop (outside the Canvas) measures the real frame
+ * cost and walks the effective pixel ratio down a fixed ladder — tier cap
+ * → 1.25 → 1.0 — when frames run consistently slow, and back up when they
+ * run consistently fast. Thresholds are deliberately asymmetric
+ * hysteresis: 40 slow frames (EMA > 34ms ≈ <29fps) to drop a rung,
+ * 120 fast frames (EMA < 12ms) to climb one back, with a wide dead-band
+ * in between — the two conditions can never both hold, so the rung cannot
+ * oscillate with the measurement. */
+const SLOW_EMA_MS = 34;
+const FAST_EMA_MS = 12;
+const SLOW_FRAMES = 40;
+const FAST_FRAMES = 120;
+
+/* registration generation — every (re)mount of <AdaptiveDprBridge> bumps
+ * it so the outer loop re-derives its ladder bookkeeping against the
+ * current root (context-loss remount, tier-cap change). */
+let adaptiveDprGeneration = 0;
+
+/* Bridge API — what the outer loop gets to touch. `ceiling` is what r3f
+ * itself resolved at mount (system dpr clamped into the tier's [1, cap]
+ * range), so a 1×-DPR display stays at 1 (nothing to trade) and the
+ * ladder never exceeds what the tier (or the display) allows. */
+type AdaptiveDprApi = {
+  gen: number;
+  ceiling: number;
+  current: () => number;
+  apply: (dpr: number) => void;
+};
+
+/* scratch vector for the composer resize (no per-flip allocation) */
+const SCRATCH_SIZE = new THREE.Vector2();
+
+/* The outer manual rAF loop lives OUTSIDE the Canvas and cannot call
+ * hooks — this tiny inner component bridges r3f's sanctioned DPR API
+ * (state.setDpr) into a stable mutable ref the loop can call. */
+function AdaptiveDprBridge({
+  api,
+  cap,
+  composerRef,
+}: {
+  api: React.RefObject<AdaptiveDprApi | null>;
+  cap: number;
+  composerRef: React.RefObject<PostprocessingComposer | null>;
+}) {
+  const setDpr = useThree((state) => state.setDpr);
+  const getState = useThree((state) => state.get);
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    /* mirror r3f's calculateDpr() for the [1, cap] range we pass as the
+     * Canvas dpr prop (including its window.devicePixelRatio fallback) */
+    const sys = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+    const ceiling = Math.min(Math.max(1, sys), cap);
+    api.current = {
+      gen: ++adaptiveDprGeneration,
+      ceiling,
+      current: () => getState().viewport.dpr,
+      apply: (value) => {
+        setDpr(value);
+        /* the postprocessing composer's render targets only track
+         * LOGICAL size changes (its wrapper watches gl.getSize) — a
+         * dpr-only change would leave its buffers at the old resolution.
+         * Sync them through the composer's own setSize, which re-reads
+         * the already-updated drawing-buffer size. Fiber's store
+         * subscription applies gl.setPixelRatio/setSize synchronously
+         * inside setDpr, so ordering is safe. */
+        const composer = composerRef.current;
+        if (composer) {
+          gl.getSize(SCRATCH_SIZE);
+          composer.setSize(SCRATCH_SIZE.width, SCRATCH_SIZE.height);
+        }
+      },
+    };
+    return () => {
+      api.current = null;
+    };
+  }, [api, cap, composerRef, getState, gl, setDpr]);
+
+  return null;
+}
+
 /* ------------------------------ Scene -------------------------------- */
 
 /* Is the hero (and therefore the scene) inside the viewport? Drives the
@@ -439,6 +543,12 @@ export function GpuScene({ flip = false }: { flip?: boolean }) {
   const virtualClock = useRef(0);
   const clockRef = useRef<THREE.Clock | null>(null);
 
+  /* Adaptive-DPR plumbing: the bridge (inside the Canvas) registers r3f's
+   * setDpr into this ref; the composer ref lets a dpr flip also resize the
+   * postprocessing render targets (which don't follow dpr-only changes). */
+  const setDprApi = useRef<AdaptiveDprApi | null>(null);
+  const composerRef = useRef<PostprocessingComposer | null>(null);
+
   /* Manual render loop — exactly ONE rAF drives this whole scene (the
    * constellation behind it owns its own separate loop; nothing nests).
    *
@@ -457,13 +567,81 @@ export function GpuScene({ flip = false }: { flip?: boolean }) {
    * behave identically), starvation gaps can't snap the pose, and pauses
    * freeze/resume the clock instead of jumping it. THREE.Clock's internal
    * oldTime is pinned right before each advance so its own getDelta() call
-   * contributes ~0 instead of corrupting the branch that computes ours. */
+   * contributes ~0 instead of corrupting the branch that computes ours.
+   *
+   * ADAPTIVE DPR (same loop, no second rAF): each tick also measures the
+   * REAL frame cost — the inter-tick interval, i.e. advance()'s render work
+   * plus everything else the main thread did that frame — as an EMA (cost
+   * clamped to 250ms so a tab-switch gap can't poison it). Sustained
+   * slowness walks the effective pixel ratio down the ladder (see
+   * AdaptiveDprBridge), sustained fastness walks it back up — applied
+   * through r3f's own setDpr, so the resize/gl.setPixelRatio plumbing is
+   * the library's, not ours. Tier is a dependency on purpose: a tier flip
+   * re-applies that tier's cap through configure(), so the bookkeeping
+   * must re-derive its ladder/rung. */
   useEffect(() => {
     if (!heroVisible) return;
     let raf = 0;
     let last = -1; // previous rAF timestamp (ms); -1 = first tick after (re)start
+    /* adaptive bookkeeping (per loop run): ladder rungs descend from the
+     * ceiling; rung indexes it; gen tracks bridge re-registrations. */
+    let ladder: number[] = [];
+    let rung = -1;
+    let seenGen = -1;
+    let ema = 0; // EMA of real frame cost (ms); 0 = uninitialized
+    let slowStreak = 0;
+    let fastStreak = 0;
+
+    const deriveLadder = (api: AdaptiveDprApi) => {
+      /* ceiling = what r3f resolved for THIS root (system dpr clamped into
+       * [1, cap]); min() keeps a stale registration honest against the
+       * current tier. A 1×-DPR display yields a single rung — nothing to
+       * trade, adaptation stays inert (ladder.length < 2). */
+      const ceiling = Math.min(api.ceiling, TIER_DPR_CAP[tier]);
+      ladder = ceiling > 1.25 ? [ceiling, 1.25, 1] : ceiling > 1 ? [ceiling, 1] : [1];
+      /* place the bookkeeping on the rung matching the CURRENT effective
+       * dpr, so a stepped-down value survives loop restarts (hero
+       * re-entry) instead of snapping back up without a fresh measurement. */
+      const cur = api.current();
+      rung = ladder.indexOf(cur);
+      if (rung < 0) rung = ladder.findIndex((r) => cur > r);
+      if (rung < 0) rung = ladder.length - 1;
+    };
+
     const tick = (t: number) => {
       const step = last < 0 ? 0 : Math.min((t - last) / 1000, MAX_FRAME_STEP);
+      if (last >= 0) {
+        const api = setDprApi.current;
+        if (api && api.gen !== seenGen) {
+          seenGen = api.gen;
+          deriveLadder(api);
+        }
+        if (ladder.length > 1) {
+          const cost = Math.min(t - last, 250);
+          ema = ema === 0 ? cost : ema * 0.85 + cost * 0.15;
+          if (ema > SLOW_EMA_MS) {
+            slowStreak++;
+            fastStreak = 0;
+          } else if (ema < FAST_EMA_MS) {
+            fastStreak++;
+            slowStreak = 0;
+          } else {
+            slowStreak = 0;
+            fastStreak = 0;
+          }
+          if (slowStreak >= SLOW_FRAMES || fastStreak >= FAST_FRAMES) {
+            const next = rung + (slowStreak >= SLOW_FRAMES ? -1 : 1);
+            if (next >= 0 && next < ladder.length) {
+              rung = next;
+              api?.apply(ladder[rung]);
+            }
+            /* the streak window itself is the debounce — a rung flip must
+             * re-earn a full window before it can flip again */
+            slowStreak = 0;
+            fastStreak = 0;
+          }
+        }
+      }
       last = t;
       virtualClock.current += step;
       if (clockRef.current) clockRef.current.oldTime = performance.now();
@@ -472,7 +650,7 @@ export function GpuScene({ flip = false }: { flip?: boolean }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [heroVisible]);
+  }, [heroVisible, tier]);
 
   const { resolvedTheme } = useTheme();
   const light = resolvedTheme === "light";
@@ -499,7 +677,7 @@ export function GpuScene({ flip = false }: { flip?: boolean }) {
     stale.dispose();
   }, [light]);
 
-  const dpr: [number, number] = tier === "tablet" ? [1, 1.6] : [1, 2];
+  const dpr: [number, number] = [1, TIER_DPR_CAP[tier]];
 
   /* Studio lighting — one strong key, a weak fill, controlled ambience.
    * The key light casts the real shadow. */
@@ -510,10 +688,15 @@ export function GpuScene({ flip = false }: { flip?: boolean }) {
     <Canvas
       key={contextGeneration}
       frameloop="never"
-      shadows
+      shadows={SHADOWS_PCF}
       dpr={dpr}
       camera={TIER_CAMERA[tier]}
-      gl={{ alpha: true, antialias: true, powerPreference: "high-performance" }}
+      /* antialias:false — the composer renders into its own targets and
+       * blits to the screen, so canvas MSAA is pure wasted fragment work
+       * (and with multisampling 0 it does nothing for the composed output
+       * anyway). Canvas AA only mattered pre-composer; the tier caps +
+       * adaptive DPR own resolution now. */
+      gl={{ alpha: true, antialias: false, powerPreference: "high-performance" }}
       onCreated={(state) => {
         const gl = state.gl;
         clockRef.current = state.clock; // for the oldTime pinning above
@@ -546,6 +729,9 @@ export function GpuScene({ flip = false }: { flip?: boolean }) {
         {/* keep the live camera on the tier's calibrated rig (the `camera`
             prop itself is mount-time only in r3f) */}
         <TierCamera tier={tier} />
+
+        {/* expose r3f's setDpr to the outer manual loop (adaptive DPR) */}
+        <AdaptiveDprBridge api={setDprApi} cap={TIER_DPR_CAP[tier]} composerRef={composerRef} />
 
         {/* studio lighting — key (shadow-casting), weak fill, crimson kicker */}
         <ambientLight intensity={ambientIntensity} />
@@ -597,9 +783,13 @@ export function GpuScene({ flip = false }: { flip?: boolean }) {
         )}
 
         {/* bloom on emissive parts — desktop only; restrained radius + gain
-         * so the PC MAX strip reads as hardware light, not a neon halo */}
+         * so the PC MAX strip reads as hardware light, not a neon halo.
+         * multisampling 0: composer-target MSAA multiplies fragment work
+         * on every pass (4× samples) while the soft materials + bloom
+         * mask hide the aliasing it was fixing — the single biggest GPU
+         * saving in this scene. ref lets a dpr flip resize its targets. */}
         {tier === "desktop" && (
-          <EffectComposer multisampling={4}>
+          <EffectComposer ref={composerRef} multisampling={0}>
             <Bloom mipmapBlur intensity={0.55} luminanceThreshold={1} luminanceSmoothing={0.15} radius={0.5} />
           </EffectComposer>
         )}
