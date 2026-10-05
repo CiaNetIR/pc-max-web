@@ -5,6 +5,7 @@ import { useState } from "react";
 import { AtSign, Bug, Mail, MessageCircle, Send, Youtube } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { WindowsIcon } from "@/components/pcmax/icons";
+import { asset } from "@/lib/gh-pages";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +54,7 @@ export function Footer() {
             <a href="#top" className="group flex items-center gap-3.5">
               <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70 transition-all duration-300 group-hover:scale-105 group-hover:ring-crimson/50">
                 <Image
-                  src="/brand/pcmax-logo-96.png"
+                  src={asset("/brand/pcmax-logo-96.png")}
                   alt=""
                   width={44}
                   height={44}

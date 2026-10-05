@@ -8,6 +8,7 @@ import { ArrowDown, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { MagneticButton } from "@/components/pcmax/ui/primitives";
 import { GpuIcon, DownloadIcon } from "@/components/pcmax/icons";
+import { asset } from "@/lib/gh-pages";
 import { springFluid } from "@/components/pcmax/ui/motion";
 
 /*
@@ -123,7 +124,7 @@ function MobileEmblem() {
         </svg>
         <div className="emblem-float relative h-full w-full">
           <Image
-            src="/brand/pcmax-logo-256.png"
+            src={asset("/brand/pcmax-logo-256.png")}
             alt=""
             width={144}
             height={144}

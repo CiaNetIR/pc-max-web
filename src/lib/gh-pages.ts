@@ -28,6 +28,19 @@ export const IS_STATIC_EXPORT = process.env.NEXT_PUBLIC_STATIC_EXPORT === "1";
  */
 export const BASE_PATH = IS_STATIC_EXPORT ? "/pc-max-web" : "";
 
+/**
+ * Prefix a public-asset path with the deployment base path.
+ *
+ * `next/image` with `images.unoptimized` (mandatory for `output: 'export'`)
+ * does NOT apply `basePath` to the `src` prop — unlike `<Link>`, metadata
+ * URLs and the `/_next` asset prefix — so every `<Image src="/…" />` /
+ * background-asset reference must be routed through this helper. In the SSR
+ * flavor `BASE_PATH === ""` and the path is returned byte-identically.
+ */
+export function asset(path: string): string {
+  return `${BASE_PATH}${path}`;
+}
+
 /** Public origin of the GitHub Pages deployment (no trailing slash). */
 export const PAGES_URL = "https://dlsdt.github.io/pc-max-web";
 

@@ -7,6 +7,7 @@ import { Check, Cloud, Lock, Minus, Square, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading, AnimatedCounter } from "@/components/pcmax/ui/primitives";
+import { asset } from "@/lib/gh-pages";
 import { GpuIcon, PerformanceIcon, BackupIcon, SettingsIcon, ShieldIcon, AiIcon, LogoMark } from "@/components/pcmax/icons";
 import { springFluid, whileHoverLift, whileTapPress } from "@/components/pcmax/ui/motion";
 import { useToast } from "@/hooks/use-toast";
@@ -24,7 +25,7 @@ const gameFiles = [
   "/games/eldenring.jpg",
   "/games/alanwake2.jpg",
   "/games/bg3.jpg",
-];
+].map(asset);
 
 /* ------------------- Panel detail copy (mock UI state) -----------------
  * Illustrative values shown inside the product mock — deliberately kept

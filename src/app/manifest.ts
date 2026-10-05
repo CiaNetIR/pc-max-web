@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/seo";
-import { BASE_PATH } from "@/lib/gh-pages";
+import { asset } from "@/lib/gh-pages";
 
 /* NOTE: `output: 'export'` requires metadata routes to export
  * `const dynamic = "force-static"` — a literal Next can statically parse.
@@ -9,9 +9,8 @@ import { BASE_PATH } from "@/lib/gh-pages";
  * only, so the SSR flavor keeps its default (per-request) behavior. */
 
 export default function manifest(): MetadataRoute.Manifest {
-  /* Prefix local URLs with the GitHub Pages base path in the static flavor
-   * ("" in the SSR flavor — byte-identical manifest). */
-  const asset = (p: string) => `${BASE_PATH}${p}`;
+  /* asset() prefixes local URLs with the GitHub Pages base path in the
+   * static flavor ("" in the SSR flavor — byte-identical manifest). */
   return {
     name: siteConfig.name,
     short_name: siteConfig.shortName,

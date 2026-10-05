@@ -10,7 +10,7 @@ import { springFluid } from "@/components/pcmax/ui/motion";
 import { GpuIcon, CpuIcon, WindowsIcon, DownloadIcon, ShieldIcon, PerformanceIcon } from "@/components/pcmax/icons";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { installerHref, IS_STATIC_EXPORT, GITHUB_REPO_URL } from "@/lib/gh-pages";
+import { installerHref, IS_STATIC_EXPORT, GITHUB_REPO_URL, asset } from "@/lib/gh-pages";
 
 /* Prop payloads — serialized server → client. The server wrapper
  * (download-cta.tsx) queries the DB directly and seeds these, so no
@@ -390,7 +390,7 @@ export function DownloadCtaClient({
             aria-hidden="true"
           />
           <Image
-            src="/brand/pcmax-logo-256.png"
+            src={asset("/brand/pcmax-logo-256.png")}
             alt="PC MAX"
             width={112}
             height={112}

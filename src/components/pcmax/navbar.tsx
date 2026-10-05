@@ -8,6 +8,7 @@ import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { asset } from "@/lib/gh-pages";
 import { springBounce, springFluid } from "@/components/pcmax/ui/motion";
 
 /* Id of the collapsible mobile menu — pairs the trigger's aria-controls
@@ -276,7 +277,7 @@ export function Navbar() {
             <a href="#top" className="group flex items-center gap-3">
               <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70 transition-all duration-300 group-hover:scale-105 group-hover:ring-crimson/50 group-hover:shadow-[0_0_18px_rgba(229,9,20,0.35)]">
                 <Image
-                  src="/brand/pcmax-logo-96.png"
+                  src={asset("/brand/pcmax-logo-96.png")}
                   alt=""
                   width={40}
                   height={40}
