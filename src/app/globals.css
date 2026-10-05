@@ -574,3 +574,27 @@ html[lang="fa"] h4 {
     animation: none;
   }
 }
+
+/* ── Progressive enhancement: content must never need JS to appear ─────────
+ * Every scroll-reveal element (framer-motion whileInView / mount initials)
+ * ships `style="opacity:0;…"` in the static HTML and only becomes visible
+ * after JS hydrates and the IntersectionObserver fires. On a slow mobile
+ * connection that window is seconds long — the visitor scrolls through a
+ * fully blank page below the hero. Until <HydrationMarker/> adds the
+ * `.hydrated` class (the moment React mounts), force any inline-hidden
+ * reveal target fully visible.
+ *
+ * Selector precision matters:
+ *   • `[style*="opacity:0;"]` matches mid-attribute values (`opacity:0;transform…`)
+ *   • `[style$="opacity:0"]`  matches `style="opacity:0"` and `…;opacity:0"`
+ *   • designed partial opacities (`opacity:0.4`, `opacity:0.6`) match NEITHER
+ *     (no `;`/end directly after the `0`).
+ * Collapsed Radix panels also match (`height:0px;opacity:0`) — harmless:
+ * height 0 keeps them invisible; only the opacity/transform are unlocked.
+ */
+html:not(.hydrated) [style*="opacity:0;"],
+html:not(.hydrated) [style$="opacity:0"] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}

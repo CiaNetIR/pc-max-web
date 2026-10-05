@@ -5,6 +5,7 @@ import path from "node:path";
 import { Sora, Vazirmatn } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/pcmax/language-context";
+import { HydrationMarker } from "@/components/pcmax/hydration-marker";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getLocaleMeta, siteConfig } from "@/lib/seo";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
@@ -273,6 +274,10 @@ export default async function RootLayout({
           />
         ))}
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
+        {/* Progressive enhancement: flags React as mounted — pairs with the
+            `html:not(.hydrated)` override at the end of globals.css so the
+            pre-hydration (slow-JS / no-JS) page never renders blank. */}
+        <HydrationMarker />
         {/* Skip link — first focusable element, a11y + keyboard users (SXO) */}
         <a
           href="#main-content"
