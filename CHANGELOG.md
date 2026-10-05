@@ -4,6 +4,33 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.2] — 2026-10-05
+
+### Fixed — critical: blank page while scrolling on slow mobile connections
+- **Symptom**: on mobile the hero rendered, but scrolling showed a blank page —
+  every section below the fold was invisible until JavaScript finished
+  downloading, hydrating and running its IntersectionObservers (a window of
+  many seconds on slow networks — notably GitHub Pages/Fastly routing).
+- **Root cause**: all 106 scroll-reveal elements ship `style="opacity:0;…"`
+  in the static HTML (framer-motion `whileInView`/mount initials). Content
+  visibility was effectively JS-gated — no progressive enhancement.
+- **Fix — progressive-enhancement gate**: while `<html>` lacks the
+  `.hydrated` class, `globals.css` force-shows any inline-hidden reveal
+  target (`opacity/transform/filter`, `!important` over inline styles).
+  The new `HydrationMarker` client component adds `.hydrated` the moment
+  React mounts, handing visibility control back to framer-motion; its
+  cleanup removes the class again if React ever unmounts (runtime error →
+  content stays readable). Selector precision: `[style*="opacity:0;"]` +
+  `[style$="opacity:0"]` match only true hidden initials — designed partial
+  opacities (0.4/0.6) are untouched, collapsed Radix panels stay collapsed
+  via their `height:0`.
+- Covered failure modes: slow network / long pre-hydration window, stalled
+  or failed JS, no-JS visitors, runtime error unmounting React.
+- Verified live: with every JS chunk blocked, all 11 section headings render
+  visible across the full 15.7k-px page; with JS on, reveals fire exactly as
+  before (zero permanently stuck sections), 12/12 images, zero console/page
+  errors, both flavors unaffected otherwise.
+
 ## [1.2.1] — 2026-10-05
 
 ### Fixed — critical: images did not load on the GitHub Pages build
