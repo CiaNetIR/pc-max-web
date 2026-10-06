@@ -19,8 +19,8 @@ export function Section({
 }) {
   /* gc-sect — pairs with `.gc-sect + .gc-sect::before` in globals.css to
    * draw the centered gradient hairline separator between adjacent
-   * sections (Guardian language). LazySection is a pass-through, so the
-   * Section elements are direct siblings inside <main>. */
+   * sections (Guardian language). Sections render as direct siblings
+   * inside <main> (no wrapper components). */
   return (
     <section id={id} className={cn("gc-sect relative w-full scroll-mt-24 py-20 sm:py-24 lg:py-28", className)}>
       <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">{children}</div>

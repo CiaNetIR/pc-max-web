@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { dictionary, type Dictionary, type Locale } from "./i18n/dictionary";
-import { IS_STATIC_EXPORT } from "@/lib/gh-pages";
+import { IS_STATIC_EXPORT, BASE_PATH } from "@/lib/gh-pages";
 import { getLocaleMeta } from "@/lib/seo";
 
 type LanguageContextValue = {
@@ -20,6 +20,11 @@ type LanguageContextValue = {
   t: Dictionary;
   setLocale: (locale: Locale) => void;
   toggleLocale: () => void;
+  /* Static flavor only (audit 29-a): the URL of the OTHER language's real
+   * document — `/fa` from the EN page, `/` from the FA page. The navbar
+   * toggle renders as a real crawlable <a href> to it (the SSR flavor keeps
+   * the in-place client toggle; null there). */
+  alternateHref: string | null;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -39,6 +44,30 @@ function getSnapshot(): Locale {
   return document.documentElement.lang === "fa" ? "fa" : "en";
 }
 
+/* Which REAL document is this (static flavor, audit 29-a)? `/fa` (the
+ * prerendered Persian route) or `/` (EN canonical). Read as an external
+ * store — subscribe to popstate, re-read on demand — so there is no
+ * setState-in-effect and no hydration mismatch (the server snapshot is
+ * always false; React swaps in the client snapshot post-hydration by
+ * design). history.replaceState doesn't fire popstate, so the /fa
+ * consolidation effect below dispatches it manually. */
+function subscribePath(onChange: () => void) {
+  window.addEventListener("popstate", onChange);
+  return () => window.removeEventListener("popstate", onChange);
+}
+
+function getFaDocumentSnapshot(): boolean {
+  if (typeof window === "undefined") return false;
+  const path = window.location.pathname.replace(/\/+$/, "");
+  return path === `${BASE_PATH}/fa`;
+}
+
+/* Server/prerender snapshot — the EN document assumption; React swaps in
+ * the real client snapshot right after hydration (no mismatch by design). */
+function getServerFaSnapshot(): boolean {
+  return false;
+}
+
 export function LanguageProvider({
   children,
   initialLocale = "en",
@@ -49,6 +78,15 @@ export function LanguageProvider({
   const getServerSnapshot = useCallback(() => initialLocale, [initialLocale]);
 
   const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+
+  /* Static flavor only (audit 29-a — the /fa architecture). */
+  const onFaDocument = useSyncExternalStore(
+    subscribePath,
+    getFaDocumentSnapshot,
+    getServerFaSnapshot
+  );
+
+  const alternateHref = IS_STATIC_EXPORT ? (onFaDocument ? `${BASE_PATH}/` : `${BASE_PATH}/fa`) : null;
 
   const setLocale = useCallback((next: Locale) => {
     try {
@@ -74,14 +112,20 @@ export function LanguageProvider({
     setLocale(document.documentElement.lang === "fa" ? "en" : "fa");
   }, [setLocale]);
 
-  /* Static GitHub Pages flavor only: the single prerendered document is EN
-   * (no proxy/cookie SSR on a static host). Restore the visitor's locale
-   * right after hydration — a `?lang=fa|en` URL param wins (shareable links
-   * keep working), then the stored preference. Runs post-hydration as a
-   * plain state update, so there is no hydration mismatch. The SSR flavor
-   * resolves the locale server-side and skips this entirely. */
+  /* Static GitHub Pages flavor only. Two real documents exist now — `/`
+   * (EN canonical) and `/fa` (Persian):
+   *  - On `/`: restore the visitor's locale right after hydration (a
+   *    `?lang=fa|en` URL param wins and is CONSOLIDATED onto /fa via
+   *    history.replaceState — legacy share-links stop advertising a URL
+   *    that serves the EN document), then the stored preference. Runs
+   *    post-hydration as a plain state update — no hydration mismatch.
+   *  - On `/fa`: the document IS Persian — never flip it back client-side
+   *    (the toggle is a link to `/` instead). The SSR flavor resolves the
+   *    locale server-side and skips all of this. */
   useEffect(() => {
     if (!IS_STATIC_EXPORT) return;
+    const path = window.location.pathname.replace(/\/+$/, "");
+    if (path === `${BASE_PATH}/fa`) return;
     try {
       const param = new URLSearchParams(window.location.search).get("lang");
       const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -91,7 +135,17 @@ export function LanguageProvider({
           : stored === "fa" || stored === "en"
             ? stored
             : null;
-      if (next && next !== document.documentElement.lang) setLocale(next);
+      if (next && next !== document.documentElement.lang) {
+        setLocale(next);
+        /* Legacy `?lang=fa` on the EN document → the real /fa URL (no search
+         * param, no duplicate signal). A reload then serves the true Persian
+         * prerender. replaceState fires no popstate — dispatch it so the
+         * path store (and alternateHref) follow. */
+        if (next === "fa" && param === "fa") {
+          window.history.replaceState(null, "", `${BASE_PATH}/fa`);
+          window.dispatchEvent(new Event("popstate"));
+        }
+      }
     } catch {
       /* storage unavailable — stay on the prerendered locale */
     }
@@ -111,8 +165,9 @@ export function LanguageProvider({
       t: dictionary[locale],
       setLocale,
       toggleLocale,
+      alternateHref,
     }),
-    [locale, setLocale, toggleLocale]
+    [locale, setLocale, toggleLocale, alternateHref]
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

@@ -4,6 +4,105 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.2.0] — 2026-10-06
+
+**Product-level audit: truth, SEO and a crawlable Persian web** — a
+three-specialist review team (SEO engineer, product/conversion strategist,
+frontend architect) audited the live v2.1.1 site end-to-end (Task 29/30).
+This release removes every fabricated or unverifiable claim, makes the
+Persian page a real indexable document, halves the codebase and hardens
+the build pipeline.
+
+### Added — a real Persian document at `/fa`
+- **`/fa` is now a genuine, crawlable, self-canonical Persian document**
+  (previously `/?lang=fa` served the byte-identical EN HTML — Persian was
+  invisible to every search engine). Implemented with an optional
+  catch-all root segment `src/app/[[...lang]]/` — the one construction
+  where the ROOT layout can bake `<html lang="fa" dir="rtl">` at build
+  time. Reciprocal hreflang (en → `/`, fa → `/fa`, x-default → `/`),
+  Persian JSON-LD, sitemap entry, IRANYekanX font preloads; the language
+  toggle in the static flavor is a real `<a>` link between the two
+  documents; legacy `?lang=fa` links consolidate onto `/fa` via
+  history.replaceState.
+- **"Verify this download" row** in the download card: the full real
+  SHA-256 of the shipped installer (9cdcde91…b8e41f — computed from the
+  actual artifact), a copy button with toast, and the exact PowerShell
+  re-check command (`Get-FileHash … -Algorithm SHA256`).
+- **CI quality gate**: a `check` job (typecheck + lint) now runs before
+  every deploy; `typescript.ignoreBuildErrors` is REMOVED from
+  next.config (tsc has been clean — the build can no longer silently
+  ignore type errors). `reactStrictMode` on (the one StrictMode casualty,
+  AnimatedCounter's started-flag, is fixed); `poweredByHeader` off.
+- **Bilingual branded 404** (self-contained dark page served by GitHub
+  Pages) — the exported Next 404 previously rendered as a bare unstyled
+  `<html>`.
+
+### Changed — hero is benefit-first and honest
+- Headline "More FPS. / Better frames. Full control." («فریم بیشتر.
+  تصویر بهتر. کنترل کامل.») + category eyebrow "PC optimization for
+  Windows · v2.4.1" + trust line "Windows 10 & 11 · x64 · Free" + four
+  trust badges (snapshot / rollback / no game injection / no telemetry).
+- The hero stage is labeled **Preview** (was "LIVE"): the fake FPS/GPU/
+  PING telemetry chips were replaced with static verifiable facts
+  (VER 2.4.1 · WIN 10/11 · SHA-256 ✓) and an explicit caption.
+
+### Removed — fabricated claims (the no-fake-data rule)
+- Fake "LIVE" hero badge + FPS 142 / GPU 61°C / PING 4.2ms chips.
+- "Clean on VirusTotal — 0 detections across 72 engines" trust card
+  (generic homepage link, unverifiable) → replaced by the real
+  checksum-verification card.
+- "Code-signed builds" / "signed NSIS installer" claims (no signing
+  infrastructure exists) → neutral wording.
+- "56 optimization profiles shipped" + "14 games in the launch
+  catalogue" + duplicate "34% average FPS gain" social tiles — replaced
+  by DB-derived facts (293K+ downloads across releases, 3 stable
+  releases, 470 automated tests, 0 telemetry).
+- Misleading live pill "293,668 downloads served from this site" (the
+  static mirror serves none) — one canonical number presentation.
+- Dead social links (x.com/pcmaxapp → 404, youtube.com/@pcmaxapp → 404)
+  from the footer, sameAs and Twitter card metadata.
+- "All systems operational" footer pill (no status page behind it).
+- The squatted `pcmax.app` canonical domain (a live third-party payment
+  site!) — canonical/OG/JSON-LD now self-canonical at the Pages URL in
+  both flavors; llms.txt / llms-full.txt rewritten to verifiable facts
+  (real URLs, no dead profiles, no invented security claims).
+- "Zero telemetry — nothing phones home" overclaim rescoped to the
+  honest scope (no analytics/trackers in the desktop app; optimization
+  runs offline).
+
+### Changed — information architecture
+- Product showcase moved above "what is PC MAX" (see the app before
+  reading about it); what-is + features merged into one "What PC MAX
+  does" section; safety hoisted above benchmarks (trust before proof);
+  per-game benchmark rows labeled as illustrative with the documented
+  methodology (+34%, median-of-3, 1440p, RTX 4070) surfaced next to them.
+- Install-section CTA is now a direct download link (was the 4th
+  scroll-CTA); install step 4 clarifies the free account's purpose;
+  showcase disclaimer hoisted next to the tabs; Persian dates render in
+  the Persian calendar with Latin digits (site digit policy).
+
+### Removed — dead code (48% of src/, ~7,050 LOC)
+- Retired WebGL hero trio (`gpu-scene`/`gpu-model`/
+  `constellation-background`, 1,923 LOC), 43 unused shadcn/ui components
+  (kept: button, input, toast, toaster, dialog), `use-mobile`,
+  `tailwind.config.ts` (never loaded by Tailwind v4), `LazySection`
+  pass-through, ThemeProvider/next-themes wrapper, ~85 LOC of dead CSS,
+  3 dead dictionary leaves, unused `pcmax-logo-256.webp`.
+- **56 of 70 runtime dependencies removed** (70 → 14: three.js stack,
+  dnd-kit, MDX editor, TanStack Query/Table, recharts, 24 unused Radix
+  packages, …) — install weight down ~350 MB, CI installs faster.
+- Fixed the corrupted `bg-grid [mask-image…]` class on the 404/error
+  pages (the decorative grid rendered as nothing) + physical glow
+  centering in RTL.
+
+### Fixed — build pipeline
+- Static export now runs `next build` **through bun** (Node ≥ 24 breaks
+  the export with the workUnitAsyncStorage invariant — a time bomb for
+  every future CI runner).
+- Release constants single-sourced: `prisma/seed.ts` and the Pages build
+  script import `APP_VERSION`/`INSTALLER_FILE` from `src/lib/gh-pages.ts`;
+  eslint `no-unused-vars` re-enabled as an error after the purge.
+
 ## [2.1.1] — 2026-10-06
 
 **Multi-agent professional audit fixes** — a four-specialist review team

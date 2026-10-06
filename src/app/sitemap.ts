@@ -9,18 +9,20 @@ import { siteConfig } from "@/lib/seo";
  * only, so the SSR flavor keeps its default (per-request) behavior. */
 
 /**
- * sitemap.xml — bilingual single-page site.
+ * sitemap.xml — bilingual site (audit 29-a: /fa is a REAL prerendered
+ * route since the [[...lang]] segment — no more `?lang=fa` duplicate that
+ * served the EN document).
  *
  *  - EN document `/` (canonical, priority 1)
- *  - FA document `/?lang=fa` (self-canonical Persian variant, priority 0.9)
- *  - Both entries carry xhtml:link hreflang alternates so every engine
- *    discovers the language pair from a single crawl.
+ *  - FA document `/fa` (self-canonical Persian variant, priority 0.9)
+ *  - Both entries carry xhtml:link hreflang alternates (+ x-default → /)
+ *    so every engine discovers the language pair from a single crawl.
  *
  * `lastModified` is the REAL latest-release date from the database — a
  * trustworthy signal that only changes when a release actually ships
  * (dynamic `new Date()` on every request would train crawlers to ignore it).
  */
-const FALLBACK_LASTMOD = new Date("2026-08-01");
+const FALLBACK_LASTMOD = new Date("2025-11-18");
 
 async function getLastModified(): Promise<Date> {
   try {
@@ -38,7 +40,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = await getLastModified();
   const languages = {
     en: `${siteConfig.url}/`,
-    fa: `${siteConfig.url}/?lang=fa`,
+    fa: `${siteConfig.url}/fa`,
+    "x-default": `${siteConfig.url}/`,
   };
 
   return [

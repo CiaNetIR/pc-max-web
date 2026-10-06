@@ -279,6 +279,13 @@ export function AppShowcase() {
         align="center"
       />
 
+      {/* Interface-preview label — hoisted to the tab strip (audit 29-b D9:
+          visitors see the mock panels first; the label must not live only in
+          a 12px footnote 700px below). */}
+      <p className="mt-3 text-center text-xs text-muted-foreground/90">
+        {t.showcase.disclaimer}
+      </p>
+
       {/* Tab strip — Guardian .ftabs language: pill tabs on a hairline-
           scrollable strip, hidden scrollbar, centered when it fits. The
           whole <button> is the hit area; snap keeps pills readable mid-scroll. */}
@@ -703,8 +710,8 @@ export function AppShowcase() {
         <p className="mt-5 text-center text-xs text-muted-foreground">{t.library.footnote}</p>
       </div>
 
-      {/* disclaimer */}
-      <p className="mt-10 text-center text-xs text-muted-foreground">{t.showcase.disclaimer}</p>
+      {/* disclaimer — hoisted to the tab strip (see above); the mock-button
+          toast below still re-states it on interaction. */}
     </Section>
   );
 }

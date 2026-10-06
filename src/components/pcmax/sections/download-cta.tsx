@@ -30,13 +30,16 @@ import {
 
 /* Last-known release — used when the DB or storage is unavailable at render
  * time (identical to the old client-side fetch fallback), so the conversion
- * section never degrades to a bare error line. Update on release. */
+ * section never degrades to a bare error line. The sha256 is the REAL digest
+ * of the shipped 2.4.1 artifact (recompute with sha256sum to update on
+ * release — keep byte-identical with prisma/seed.ts + gh-pages.ts). */
 const FALLBACK_RELEASE: ReleaseInfo = {
   version: "2.4.1",
   size: "2.1 MB",
   channel: "stable",
   releasedAt: "2025-11-18T10:00:00.000Z",
   checksum: null,
+  sha256: "9cdcde918d01e5fadc144f0789786d6eab64f7a61ea35bfb5b3b189786b8e41f",
   fileName: INSTALLER_FILE,
 };
 
@@ -102,6 +105,7 @@ async function fetchLatestRelease(): Promise<ReleaseInfo | null> {
     size,
     releasedAt: release.releasedAt.toISOString(),
     checksum: sha256 ? `sha256:${sha256.slice(0, 16)}…${sha256.slice(-8)}` : null,
+    sha256: sha256 ?? null,
     fileName,
   };
 }

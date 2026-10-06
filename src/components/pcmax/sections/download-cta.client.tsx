@@ -2,7 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { Check, ChevronDown, Loader2, Mail, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Copy, Loader2, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section } from "@/components/pcmax/ui/primitives";
 import { springFluid } from "@/components/pcmax/ui/motion";
@@ -20,7 +20,11 @@ export type ReleaseInfo = {
   size: string;
   channel: string;
   releasedAt: string;
+  /* Truncated display form (chips). */
   checksum: string | null;
+  /* FULL hex digest — powers the "Verify this download" row (copy +
+   * PowerShell re-check). Real data, measured from the shipped artifact. */
+  sha256: string | null;
   /* Installer file name — resolves the download href (API route in the SSR
    * flavor, deployed artifact in the static GitHub Pages flavor). */
   fileName: string;
@@ -58,7 +62,7 @@ function ReleaseChips({ state, release, locale }: { state: DataState; release: R
   const { t } = useLanguage();
 
   const date = release
-    ? new Date(release.releasedAt).toLocaleDateString(locale === "fa" ? "fa-IR" : "en-US", {
+    ? new Date(release.releasedAt).toLocaleDateString(locale === "fa" ? "fa-IR-u-ca-persian-nu-latn" : "en-US", {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -139,7 +143,7 @@ function Changelog({ state, groups }: { state: DataState; groups: ChangelogGroup
               <div className="flex items-baseline gap-2.5">
                 <span className="font-mono text-sm font-bold text-crimson">v{group.version}</span>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(group.releasedAt).toLocaleDateString(locale === "fa" ? "fa-IR" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  {new Date(group.releasedAt).toLocaleDateString(locale === "fa" ? "fa-IR-u-ca-persian-nu-latn" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
               <ul className="mt-2.5 space-y-2">
@@ -224,6 +228,65 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* Verify row — the FULL SHA-256 of the shipped artifact with a copy button
+ * and the exact PowerShell re-check command. Replaces the fabricated
+ * VirusTotal / "code-signed" trust claims with the strongest HONEST signal
+ * we own: a checksum anyone can recompute locally (audit 29-b D3). */
+function VerifyRow({ release }: { release: ReleaseInfo | null }) {
+  const { t } = useLanguage();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  if (!release?.sha256) return null;
+
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(release.sha256!);
+      setCopied(true);
+      toast({ title: "PC MAX", description: t.cta.verify.copied });
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* Clipboard unavailable (permissions / non-secure context) — the hash
+       * stays selectable as plain text; no error toast needed. */
+    }
+  };
+
+  return (
+    <div className="mt-4 rounded-xl border border-border/70 bg-[#121216] p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="type-eyebrow flex items-center gap-2 text-[11px] font-bold uppercase text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-crimson" aria-hidden="true" />
+          {t.cta.verify.label}
+        </span>
+        <button
+          type="button"
+          onClick={onCopy}
+          className="gc-btn-ghost press inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold"
+          aria-label={t.cta.verify.copy}
+        >
+          {copied ? (
+            <Check className="h-3.5 w-3.5 text-crimson" aria-hidden="true" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+          <span aria-hidden="true">{copied ? null : t.cta.verify.copy}</span>
+          <span className="sr-only">{t.cta.verify.copied}</span>
+        </button>
+      </div>
+      {/* Full digest — selectable, wraps anywhere (64 hex chars) */}
+      <code
+        dir="ltr"
+        className="mt-2 block break-all font-mono text-[11px] leading-relaxed text-foreground/80"
+      >
+        sha256: {release.sha256}
+      </code>
+      <p dir="ltr" className="mt-2 text-[10.5px] text-muted-foreground/80">
+        {t.cta.verify.howto}
+      </p>
     </div>
   );
 }
@@ -500,6 +563,7 @@ export function DownloadCtaClient({
 
               <ReleaseChips state={releaseState} release={release} locale={locale} />
               <p className="mt-3 text-center text-xs text-muted-foreground">{t.cta.meta}</p>
+              <VerifyRow release={release} />
             </div>
           </div>
 

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
-import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/pcmax/language-context";
 import { HydrationMarker } from "@/components/pcmax/hydration-marker";
 import { ServiceWorkerRegister } from "@/components/pcmax/sw-register";
@@ -9,7 +8,7 @@ import { getLocaleMeta, siteConfig } from "@/lib/seo";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
 import { IS_STATIC_EXPORT, BASE_PATH } from "@/lib/gh-pages";
 import { Toaster } from "@/components/ui/toaster";
-import "./globals.css";
+import "../globals.css";
 
 /* ---------------------------------------------------------------------
  * The TweakFa font pair, self-hosted (downloaded from tweakfa.com
@@ -52,25 +51,38 @@ const localFontFace = LOCAL_FACES.map((f) => {
 }).join("");
 
 /* Above-the-fold preloads per locale (tiny subsets): EN paints Poppins
- * (canonical static document), FA paints IRANYekanX (SSR flavor only —
- * the static flavor restores FA client-side after hydration). */
+ * (canonical document), FA paints IRANYekanX (a real prerendered /fa
+ * document since the [[...lang]] route — both flavors). */
 const FONT_PRELOADS: Record<Locale, string[]> = {
   en: ["Poppins-Regular.latin.woff2", "Poppins-SemiBold.latin.woff2", "Poppins-Bold.latin.woff2"],
   fa: ["IRANYekanX-Regular.woff2", "IRANYekanX-Bold.woff2", "IRANYekanX-ExtraBold.woff2"],
 };
 
+/* Route params for the optional catch-all root segment `[[...lang]]`:
+ * `undefined`/`[]` → `/` (EN canonical), `["fa"]` → `/fa` (Persian). */
+type LangRouteParams = Promise<{ lang?: string[] }>;
+
 /**
- * Locale resolution order:
- *  1. `x-pcmax-lang` request header — set by proxy from the `?lang=` URL param
- *     (makes `/?lang=fa` a real, crawlable Persian document)
- *  2. `pcmax-lang` cookie — set by the in-page language toggle
- *  3. English default (the canonical document)
+ * Locale resolution order (audit 29-a — the /fa architecture):
+ *  1. ROUTE SEGMENT — `/fa` is a real, crawlable, self-canonical Persian
+ *     document (prerendered in the static export via generateStaticParams,
+ *     SSR'd in dev). This is the ONLY construction where the ROOT layout
+ *     itself can bake `<html lang dir>` at build time.
+ *  2. `x-pcmax-lang` request header — set by proxy from the `?lang=` URL
+ *     param (legacy share-links; the client later consolidates them onto
+ *     /fa via history.replaceState)
+ *  3. `pcmax-lang` cookie — set by the in-page language toggle (SSR flavor)
+ *  4. English default (the canonical document)
  */
-async function resolveLocale(): Promise<Locale> {
-  /* Static GitHub Pages flavor: there is exactly ONE prerendered document
-   * (EN — the canonical one) and no request exists to read headers/cookies
+async function resolveLocale(routeLang?: string[]): Promise<Locale> {
+  /* The route segment wins over everything — /fa IS the Persian document
+   * in both flavors (checked BEFORE the static short-circuit so the
+   * prerendered /fa page bakes lang=fa dir=rtl). */
+  if (routeLang?.[0] === "fa") return "fa";
+  /* Static GitHub Pages flavor, `/` document: exactly ONE canonical EN
+   * page is prerendered and no request exists to read headers/cookies
    * from. Persian visitors get their locale restored client-side right
-   * after hydration (see language-context.tsx). */
+   * after hydration (see language-context.tsx) — or land on /fa directly. */
   if (IS_STATIC_EXPORT) return "en";
   const headerStore = await headers();
   const fromParam = headerStore.get("x-pcmax-lang");
@@ -81,11 +93,17 @@ async function resolveLocale(): Promise<Locale> {
 
 /**
  * Locale-aware metadata. EN is the canonical document at `/`; the Persian
- * variant self-canonicals at `/?lang=fa`. hreflang + x-default tell every
- * engine (and AI crawler) that this one page serves two language documents.
+ * variant self-canonicals at `/fa` (a real prerendered document since the
+ * [[...lang]] route). hreflang + x-default tell every engine (and AI
+ * crawler) that this one page serves two language documents.
  */
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = await resolveLocale();
+export async function generateMetadata({
+  params,
+}: {
+  params: LangRouteParams;
+}): Promise<Metadata> {
+  const { lang } = await params;
+  const locale = await resolveLocale(lang);
   const meta = getLocaleMeta(locale);
   const isFa = locale === "fa";
 
@@ -105,11 +123,13 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       /* NOTE: Next auto-applies basePath to metadata-resolved URLs
        * (canonical/hreflang/og) in the static flavor — values here must stay
-       * ROOT-relative ("/", "/?lang=fa") or they get double-prefixed. */
+       * ROOT-relative ("/", "/fa") or they get double-prefixed. The FA
+       * document is a real prerendered route since the [[...lang]] segment:
+       * en → / (canonical), fa → /fa, x-default → /. */
       canonical: meta.path,
       languages: {
         en: "/",
-        fa: "/?lang=fa",
+        fa: "/fa",
         "x-default": "/",
       },
     },
@@ -134,8 +154,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      site: siteConfig.twitterHandle,
-      creator: siteConfig.twitterHandle,
+      /* site/creator handles dropped (audit 29-b D7): @pcmaxapp is a 404
+       * profile — card metadata should not reference a dead account. */
       title: meta.ogTitle,
       description: meta.description,
       images: [
@@ -175,10 +195,13 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: LangRouteParams;
 }>) {
-  const locale = await resolveLocale();
+  const { lang } = await params;
+  const locale = await resolveLocale(lang);
   const dir = locale === "fa" ? "rtl" : "ltr";
 
   return (
@@ -189,9 +212,9 @@ export default async function RootLayout({
       lang={locale}
       dir={dir}
       suppressHydrationWarning
-      /* `dark` is pinned server-side so the very first paint (before
-       * next-themes hydrates) already renders the Guardian dark palette;
-       * forcedTheme="dark" below keeps it there permanently. */
+      /* `dark` is pinned server-side so the very first paint already
+       * renders the Guardian dark palette; :root/.dark in globals.css carry
+       * identical values (dark-only site since the Task 26 redesign). */
       className="dark"
     >
       {/* The TweakFa font pair — @font-face with BASE_PATH-aware urls so
@@ -230,9 +253,10 @@ export default async function RootLayout({
         >
           {dictionary[locale].common.skipToContent}
         </a>
-        <ThemeProvider>
-          <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
-        </ThemeProvider>
+        {/* Dark theme is pinned via html class="dark" + the color-scheme
+            viewport meta — the next-themes wrapper was retired with the
+            audit 29-c purge (dark-only site, zero useTheme consumers). */}
+        <LanguageProvider initialLocale={locale}>{children}</LanguageProvider>
         <JsonLd locale={locale} />
         <Toaster />
       </body>

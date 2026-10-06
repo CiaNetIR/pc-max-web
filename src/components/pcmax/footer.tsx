@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { AtSign, Bug, Mail, MessageCircle, Send, Youtube } from "lucide-react";
+import { Bug, Mail, MessageCircle, Send } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { WindowsIcon } from "@/components/pcmax/icons";
 import { asset } from "@/lib/gh-pages";
@@ -16,8 +16,9 @@ import {
 
 type LegalDialog = "privacy" | "terms";
 
-/** Icons for the community column, ordered like dictionary footer.communityLinks. */
-const communityIcons = [MessageCircle, Send, AtSign, Youtube] as const;
+/** Icons for the community column, ordered like dictionary footer.communityLinks
+ * (Discord, Telegram — dead X/YouTube profiles removed, audit 29-b D7). */
+const communityIcons = [MessageCircle, Send] as const;
 
 /** Icons for the support column, ordered like dictionary footer.supportLinks. */
 const supportIcons = [Mail, Bug] as const;
@@ -197,13 +198,8 @@ export function Footer() {
             <p className="text-xs font-medium text-muted-foreground">
               {t.footer.rights.replace("{year}", String(year))}
             </p>
-            <p className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
-              <span className="relative flex h-2 w-2" aria-hidden="true">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-crimson opacity-60 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-crimson" />
-              </span>
-              {t.footer.status}
-            </p>
+            {/* Status pill removed — there is no status page behind the claim
+                (audit 29-b D12: unverifiable trust signal). */}
           </div>
         </div>
       </div>

@@ -21,10 +21,16 @@ const nextConfig: NextConfig = {
         images: { unoptimized: true },
       }
     : { output: "standalone" as const }),
+  /* Type errors FAIL the build (audit 29-c): tsc --noEmit has been clean
+   * since v2.1.1 and the CI check job guards it — silently ignoring
+   * type errors in a production build is unacceptable. */
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
-  reactStrictMode: false,
+  /* StrictMode on (audit 29-c): every effect-heavy component was audited;
+   * the one real casualty (AnimatedCounter's started-flag) is fixed. */
+  reactStrictMode: true,
+  poweredByHeader: false,
 };
 
 export default nextConfig;

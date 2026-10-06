@@ -12,7 +12,7 @@
  * what lets Google's Knowledge Graph and LLMs resolve "PC MAX" as one entity.
  */
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
-import { IS_STATIC_EXPORT, PAGES_URL } from "@/lib/gh-pages";
+import { PAGES_URL } from "@/lib/gh-pages";
 
 export interface SiteConfig {
   name: string;
@@ -21,14 +21,11 @@ export interface SiteConfig {
   longDescription: string;
   url: string;
   ogImage: string;
-  twitterHandle: string;
   keywords: readonly string[];
   /* Brand entity — sameAs links (social profiles) feed Knowledge Graph + AI entity resolution */
   social: {
     discord: string;
     telegram: string;
-    x: string;
-    youtube: string;
   };
   sameAs: readonly string[];
   contact: {
@@ -55,14 +52,32 @@ export const siteConfig: SiteConfig = {
     "PC MAX intelligently optimizes Windows, installs advanced frame-generation workflows, and prepares your games for maximum performance.",
   longDescription:
     "PC MAX installs and manages multi-frame generation pipelines built on OptiScaler and AI Optical Flow, bringing DLSS-class upscaling and frame multiplication to virtually any GPU. It also fine-tunes Windows for gaming with safe, reversible optimizations, while keeping full backups of every change so your system can be restored in a single click.",
-  /* Static GitHub Pages flavor: the mirror is self-canonical — its OG
-   * images, sitemap and JSON-LD resolve correctly when the Pages URL is
-   * shared. The SSR flavor keeps the brand domain as the canonical entity. */
-  url: IS_STATIC_EXPORT ? PAGES_URL : "https://pcmax.app",
+  /* Self-canonical at the GitHub Pages URL in BOTH flavors (audit 29-a
+   * D2): the previously claimed https://pcmax.app is a live third-party
+   * squatter page — pointing canonical/OG/JSON-LD at a URL we don't control
+   * is an entity-integrity + deindexing risk. When a real brand domain is
+   * acquired, repoint this ONE constant and everything follows. */
+  url: PAGES_URL,
   ogImage: "/og.png",
-  /* Matches the real X profile (x.com/pcmaxapp). Must stay identical across
-   * site metadata, footer links and Organization.sameAs — entity consistency. */
-  twitterHandle: "@pcmaxapp",
+  /* Social surface — only channels that actually resolve (audit 29-b D7:
+   * x.com/pcmaxapp and youtube.com/@pcmaxapp are hard-404s; advertising
+   * dead profiles as community channels damages trust and pollutes the
+   * Organization entity). Re-add them in sameAs + footer when they exist. */
+  social: {
+    discord: "https://discord.gg/pcmax",
+    telegram: "https://t.me/pcmaxapp",
+  },
+  sameAs: [
+    "https://discord.gg/pcmax",
+    "https://t.me/pcmaxapp",
+  ],
+  contact: {
+    support: "support@pcmax.io",
+    bugs: "bugs@pcmax.io",
+  },
+  logo: "/brand/pcmax-logo-256.png",
+  logoMaskable: "/brand/pcmax-logo-maskable.png",
+  slogan: "Your PC. Optimized.",
   keywords: [
     "windows optimization",
     "frame generation",
@@ -75,25 +90,6 @@ export const siteConfig: SiteConfig = {
     "fps boost",
     "windows 11 gaming",
   ],
-  social: {
-    discord: "https://discord.gg/pcmax",
-    telegram: "https://t.me/pcmaxapp",
-    x: "https://x.com/pcmaxapp",
-    youtube: "https://youtube.com/@pcmaxapp",
-  },
-  sameAs: [
-    "https://discord.gg/pcmax",
-    "https://t.me/pcmaxapp",
-    "https://x.com/pcmaxapp",
-    "https://youtube.com/@pcmaxapp",
-  ],
-  contact: {
-    support: "support@pcmax.io",
-    bugs: "bugs@pcmax.io",
-  },
-  logo: "/brand/pcmax-logo-256.png",
-  logoMaskable: "/brand/pcmax-logo-maskable.png",
-  slogan: "Your PC. Optimized.",
   knowsAbout: [
     "Windows optimization",
     "PC gaming performance",
@@ -140,19 +136,23 @@ export function getLocaleMeta(locale: Locale): LocaleMeta {
   if (locale === "fa") {
     return {
       locale: "fa",
-      title: "پی‌سی‌مکس — پلتفرم بهینه‌سازی بازی روی ویندوز",
+      /* CTR/keyword-aware copy (audit 29-a): covers the highest-volume
+       * Persian queries — بهینه‌سازی ویندوز / بازی / افزایش FPS. */
+      title: "پی‌سی‌مکس | بهینه‌سازی ویندوز برای بازی و افزایش FPS",
       ogTitle: "پی‌سی‌مکس — رایانه‌ی شما. بهینه‌سازی‌شده.",
-      description: dictionary.fa.hero.sub,
+      description:
+        "پی‌سی‌مکس ویندوز را برای بازی بهینه می‌کند؛ فریم‌جنریشن (OptiScaler، DLSS، FSR) متناسب با کارت گرافیک شما نصب می‌کند و همه‌ی تغییرها با یک کلیک قابل بازگشت‌اند — رایگان، بدون تله‌متری.",
       ogLocale: "fa_IR",
       inLanguage: "fa-IR",
-      path: "/?lang=fa",
+      path: "/fa",
     };
   }
   return {
     locale: "en",
-    title: "PC MAX — Windows Gaming Optimization Platform",
+    title: "PC MAX — Free Windows Gaming Optimizer & FPS Booster",
     ogTitle: "PC MAX — Your PC. Optimized.",
-    description: dictionary.en.hero.sub,
+    description:
+      "Free Windows gaming optimizer: per-game profiles, OptiScaler/DLSS/FSR frame generation, and fully reversible tweaks with one-click rollback.",
     ogLocale: "en_US",
     inLanguage: "en",
     path: "/",

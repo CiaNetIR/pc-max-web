@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { springFluid } from "@/components/pcmax/ui/motion";
 import { Reveal, Section, SectionHeading } from "@/components/pcmax/ui/primitives";
+import { installerHref } from "@/lib/gh-pages";
 import {
   GamepadIcon,
   FolderIcon,
@@ -23,6 +24,11 @@ const stepIcons = [DownloadIcon, WindowsIcon, LogoMark, ShieldIcon, FolderIcon, 
 
 export function InstallFlow() {
   const { t } = useLanguage();
+  /* Latest known installer — the step-1 card links straight to it (audit
+   * 29-b D13: this was the 4th scroll-CTA before the single real download
+   * button; a direct link removes the dead-end feel without competing with
+   * the premium card, which stays the canonical download surface). */
+  const downloadHref = installerHref();
   /* motion-sensitive users get the same calm grid — no scroll hijacking,
    * no pinned rail; the entrance tween simply snaps in place. */
   const reduce = useReducedMotion();
@@ -77,11 +83,12 @@ export function InstallFlow() {
         })}
       </ol>
 
-      {/* terminal flourish — straight to the download */}
+      {/* terminal flourish — a REAL download link (SSR: counting route,
+          static: the deployed artifact), not another scroll-to-CTA */}
       <Reveal delay={0.15} className="mt-10 flex justify-center">
         <a
-          href="#download"
-          className="gc-btn-primary inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-bold"
+          href={downloadHref}
+          className="gc-btn-primary press inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-bold"
         >
           <DownloadIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
           {t.hero.primary}

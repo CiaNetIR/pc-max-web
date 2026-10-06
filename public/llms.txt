@@ -1,38 +1,40 @@
 # PC MAX
 
-> PC MAX is a Windows gaming optimization platform — per-game graphics settings and Windows tuning delivered from its own server, not baked into the app. It installs per-game frame-generation workflows (OptiScaler, AI Optical Flow, Streamline PC MAX) and applies safe, fully reversible Windows tuning — snapshotted before every change, with zero telemetry.
+> PC MAX is a Windows gaming optimization platform — per-game graphics settings and Windows tuning delivered from its own server, not baked into the app. It installs per-game frame-generation workflows (OptiScaler, AI Optical Flow, Streamline PC MAX) and applies safe, fully reversible Windows tuning — snapshotted before every change, with zero telemetry in the desktop app.
 
 PC MAX is a desktop application for Windows 10 and 11 (64-bit) built by the PC MAX team. It sits between a player's game catalogue, their GPU and Windows itself: games and optimization profiles sync from the server (nothing is hardcoded — new titles arrive without an app rebuild), the Rust engine tunes the operating system for gaming workloads, and it installs the right frame-generation workflow for each game. Every change is snapshotted before it happens, applied as an all-or-nothing transaction, and reversible in one click. The core edition is free, works offline once synced, and contains no telemetry.
 
 Key facts:
 
-- Product name: PC MAX (brand of the PC MAX team; pcmax.app)
+- Product name: PC MAX (a brand of the PC MAX team)
 - Price: Free core edition. A free account (email + password) signs you in and syncs your catalogue; premium extras are subscription-gated and enforced server-side (Pro edition coming soon)
 - Platforms: Windows 10 and Windows 11, 64-bit (x64)
 - Size: 220 MB on disk
 - Requirements: 4 GB RAM minimum (8 GB recommended), DirectX 12 compatible GPU
 - Offline-first: works from your last synced catalogue and profiles, re-syncs automatically when back online; internet only for the first sync, updates and optional package downloads
-- Privacy: zero telemetry in the app; the website logs anonymous aggregate events only
+- Privacy: zero telemetry in the desktop app (no analytics, no trackers); the website logs anonymous aggregate events only
 - Safety model: snapshot → apply (one transaction, all or nothing) → rollback on failure → restore (one-click, anytime). 235 automated tests in CI (151 API · 48 desktop · 36 Rust engine)
-- Official website: https://pcmax.app
-- Download: https://pcmax.app/api/download
+- Languages: English at the root URL, Persian (فارسی, RTL) at /fa — both fully translated documents
+- Official website: https://dlsdt.github.io/pc-max-web
+- Download: https://dlsdt.github.io/pc-max-web/releases/PCMAX-Setup-2.4.1-x64.exe (installer ~2.1 MB; SHA-256 published in the download card on the website)
 - Support email: support@pcmax.io
 - Community: https://discord.gg/pcmax
 
 The complete, citation-ready reference (full FAQ in English and Persian, workflows, installation steps, benchmarks methodology, privacy and terms) is available at:
 
-- [llms-full.txt](https://pcmax.app/llms-full.txt): Complete PC MAX product reference for LLMs and answer engines
+- [llms-full.txt](https://dlsdt.github.io/pc-max-web/llms-full.txt): Complete PC MAX product reference for LLMs and answer engines
 
 ## Docs
 
-- [What is PC MAX](https://pcmax.app/#what-is): Platform overview — one layer between games, GPU and Windows
-- [Multi-Frame Generation workflows](https://pcmax.app/#multiframe): OptiScaler, AI Optical Flow and Streamline PC MAX explained, with GPU compatibility
-- [Installation flow](https://pcmax.app/#install): The seven-step verified install pipeline
-- [System requirements](https://pcmax.app/#download): Requirements, editions and download
-- [FAQ](https://pcmax.app/#faq): General and technical questions, answered
+- [What PC MAX does](https://dlsdt.github.io/pc-max-web/#features): Platform overview — the pipeline and the Detect / Optimize / Protect disciplines
+- [Multi-Frame Generation workflows](https://dlsdt.github.io/pc-max-web/#multiframe): OptiScaler, AI Optical Flow and Streamline PC MAX explained, with GPU compatibility
+- [Installation flow](https://dlsdt.github.io/pc-max-web/#install): The seven-step verified install pipeline
+- [System requirements](https://dlsdt.github.io/pc-max-web/#download): Requirements, editions, checksum and download
+- [FAQ](https://dlsdt.github.io/pc-max-web/#faq): General and technical questions, answered
 
 ## Optional
 
-- [Benchmarks methodology](https://pcmax.app/#benchmarks): How PC MAX measures FPS gains (median of 3 runs, 1440p, results vary by system)
-- [Privacy policy](https://pcmax.app/llms-full.txt): Offline-first, no personal data collection (full text in the complete reference)
-- [Terms of use](https://pcmax.app/llms-full.txt): Free of charge, as-is; disclaims affiliation with NVIDIA, Microsoft and game publishers (full text in the complete reference)
+- [Benchmarks methodology](https://dlsdt.github.io/pc-max-web/#benchmarks): How PC MAX measures FPS gains (median of 3 runs, 1440p, results vary by system)
+- [نسخه فارسی](https://dlsdt.github.io/pc-max-web/fa): کامل‌ترین نسخه فارسی سایت
+- [Privacy policy](https://dlsdt.github.io/pc-max-web/llms-full.txt): Offline-first, no personal data collection (full text in the complete reference)
+- [Terms of use](https://dlsdt.github.io/pc-max-web/llms-full.txt): Free of charge, as-is; disclaims affiliation with NVIDIA, Microsoft and game publishers (full text in the complete reference)

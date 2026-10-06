@@ -118,10 +118,11 @@ export async function JsonLd({ locale = "en" }: { locale?: Locale }): Promise<Re
           height: 630,
         },
         inLanguage: meta.inLanguage,
-        /* Voice / Assistant: the headline + intro answer is the speakable unit */
+        /* Voice / Assistant: the headline + intro answer is the speakable unit
+         * (the what-is/features sections merged under #features — audit 29-b). */
         speakable: {
           "@type": "SpeakableSpecification",
-          cssSelector: ["#top h1", "#what-is h2", "#what-is p"],
+          cssSelector: ["#top h1", "#features h2", "#features .type-lead"],
         },
       },
 

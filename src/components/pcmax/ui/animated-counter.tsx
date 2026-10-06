@@ -41,7 +41,14 @@ export function AnimatedCounter({
       if (p < 1) raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      /* StrictMode double-effect (audit 29-c): the dev-only remount re-runs
+       * this effect, but `started` was already consumed — the count-up was
+       * silently skipped. Reset the guard in cleanup so the second (real)
+       * effect run animates again. Production is unaffected. */
+      started.current = false;
+    };
   }, [inView, reduce, value, duration]);
 
   return (

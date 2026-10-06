@@ -21,8 +21,8 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
 
   return (
     <main className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-4 text-center">
-      <div className="absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]" aria-hidden="true" />
-      <div className="absolute start-1/2 top-1/2 h-[360px] w-[720px] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full bg-crimson/[0.1] blur-[130px]" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]" aria-hidden="true" />
+      <div className="absolute left-1/2 top-1/2 h-[360px] w-[720px] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full bg-crimson/[0.1] blur-[130px]" aria-hidden="true" />
 
       <div className="relative">
         <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">

@@ -61,7 +61,7 @@ async function main() {
   /* 1 — game key-arts: JPEG → WebP q78 (displayed ≤662×378 desktop, ~350px
    *     mobile; 840px source retained for ~1.25× DPR headroom). */
   for (const f of (await readdir(path.join(ROOT, "public/games"))).filter((f) => f.endsWith(".jpg"))) {
-    const [src, out, outSize] = await toWebp(`public/games/${f}`, 78);
+    const [src, _out, outSize] = await toWebp(`public/games/${f}`, 78);
     const before = await sizeOf(src);
     saved += before - outSize;
     log(`games/${f}: ${KB(before)} → ${KB(outSize)} (webp q78)`);
@@ -74,7 +74,7 @@ async function main() {
     ["public/brand/pcmax-logo-256.png", 92],
     ["public/brand/pcmax-logo-96.png", 92],
   ] as const) {
-    const [src, out, outSize] = await toWebp(rel, q);
+    const [src, _out, outSize] = await toWebp(rel, q);
     const before = await sizeOf(src);
     saved += before - outSize;
     log(`${rel}: ${KB(before)} → ${KB(outSize)} (webp q${q})`);

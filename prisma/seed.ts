@@ -1,6 +1,11 @@
 /* Seed: PC MAX releases + changelog history.
- * Run: bun prisma/seed.ts */
+ * Run: bun prisma/seed.ts
+ *
+ * The latest release's version + fileName are imported from
+ * src/lib/gh-pages.ts (single source of truth, audit 29-c) so the seed can
+ * never drift from the shipped artifact constant. */
 import { PrismaClient } from "@prisma/client";
+import { APP_VERSION, INSTALLER_FILE } from "../src/lib/gh-pages";
 
 const db = new PrismaClient();
 
@@ -14,9 +19,9 @@ async function main() {
   await db.release.createMany({
     data: [
       {
-        version: "2.4.1",
+        version: APP_VERSION,
         channel: "stable",
-        fileName: "PCMAX-Setup-2.4.1-x64.exe",
+        fileName: INSTALLER_FILE,
         notes: "Streamline guardrails for Blackwell, faster Epic detection",
         releasedAt: new Date("2025-11-18T10:00:00Z"),
         downloads: 128450,

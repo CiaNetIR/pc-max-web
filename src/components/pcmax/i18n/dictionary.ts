@@ -12,15 +12,26 @@ const en = {
   hero: {
     /* {version} is replaced with APP_VERSION at render (hero.tsx) — keep in
        sync with INSTALLER_FILE via lib/gh-pages.ts, never hardcode it here. */
-    kicker: "Version {version} · Windows 10 & 11",
-    title1: "Your PC.",
-    title2: "Optimized.",
+    kicker: "PC optimization for Windows · v{version}",
+    title1: "More FPS.",
+    title2: "Better frames. Full control.",
     sub: "PC MAX intelligently optimizes Windows, installs advanced frame-generation workflows, and prepares your games for maximum performance.",
+    /* Trust badges — every claim here is documented on-page (FAQ / safety /
+       privacy): snapshot+rollback, no-injection, telemetry scope. */
     bullets: [
-      "Per-game graphics settings, delivered from the server",
-      "Frame generation tuned to your exact GPU",
-      "Snapshot & one-click rollback before every change",
+      "Snapshot before every change",
+      "One-click rollback, any time",
+      "No game injection",
+      "No telemetry in the desktop app",
     ],
+    trustLine: "Windows 10 & 11 · x64 · Free",
+    /* The framed app-window stage below the CTAs is an interface PREVIEW,
+     * not a live feed — the badge + caption keep that explicit (no fake
+     * live-data framing). Chips carry static, verifiable product facts. */
+    stage: {
+      badge: "Preview",
+      caption: "Interface preview — artwork is illustrative.",
+    },
     primary: "Download PC MAX",
     secondary: "See how it works",
     hint: "Scroll to explore",
@@ -110,10 +121,10 @@ const en = {
     title: "From download to optimized, in seven steps.",
     desc: "A verified pipeline — installer, account, sync, profile. A snapshot is taken before anything changes.",
     steps: [
-      { title: "Download", desc: "Grab the signed NSIS installer, built in CI" },
+      { title: "Download", desc: "Get the PC MAX installer for Windows" },
       { title: "Run Setup", desc: "The wizard installs PC MAX on your Windows PC" },
       { title: "Launch", desc: "Open the app — a native Windows desktop application" },
-      { title: "Sign In", desc: "Create an account with your email and password" },
+      { title: "Sign In", desc: "A free account (email + password) — it syncs your catalogue" },
       { title: "Sync", desc: "The game catalogue and profiles sync from the server" },
       { title: "Pick a Game", desc: "Browse or search, open a title, choose a profile" },
       { title: "Apply", desc: "A full snapshot is taken first — then it applies. Play." },
@@ -196,7 +207,7 @@ const en = {
   bench: {
     eyebrow: "Benchmarks",
     title: "Numbers, not promises.",
-    desc: "Frame-generation workflows plus Windows tuning — measured before and after PC MAX on our test bench.",
+    desc: "Frame generation plus Windows tuning — the combined effect, measured before and after on our test bench.",
     avgLabel: "Average observed uplift",
     avg: "+34%",
     unit: "fps",
@@ -204,6 +215,9 @@ const en = {
     afterLabel: "PC MAX",
     viewAll: "View all benchmarks",
     viewLess: "Show fewer",
+    /* The per-game pairs below are illustrative examples of typical results —
+     * only the +34% headline is a measured, documented figure. */
+    gamesNote: "Per-game pairs are illustrative; the headline average is the measured figure.",
     games: [
       { name: "Cyberpunk 2077", before: 68, after: 94 },
       { name: "Alan Wake 2", before: 54, after: 76 },
@@ -217,20 +231,22 @@ const en = {
   social: {
     eyebrow: "Trust",
     title: "The numbers behind the platform.",
-    desc: "Live platform counters and verifiable release facts — no borrowed credibility, no invented quotes.",
-    stats: [
-      { value: 290, suffix: "K+", label: "downloads to date" },
-      { value: 56, suffix: "", label: "optimization profiles shipped" },
-      { value: 34, suffix: "%", label: "average FPS gain" },
-      { value: 14, suffix: "", label: "games in the launch catalogue" },
-    ],
+    desc: "Download counts from our own release records — plus facts you can verify on this page.",
+    /* `downloads` + `releases` values are DB-derived at render (server
+     * wrapper / build-time DB); the `fallback` is used only when the DB is
+     * unavailable. `tests` + `telemetry` are static documented facts. */
+    stats: {
+      downloads: { fallback: 293, suffix: "K+", label: "downloads across releases" },
+      releases: { fallback: 3, suffix: "", label: "stable releases shipped" },
+      tests: { value: 470, suffix: "", label: "automated tests" },
+      telemetry: { value: 0, suffix: "", label: "telemetry in the desktop app" },
+    },
     trust: {
       title: "Trust, by design",
-      viewReport: "View report",
       items: [
-        { title: "Code-signed builds", desc: "Every release is signed and verifiable before you run it.", meta: "", href: "" },
-        { title: "Clean on VirusTotal", desc: "0 detections across 72 engines.", meta: "Scanned Sep 2026", href: "https://www.virustotal.com/" },
-        { title: "Zero telemetry", desc: "Nothing phones home. Optimization works fully offline.", meta: "", href: "" },
+        { title: "Verify every install", desc: "Every release publishes its SHA-256 checksum — check the installer before you run it.", meta: "See the Download card", href: "#download" },
+        { title: "No telemetry", desc: "No analytics, no trackers in the desktop app. Optimizations run fully offline.", meta: "", href: "" },
+        { title: "Open changelog", desc: "Every release is documented and dated — features, improvements, fixes.", meta: "View the changelog", href: "#download" },
       ],
     },
     artifacts: {
@@ -238,12 +254,11 @@ const en = {
       changelog: "View the changelog",
       benchmarks: "See the benchmarks",
     },
-    liveLabel: "downloads served from this site",
   },
   showcase: {
     eyebrow: "Product",
     title: "The console for your PC.",
-    desc: "The PC MAX desktop app — glass surfaces, soft reflections and live tabs, exactly as it ships.",
+    desc: "The PC MAX desktop app — glass surfaces, soft reflections and live tabs.",
     disclaimer: "Interface preview — values are illustrative.",
     tabs: {
       dashboard: "Dashboard",
@@ -365,7 +380,7 @@ const en = {
     ],
     stillHave: {
       title: "Still have questions?",
-      desc: "The community and the team answer fast on Discord — or drop us an email.",
+      desc: "Ask the community on Discord — or drop us an email.",
       cta: "Join the Discord",
     },
   },
@@ -376,13 +391,12 @@ const en = {
     meta: "Free download · Windows 10/11 · x64",
     fetching: "Checking latest release…",
     versionLabel: "Latest",
-    sizeLabel: "Size",
+    sizeLabel: "Installer",
     channelLabel: "Channel",
-    checksumLabel: "Checksum",
+    checksumLabel: "SHA-256",
     releasedLabel: "Released",
-    error: "Release info unavailable — try again from the app.",
+    error: "Release info unavailable — try again in a moment.",
     requirements: {
-      title: "System requirements",
       os: "OS",
       osValue: "Windows 10 / 11 · 64-bit",
       arch: "Architecture",
@@ -395,13 +409,11 @@ const en = {
       gpuValue: "DirectX 12 compatible GPU",
     },
     editions: {
-      title: "Editions",
       free: {
         name: "PC MAX",
         badge: "Current",
         price: "Free",
         tagline: "Everything on this page. Every optimization, every workflow.",
-        cta: "Download",
       },
       pro: {
         name: "PC MAX Pro",
@@ -416,6 +428,16 @@ const en = {
       tags: { feature: "New", improvement: "Improved", fix: "Fixed" },
       error: "Changelog unavailable right now.",
       empty: "No release notes yet.",
+    },
+    /* Installer verification — the full SHA-256 of the shipped artifact,
+     * a copy button, and the exact PowerShell command to re-check it.
+     * Real, computable facts (audit 29-b D3) replacing the fabricated
+     * VirusTotal / code-signed claims. */
+    verify: {
+      label: "Verify this download",
+      copy: "Copy SHA-256",
+      copied: "SHA-256 copied to clipboard",
+      howto: "PowerShell: Get-FileHash <installer> -Algorithm SHA256",
     },
     waitlist: {
       title: "Get Pro early",
@@ -447,8 +469,6 @@ const en = {
     communityLinks: [
       { label: "Discord", href: "https://discord.gg/pcmax" },
       { label: "Telegram", href: "https://t.me/pcmaxapp" },
-      { label: "X (Twitter)", href: "https://x.com/pcmaxapp" },
-      { label: "YouTube", href: "https://youtube.com/@pcmaxapp" },
     ],
     supportLinks: [
       { label: "support@pcmax.io", href: "mailto:support@pcmax.io" },
@@ -458,7 +478,6 @@ const en = {
     terms: "Terms of Use",
     privacyBody: "PC MAX works offline-first. We do not collect, store or transmit personal data. This website logs anonymous, aggregate events only (page views, download counts) — no identifiers. The desktop app contains zero telemetry. Emails shared with the waitlist are used only to announce Pro availability, and nothing else.",
     termsBody: "PC MAX is provided free of charge, as-is, without warranty. You remain responsible for keeping backups — the app automates this, but verification is good practice. OptiScaler is used under its open-source license. PC MAX is not affiliated with NVIDIA, Microsoft, Valve or any game publisher.",
-    status: "All systems operational",
     platformItems: ["Windows 10 & 11", "x64 architecture", "Offline-ready", "Zero telemetry"],
     rights: "© {year} PC MAX. All rights reserved.",
     disclaimer: "PC MAX is an independent product. Not affiliated with NVIDIA, Microsoft, or any game publisher.",
@@ -492,15 +511,22 @@ const fa: Dictionary = {
     menu: "منو",
   },
   hero: {
-    kicker: "نسخه {version} · ویندوز 10 و 11",
-    title1: "رایانه‌ی شما.",
-    title2: "بهینه‌سازی‌شده.",
+    kicker: "بهینه‌سازی ویندوز برای بازی · نسخه {version}",
+    title1: "فریم بیشتر.",
+    title2: "تصویر بهتر. کنترل کامل.",
     sub: "پی‌سی‌مکس ویندوز را هوشمندانه بهینه می‌کند، جریان‌کاری پیشرفته‌ی فریم‌ساخت را نصب می‌کند و بازی‌های شما را برای حداکثر عملکرد آماده می‌سازد.",
+    /* نشان‌های اعتماد — هر ادعا در همین صفحه مستند است (سوالات / ایمنی / حریم خصوصی). */
     bullets: [
-      "تنظیمات گرافیکی اختصاصی هر بازی، تحویل از سرور",
-      "فریم‌ساخت متناسب با دقیقاً همان کارت گرافیک شما",
-      "اسنپ‌شات و بازگشت با یک کلیک، پیش از هر تغییر",
+      "اسنپ‌شات پیش از هر تغییر",
+      "بازگشت با یک کلیک، در هر زمان",
+      "بدون تزریق داخل بازی",
+      "بدون تله‌متری در اپ دسکتاپ",
     ],
+    trustLine: "ویندوز 10 و 11 · x64 · رایگان",
+    stage: {
+      badge: "پیش‌نمایش",
+      caption: "پیش‌نمایش رابط — تصویر، نمایشی است.",
+    },
     primary: "دانلود PC MAX",
     secondary: "نحوه‌ی کار را ببینید",
     hint: "برای کاوش اسکرول کنید",
@@ -544,7 +570,7 @@ const fa: Dictionary = {
       },
       {
         name: "Streamline PC MAX",
-        tagline: "درون‌یابی فریم نسل جدید",
+        tagline: "میان‌یابی فریم نسل جدید",
         warning: "فقط RTX 40 / RTX 50",
         bullets: [
           "جدیدترین مسیر فریم‌ساخت",
@@ -587,13 +613,13 @@ const fa: Dictionary = {
   },
   install: {
     eyebrow: "فرآیند نصب",
-    title: "از دانلود تا بهینه، در هفت گام.",
+    title: "از دانلود تا سیستم بهینه، در هفت گام.",
     desc: "یک فرآیند راستی‌آزمایی‌شده — نصب‌کننده، حساب کاربری، همگام‌سازی، پروفایل. پیش از هر تغییری اسنپ‌شات گرفته می‌شود.",
     steps: [
-      { title: "دانلود", desc: "نصب‌کننده‌ی امضاشده‌ی NSIS را دریافت کنید" },
+      { title: "دانلود", desc: "نصب‌کننده‌ی PC MAX را برای ویندوز دریافت کنید" },
       { title: "راه‌اندازی", desc: "ویزارد نصب، پی‌سی‌مکس را روی ویندوز شما مستقر می‌کند" },
       { title: "اجرای اپ", desc: "اپ را باز کنید — یک اپلیکیشن دسکتاپ بومی ویندوز" },
-      { title: "ورود", desc: "با ایمیل و رمز عبور حساب بسازید یا وارد شوید" },
+      { title: "ورود", desc: "یک حساب رایگان (ایمیل و رمز عبور) — کاتالوگ شما را همگام نگه می‌دارد" },
       { title: "همگام‌سازی", desc: "کاتالوگ بازی‌ها و پروفایل‌ها از سرور همگام می‌شوند" },
       { title: "انتخاب بازی", desc: "مرور یا جست‌وجو کنید؛ بازی را باز و پروفایل را انتخاب کنید" },
       { title: "اعمال", desc: "اول اسنپ‌شات کامل، بعد اعمال پروفایل. بازی کنید." },
@@ -676,7 +702,7 @@ const fa: Dictionary = {
   bench: {
     eyebrow: "بنچمارک",
     title: "اعداد، نه وعده.",
-    desc: "جریان‌کاری فریم‌ساخت همراه با تنظیمات ویندوز — قبل و بعد از پی‌سی‌مکس، روی میز آزمون ما اندازه‌گیری شده است.",
+    desc: "فریم‌ساخت همراه با تنظیمات ویندوز — اثر ترکیبی، قبل و بعد از پی‌سی‌مکس روی میز آزمون ما اندازه‌گیری شده است.",
     avgLabel: "میانگین بهبود مشاهده‌شده",
     avg: "+34%",
     unit: "fps",
@@ -684,6 +710,7 @@ const fa: Dictionary = {
     afterLabel: "با PC MAX",
     viewAll: "مشاهده‌ی همه‌ی بنچمارک‌ها",
     viewLess: "نمایش کمتر",
+    gamesNote: "جفت‌های هر بازی نمونه‌های نمایشی هستند؛ میانگین اعلام‌شده عدد اندازه‌گیری‌شده است.",
     games: [
       { name: "Cyberpunk 2077", before: 68, after: 94 },
       { name: "Alan Wake 2", before: 54, after: 76 },
@@ -697,20 +724,19 @@ const fa: Dictionary = {
   social: {
     eyebrow: "اعتماد",
     title: "اعدادِ پشت پلتفرم.",
-    desc: "شمارنده‌های زنده‌ی پلتفرم و حقایق قابل‌راستی‌آزمایی انتشار — بدون اعتبار قرضی و بدون نقل‌قول ساختگی.",
-    stats: [
-      { value: 290, suffix: "K+", label: "دانلود تا امروز" },
-      { value: 56, suffix: "", label: "پروفایل بهینه‌سازی عرضه‌شده" },
-      { value: 34, suffix: "%", label: "میانگین افزایش فریم" },
-      { value: 14, suffix: "", label: "بازی در کاتالوگ عرضه" },
-    ],
+    desc: "شمار دانلودها از سوابق انتشار خودمان — به‌همراه حقایقی که می‌توانید در همین صفحه راستی‌آزمایی کنید.",
+    stats: {
+      downloads: { fallback: 293, suffix: "K+", label: "دانلود در همه‌ی نسخه‌ها" },
+      releases: { fallback: 3, suffix: "", label: "نسخه‌ی پایدار عرضه‌شده" },
+      tests: { value: 470, suffix: "", label: "تست خودکار" },
+      telemetry: { value: 0, suffix: "", label: "تله‌متری در اپ دسکتاپ" },
+    },
     trust: {
       title: "اعتماد، در طراحی",
-      viewReport: "مشاهده‌ی گزارش",
       items: [
-        { title: "بیلدهای کد‌ساین‌شده", desc: "هر نسخه پیش از اجرا امضا و قابل راستی‌آزمایی است.", meta: "", href: "" },
-        { title: "پاک در VirusTotal", desc: "صفر شناسایی در 72 موتور.", meta: "اسکن: سپتامبر 2026", href: "https://www.virustotal.com/" },
-        { title: "تله‌متری صفر", desc: "هیچ‌چیز به هیچ‌جا تماس نمی‌گیرد. بهینه‌سازی کاملاً آفلاین کار می‌کند.", meta: "", href: "" },
+        { title: "هر نصب را راستی‌آزمایی کنید", desc: "برای هر نسخه SHA-256 منتشر می‌شود — پیش از اجرا، نصب‌کننده را بررسی کنید.", meta: "در کارت دانلود", href: "#download" },
+        { title: "بدون تله‌متری", desc: "اپ دسکتاپ هیچ تحلیلی نمی‌فرستد و ردیاب ندارد. بهینه‌سازی‌ها کاملاً آفلاین اجرا می‌شوند.", meta: "", href: "" },
+        { title: "تاریخچه‌ی باز", desc: "هر نسخه مستند و تاریخ‌دار است — قابلیت‌ها، بهبودها و رفع اشکال‌ها.", meta: "مشاهده‌ی تاریخچه", href: "#download" },
       ],
     },
     artifacts: {
@@ -718,12 +744,11 @@ const fa: Dictionary = {
       changelog: "مشاهده‌ی تاریخچه تغییرات",
       benchmarks: "مشاهده‌ی بنچمارک‌ها",
     },
-    liveLabel: "دانلودهای ارائه‌شده از همین سایت",
   },
   showcase: {
     eyebrow: "محصول",
     title: "کنسولِ رایانه‌ی شما.",
-    desc: "اپلیکیشن دسکتاپ PC MAX — سطوح شیشه‌ای، بازتاب‌های ملایم و تب‌های زنده؛ دقیقاً همان که نصب می‌کنید.",
+    desc: "اپلیکیشن دسکتاپ PC MAX — سطوح شیشه‌ای، بازتاب‌های ملایم و تب‌های زنده.",
     disclaimer: "پیش‌نمایش رابط کاربری — مقادیر نمایشی هستند.",
     tabs: {
       dashboard: "داشبورد",
@@ -812,14 +837,14 @@ const fa: Dictionary = {
         a: "هر کارت گرافیکی سازگار با DirectX 12 از بهینه‌سازی ویندوز بهره می‌برد. فریم‌ساخت آگاه از سخت‌افزار است: اپتی‌اسکیلر گسترده است، AI Optical Flow به RTX 20 و بالاتر و Streamline به RTX 40/50 نیاز دارد. نصب‌کننده فقط مسیرهای پشتیبانی‌شده‌ی سخت‌افزار شما را پیشنهاد می‌دهد.",
       },
       {
-        q: "بحث ضدچیت چیست؟",
+        q: "وضعیت ضدچیت‌ها چیست؟",
         a: "پی‌سی‌مکس هیچ چیزی داخل بازی تزریق نمی‌کند و به سیستم‌های ضدچیت دست نمی‌زند. ویندوز را بهینه می‌کند و فایل‌های مستند مقیاس‌بندی را به‌ازای هر بازی نصب می‌کند — همان فایل‌هایی که راستی‌آزمایی فایل Steam می‌تواند بازیابی کند. با این حال توصیه می‌کنیم ابتدا در مسابقات غیررتبه‌ای آزمایش کنید؛ سیاست‌ها را ناشر هر بازی تعیین می‌کند.",
       },
     ],
     fullLabel: "همه‌ی سوالات",
     full: [
       {
-        q: "اشتراک یا هزینه‌ای دارد؟",
+        q: "آیا اشتراک یا هزینه‌ای دارد؟",
         a: "اپ اصلی رایگان است. ورود با ایمیل و رمز عبور، کاتالوگ شما را همگام نگه می‌دارد؛ برخی قابلیت‌های ویژه اشتراکی‌اند و سمت سرور کنترل می‌شوند.",
       },
       {
@@ -845,7 +870,7 @@ const fa: Dictionary = {
     ],
     stillHave: {
       title: "هنوز سوال دارید؟",
-      desc: "کامیونیتی و تیم در دیسکورد سریع پاسخ می‌دهند — یا برایمان ایمیل بفرستید.",
+      desc: "سوال‌تان را در دیسکورد بپرسید — یا برایمان ایمیل بفرستید.",
       cta: "عضویت در دیسکورد",
     },
   },
@@ -856,13 +881,12 @@ const fa: Dictionary = {
     meta: "دانلود رایگان · ویندوز 10/11 · 64بیتی",
     fetching: "در حال بررسی آخرین نسخه…",
     versionLabel: "آخرین نسخه",
-    sizeLabel: "حجم",
-    channelLabel: "کانال",
-    checksumLabel: "چک‌سام",
+    sizeLabel: "نصب‌کننده",
+    channelLabel: "کانال انتشار",
+    checksumLabel: "SHA-256",
     releasedLabel: "انتشار",
-    error: "اطلاعات نسخه در دسترس نیست — از خود برنامه دوباره امتحان کنید.",
+    error: "اطلاعات نسخه در دسترس نیست — کمی بعد دوباره تلاش کنید.",
     requirements: {
-      title: "نیازمندی‌های سیستم",
       os: "سیستم‌عامل",
       osValue: "ویندوز 10 / 11 · 64بیتی",
       arch: "معماری",
@@ -875,13 +899,11 @@ const fa: Dictionary = {
       gpuValue: "کارت گرافیکی سازگار با DirectX 12",
     },
     editions: {
-      title: "نسخه‌ها",
       free: {
         name: "PC MAX",
         badge: "فعلی",
         price: "رایگان",
         tagline: "همه‌چیزِ همین صفحه. تمام بهینه‌سازی‌ها، تمام جریان‌های کاری.",
-        cta: "دانلود",
       },
       pro: {
         name: "PC MAX Pro",
@@ -897,6 +919,12 @@ const fa: Dictionary = {
       error: "تاریخچه تغییرات در حال حاضر در دسترس نیست.",
       empty: "هنوز یادداشتی برای نسخه‌ها ثبت نشده است.",
     },
+    verify: {
+      label: "راستی‌آزمایی این دانلود",
+      copy: "کپی SHA-256",
+      copied: "SHA-256 در کلیپ‌بورد کپی شد",
+      howto: "PowerShell: Get-FileHash <installer> -Algorithm SHA256",
+    },
     waitlist: {
       title: "پرو را زودتر بگیرید",
       desc: "یک ایمیل هنگام عرضه‌ی Pro. همین — هیچ چیز دیگری.",
@@ -905,7 +933,7 @@ const fa: Dictionary = {
       button: "خبرم کن",
       success: "در لیست هستید.",
       successDesc: "به‌محض عرضه‌ی PC MAX Pro به شما ایمیل می‌زنیم.",
-      duplicate: "قبلاً در لیست هستید — تا روز عرضه خداحافظ.",
+      duplicate: "قبلاً در لیست هستید — منتظر روز عرضه هستیم.",
       error: "ثبت‌نام انجام نشد — آدرس را بررسی و دوباره تلاش کنید.",
       /* در نسخهٔ استاتیک GitHub Pages به‌جای فرم نمایش داده می‌شود. */
       staticNote:
@@ -926,8 +954,6 @@ const fa: Dictionary = {
     communityLinks: [
       { label: "دیسکورد", href: "https://discord.gg/pcmax" },
       { label: "تلگرام", href: "https://t.me/pcmaxapp" },
-      { label: "ایکس (توییتر)", href: "https://x.com/pcmaxapp" },
-      { label: "یوتیوب", href: "https://youtube.com/@pcmaxapp" },
     ],
     supportLinks: [
       { label: "support@pcmax.io", href: "mailto:support@pcmax.io" },
@@ -937,7 +963,6 @@ const fa: Dictionary = {
     terms: "شرایط استفاده",
     privacyBody: "پی‌سی‌مکس آفلاین-محور کار می‌کند. هیچ داده‌ی شخصی‌ای جمع‌آوری، ذخیره یا منتقل نمی‌شود. این وب‌سایت فقط رویدادهای تجمیعی و بی‌نام (بازدید صفحه، شمار دانلود) را ثبت می‌کند؛ بدون هیچ شناسه‌ای. اپلیکیشن دسکتاپ تله‌متری صفر دارد. ایمیل‌های ثبت‌شده در لیست انتظار فقط برای اطلاع‌رسانی عرضه‌ی Pro استفاده می‌شوند و نه چیز دیگری.",
     termsBody: "پی‌سی‌مکس رایگان و «همین‌طور که هست» و بدون ضمانت ارائه می‌شود. مسئولیت نگه‌داری پشتیبان با شماست؛ اپ خودکار این کار را انجام می‌دهد اما راستی‌آزمایی عادت خوبی است. اپتی‌اسکیلر تحت مجوز متن‌باز خودش استفاده می‌شود. پی‌سی‌مکس وابسته به NVIDIA، مایکروسافت، Valve یا هیچ ناشر بازی نیست.",
-    status: "همه‌ی سیستم‌ها عملیاتی هستند",
     platformItems: ["ویندوز 10 و 11", "معماری x64", "آفلاین‌پذیر", "بدون تله‌متری"],
     rights: "© {year} پی‌سی‌مکس. تمامی حقوق محفوظ است.",
     disclaimer: "پی‌سی‌مکس محصولی مستقل است و وابسته به NVIDIA، مایکروسافت یا هیچ ناشر بازی نیست.",

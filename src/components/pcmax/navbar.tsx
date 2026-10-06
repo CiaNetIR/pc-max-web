@@ -22,7 +22,36 @@ const SPY_IDS = ["top", "features", "install", "benchmarks", "faq"] as const;
 /* ---------------------------- Language toggle ------------------------ */
 
 function LanguageToggle() {
-  const { t, toggleLocale } = useLanguage();
+  const { t, toggleLocale, alternateHref } = useLanguage();
+
+  /* Static flavor (audit 29-a D7): the toggle is a REAL crawlable <a> to the
+   * other language's document (/fa ↔ /) — the Persian page becomes a
+   * linkable, shareable, indexable URL instead of a client-only state flip.
+   * The click still persists the preference cookie first, so returning
+   * visitors on / keep getting their locale restored. SSR/dev flavor keeps
+   * the in-place client toggle (cookie + server locale). */
+  const sharedClass =
+    "press flex h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-transparent px-4 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:h-9 sm:px-3.5";
+
+  if (alternateHref) {
+    return (
+      <a
+        href={alternateHref}
+        aria-label={t.common.switchTo}
+        onClick={() => {
+          /* Persist the target locale before navigating (storage+cookie via
+           * setLocale — the context's store flips too, which is harmless one
+           * frame before the navigation replaces the document). */
+          toggleLocale();
+        }}
+        className={sharedClass}
+      >
+        <Globe className="h-4 w-4" />
+        <span>{t.common.switchTo}</span>
+      </a>
+    );
+  }
+
   return (
     <button
       type="button"
@@ -31,7 +60,7 @@ function LanguageToggle() {
       /* Ghost hairline pill (reference .hdr-cta ghost): transparent bg,
        * hairline border, muted text lifting to foreground on hover.
        * 44px hit area on touch, compact pill from sm up (a11y touch target). */
-      className="press flex h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-transparent px-4 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:h-9 sm:px-3.5"
+      className={sharedClass}
     >
       <Globe className="h-4 w-4" />
       <span>{t.common.switchTo}</span>

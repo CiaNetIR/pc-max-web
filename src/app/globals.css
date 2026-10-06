@@ -40,28 +40,6 @@
   --font-sans: "Poppins", "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: "Poppins", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
-
-  /* Radix accordion open/close — used by ui/accordion (data-[state] utilities) */
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
-  }
 }
 
 @theme inline {
@@ -90,8 +68,9 @@
 }
 
 /* DARK-ONLY site (Task 26): :root and .dark carry identical Guardian
-   values — light mode no longer exists, the class stays only so
-   next-themes (forcedTheme="dark") and legacy .dark selectors keep working.
+   values — light mode no longer exists; the html.dark class is pinned
+   server-side by the root layout (the next-themes wrapper was retired,
+   audit 29-c) and legacy .dark selectors keep working.
    color-scheme: dark — native controls/scrollbars match. */
 :root,
 .dark {
@@ -294,34 +273,6 @@ html:root {
   transform: translateY(0) scale(0.97);
 }
 
-/* Legacy convex/glass buttons — re-tuned to the crimson language so older
-   call-sites keep a coherent look until they are rebuilt. */
-.btn-convex {
-  background: linear-gradient(180deg, #ff4a42 0%, #e50914 58%, #a30812 100%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -2px 5px rgba(46, 2, 8, 0.55),
-    0 8px 24px -8px rgba(229, 9, 20, 0.5);
-  transition: filter 160ms ease, box-shadow 160ms ease, transform 120ms cubic-bezier(0, 0, 0.2, 1);
-}
-.btn-convex:hover {
-  filter: brightness(1.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.46),
-    inset 0 -2px 5px rgba(46, 2, 8, 0.55),
-    0 12px 32px -10px rgba(229, 9, 20, 0.6);
-}
-.btn-convex:active {
-  filter: brightness(0.96);
-  transform: scale(0.97);
-}
-.btn-glass {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
 /* ------------------------------------------------------------------ */
 /*  Surfaces — Guardian cards / frames / glass                         */
 /* ------------------------------------------------------------------ */
@@ -372,19 +323,6 @@ html:root {
     inset 0 1px 0 rgba(255, 255, 255, 0.07),
     0 12px 40px -18px rgba(0, 0, 0, 0.6);
 }
-.glass-chrome {
-  background: rgba(10, 10, 12, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 14px 44px -18px rgba(0, 0, 0, 0.7);
-}
-.card-ios {
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 16px 44px -20px rgba(0, 0, 0, 0.6);
-}
 .specular {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
@@ -410,7 +348,6 @@ html:root {
 /* Accessibility — materials degrade gracefully */
 @media (prefers-reduced-transparency: reduce) {
   .glass,
-  .glass-chrome,
   .gc-hud-chip,
   .gc-hdr {
     background: var(--card);
@@ -419,8 +356,6 @@ html:root {
 }
 @media (prefers-contrast: more) {
   .glass,
-  .glass-chrome,
-  .card-ios,
   .gc-card,
   .gc-frame {
     border-color: rgba(255, 255, 255, 0.45);
@@ -1007,51 +942,10 @@ details[open] > summary .gc-chevron {
   background: #ff3b30;
 }
 
-/* content-visibility — per-section opt-in (LEAD DECISION, do not blanket-apply). */
-.cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 500px;
-}
-
-/* Hero readability scrim — deterministic logical direction (legacy, kept
-   for un-rebuilt hero variants; new hero may not need it). */
-.hero-scrim {
-  background: linear-gradient(
-    to bottom,
-    rgba(8, 8, 10, 0.82) 0%,
-    rgba(8, 8, 10, 0.35) 55%,
-    rgba(8, 8, 10, 0.62) 100%
-  );
-}
-
 /* Product-dashboard tabs — comfortable touch targets on coarse pointers. */
 @media (pointer: coarse) {
   .showcase-tab {
     min-height: 44px;
-  }
-}
-
-/* Installation flow arrows — self-drawing with a subtle loop (legacy) */
-@keyframes flow-draw {
-  0%,
-  12% {
-    stroke-dashoffset: 60;
-    opacity: 0.35;
-  }
-  55%,
-  100% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-}
-.flow-arrow-draw {
-  animation: flow-draw 2.4s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .flow-arrow-draw {
-    animation: none;
-    stroke-dashoffset: 0;
-    opacity: 0.8;
   }
 }
 

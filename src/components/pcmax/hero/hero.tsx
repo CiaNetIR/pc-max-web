@@ -167,11 +167,24 @@ export function Hero() {
             />
           </a>
         </motion.div>
+
+        {/* trust line — the verifiable platform facts under the CTA pair
+         * (audit 29-b: Free/OS/arch stated once, near the primary action) */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.66, ease: "easeOut" }}
+          className="mt-5 text-[13px] font-medium tracking-wide text-muted-foreground"
+        >
+          {t.hero.trustLine}
+        </motion.p>
       </div>
 
-      {/* THE STAGE — framed app-window with live HUD chips. Sits below the
-       * max-w-3xl copy stack as a sibling so its max-w-4xl width is not
-       * capped by the narrower copy container. */}
+      {/* THE STAGE — framed app-window over artwork. An interface PREVIEW,
+       * never a live feed: the badge says so, the chips carry static,
+       * verifiable product facts (version / installer size / checksum
+       * policy) instead of fabricated FPS/GPU/PING telemetry (audit 29-b
+       * D2), and the caption under the frame keeps the framing honest. */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -198,13 +211,13 @@ export function Hero() {
               <span className="ms-2 flex-1 text-start text-xs font-semibold text-muted-foreground">
                 PC MAX
               </span>
-              <span className="rounded-full bg-[rgba(31,191,156,0.14)] px-2.5 py-0.5 text-[11px] font-bold text-[#1fbf9c]">
-                LIVE
+              <span className="rounded-full bg-[rgba(255,255,255,0.08)] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                {t.hero.stage.badge}
               </span>
             </div>
 
-            {/* media + HUD overlay — decorative (stat glyphs are universal
-             * hardware shorthand, not localized copy) */}
+            {/* media + fact chips — decorative (the facts are stated
+             * verbatim in the download card; chips are visual shorthand) */}
             <div className="relative aspect-[16/10] overflow-hidden">
               <img
                 src={asset("/games/cyberpunk.webp")}
@@ -218,46 +231,51 @@ export function Hero() {
                 className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#08080a]/80 to-transparent"
               />
 
-              {/* HUD chips — FPS / GPU / PING */}
+              {/* fact chips — VER / SIZE / SHA — static, verifiable */}
               <div
                 aria-hidden="true"
                 className="gc-hud-chip hud-drift pointer-events-none absolute top-[6%] start-[4%] flex items-baseline gap-2 px-3.5 py-2"
               >
                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
-                  FPS
+                  VER
                 </span>
-                <b className="font-display text-xl font-bold tabular-nums text-[#1fbf9c]">142</b>
+                <b className="font-display text-xl font-bold tabular-nums text-[#1fbf9c]">
+                  {APP_VERSION}
+                </b>
               </div>
               <div
                 aria-hidden="true"
                 className="gc-hud-chip hud-drift-2 pointer-events-none absolute top-[6%] end-[4%] flex items-baseline gap-2 px-3.5 py-2"
               >
                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
-                  GPU
+                  WIN
                 </span>
-                <b className="font-display text-xl font-bold tabular-nums text-white">61°C</b>
+                <b className="font-display text-xl font-bold tabular-nums text-white">10/11</b>
               </div>
               <div
                 aria-hidden="true"
                 className="gc-hud-chip hud-drift-3 pointer-events-none absolute bottom-[6%] end-[4%] flex items-baseline gap-2 px-3.5 py-2"
               >
                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
-                  PING
+                  SHA-256
                 </span>
                 <b className="font-display text-xl font-bold tabular-nums text-[#fedb29]">
-                  4.2ms
+                  ✓
                 </b>
               </div>
             </div>
           </div>
         </div>
+        <p className="mx-auto mt-3 max-w-4xl text-center text-xs text-muted-foreground/80">
+          {t.hero.stage.caption}
+        </p>
       </motion.div>
 
       {/* scroll hint — content-flow below the stage (hero is no longer
        * 100svh), pointing at the first content section */}
       <motion.button
         type="button"
-        onClick={() => scrollTo("what-is")}
+        onClick={() => scrollTo("showcase")}
         className="press type-eyebrow mx-auto mt-12 flex w-fit flex-col items-center gap-1.5 text-[10px] font-semibold uppercase text-muted-foreground transition-colors hover:text-foreground"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
