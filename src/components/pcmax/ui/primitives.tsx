@@ -51,7 +51,7 @@ export function SectionHeading({
         className
       )}
     >
-      {/* Kicker pill — Guardian eyebrow (violet dim bg, #b49bff text) */}
+      {/* Kicker pill — Guardian eyebrow (crimson dim bg, #ff8a80 text) */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}

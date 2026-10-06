@@ -445,7 +445,7 @@ export function DownloadCtaClient({
                 <div className="min-w-0">
                   <span
                     dir="ltr"
-                    className="block bg-gradient-to-r from-[#fedb29] via-[#8b5cff] to-[#1fbf9c] bg-clip-text text-[11px] font-bold tracking-[0.22em] text-transparent"
+                    className="block bg-gradient-to-r from-[#fedb29] via-[#ff3b30] to-[#1fbf9c] bg-clip-text text-[11px] font-bold tracking-[0.22em] text-transparent"
                   >
                     PC MAX
                   </span>

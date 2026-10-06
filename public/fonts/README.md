@@ -1,35 +1,31 @@
 # Fonts
 
-## Ariobarzan (Persian typeface) — drop-in slot
+## The TweakFa pair (IRANYekanX + Poppins) — active
 
-Ariobarzan is a **commercial font** (designer: Saeid Poonki) sold at
-<https://spacedesign.ir/store/downloads/دانلود-فونت-آریوبرزن-ariobarzan-فونت-فارسی-bold-بر/>.
-It cannot be redistributed with the project — purchase it, then drop the
-files here and the site picks them up **automatically, zero code changes**.
-
-Expected filenames (any of the three extensions works, `.woff2` preferred):
+Self-hosted woff2 cuts downloaded from <https://tweakfa.com/phoenix-landing/fonts/>
+(the Phoenix-Guardian landing), matching the reference site's typography
+byte-for-byte:
 
 ```
-ariobarzan-regular.woff2   → body text   (weight 400)
-ariobarzan-bold.woff2      → display/titles (weight 700)
+IRANYekanX-{Regular,Medium,DemiBold,Bold,ExtraBold}.woff2   → Persian face, 400–800
+Poppins-{Regular,SemiBold,Bold}.latin.woff2                 → Latin face, 400/600/700
+Poppins-{Regular,SemiBold,Bold}.digits.woff2                → Latin digit subsets (U+0030-0039)
 ```
 
-Rules already wired in `src/app/layout.tsx` + `src/app/globals.css`:
+Wired in `src/app/layout.tsx` (`LOCAL_FACES` → injected hoisted `<style>` with
+BASE_PATH-aware urls) + `src/app/globals.css` (`--font-sans` / `--font-display`
+stacks, `html[dir="rtl"]` override):
 
-- `font-display: swap` (Persian text paints on the fallback while loading)
-- Arabic-script `unicode-range` — Latin text stays on the system stack
-- **Both files present** → titles *and* body text use Ariobarzan
-- **Bold file only** → titles use Ariobarzan, body text stays on Vazirmatn
-  (a Bold-only cut must never render long-form paragraphs)
-- Files absent → Vazirmatn fallback, no failed font requests
+- `font-display: swap` on every face.
+- **The digits trick**: the Poppins digit files are declared UNDER the
+  `'IRANYekanX'` family with `unicode-range: U+0030-0039` — Latin digits inside
+  Persian text render in Poppins while every other glyph renders in IRANYekanX
+  (the signature TweakFa move).
+- EN preloads the three Poppins latin cuts; the FA SSR flavor preloads
+  IRANYekanX Regular/Bold/ExtraBold.
 
-### Converting TTF → WOFF2
+## Ariobarzan (Persian typeface) — retired
 
-```bash
-pip install fonttools brotli
-fonttools ttLib.woff2 compress ariobarzan-regular.ttf
-fonttools ttLib.woff2 compress ariobarzan-bold.ttf
-```
-
-Other files in this directory (`pcmax-sora-800.ttf`) are the Latin brand
-cut used by the GPU brand texture — not related to Persian typography.
+The old commercial-font drop-in contract was removed in v2.1.0 when the
+TweakFa pair landed. (Ariobarzan remains a paid font at spacedesign.ir and
+cannot be redistributed.)

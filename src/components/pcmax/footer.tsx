@@ -54,7 +54,7 @@ export function Footer() {
               the visible wordmark is the accessible name, logo decorative. */}
           <div>
             <a href="#top" className="group flex items-center gap-2.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#6734ff] to-[#a07bff] shadow-[0_6px_20px_rgba(103,52,255,0.42)] transition-transform duration-300 group-hover:scale-105">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#ff5a50] to-[#e50914] shadow-[0_6px_20px_rgba(229,9,20,0.42)] transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src={asset("/brand/pcmax-logo-96.webp")}
                   alt=""

@@ -4,6 +4,56 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.1.0] — 2026-10-06
+
+**Red Edition + the TweakFa type system** — per user request
+("۹۹.۹۹٪ شبیه این بشه بجز رنگش که باید همون تم قرمز مشکی بمونه…
+از فونتش بگیر تا همه چیز شبیهش بشه"): the Guardian structure stays
+byte-identical, the violet palette is swapped back to the classic PC-Max
+**crimson/black** brand, and the site now ships the exact **TweakFa font
+pair** — self-hosted `IRANYekanX` (Persian, 5 weights) + `Poppins` (Latin,
+3 weights) with the signature *Poppins-digits-inside-Persian* unicode-range
+trick.
+
+### Changed — fonts (layout.tsx, globals.css)
+- **IRANYekanX** (400/500/600/700/800) + **Poppins** (400/600/700 latin +
+  Regular/SemiBold/Bold digit subsets) downloaded from tweakfa.com
+  phoenix-landing/fonts into `public/fonts/` (11 woff2 files, ~135 KB).
+- `@font-face` injected via a hoisted `<style href="pcmax-local-fonts"
+  precedence="font-face">` — BASE_PATH-interpolated so both the SSR and the
+  static GitHub-Pages flavors resolve `/fonts/…` (fixes the raw-`<style>`
+  -in-`<html>` hydration error the old Ariobarzan path would have hit).
+- The TweakFa signature move: Poppins DIGITS (U+0030-0039) declared under
+  the `'IRANYekanX'` family — Latin digits inside Persian text render in
+  Poppins, every other glyph in IRANYekanX.
+- Font stacks: EN = `--font-sans/--font-display: "Poppins"` (was Sora +
+  system body); `html[dir="rtl"]` = `"IRANYekanX"` (was Vazirmatn).
+  `next/font/google` (Sora + Vazirmatn) and the Ariobarzan drop-in
+  contract are removed — zero external font requests.
+- Per-locale above-the-fold preloads (EN: 3 Poppins cuts ≈27 KB; FA SSR:
+  IRANYekanX Regular/Bold/ExtraBold). `.gc-stat`/`.gc-step` numerals
+  pinned to Poppins + sans fallback (Persian digits still render Yekan).
+
+### Changed — color (globals.css + 5 components)
+- Violet → the classic crimson/black theme on every Guardian role:
+  brand fill `#e50914` (buttons/pills/selection/logo box), text/vivid
+  `#ff3b30` (Task-25-approved hue, 5.7:1 on #08080a), deep stop `#c1121f`,
+  kicker text `#ff8a80`, `--accent rgba(229,9,20,.16)`, `--ring #ff3b30`.
+- Full-bleed swaps: bgfx top glow, kicker pill, `.gc-btn-primary`,
+  `.gc-frame`, `.text-glow-crimson` ramp, `.glow-crimson`, `.tick-violet`,
+  `.btn-convex` legacy ramp, `stNum` step animation, the `.shcard` family
+  (conic orbit now gold→**crimson**→teal, drifting glows, breathing mark),
+  `details.gc-q[open]` border, slim scrollbar.
+- Hardcoded component hexes re-pinned: navbar/footer logo box
+  `from-[#ff5a50] to-[#e50914]`, showcase active tab `bg-[#e50914]`,
+  shcard "PC MAX" label gradient `via-[#ff3b30]`.
+- Gold #fedb29 / teal #1fbf9c / warning #e08a09 accents unchanged — the
+  red/gold/teal triad on near-black keeps the Guardian premium feel.
+
+### Maintenance
+- Service-worker cache `v2.0.0` → `v2.1.0` (repeat visitors drop the
+  violet CSS/font cache). package.json → 2.1.0.
+
 ## [2.0.0] — 2026-10-06
 
 The **Guardian redesign** — the whole visual language rebuilt after the TweakFa

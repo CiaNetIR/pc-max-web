@@ -175,7 +175,7 @@ export function Navbar() {
             scrolling + its own reduced-motion override); the visible
             "PC MAX" wordmark is the accessible name, the logo is decorative */}
         <a href="#top" className="flex shrink-0 items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#6734ff] to-[#a07bff] shadow-[0_6px_20px_rgba(103,52,255,0.42)]">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#ff5a50] to-[#e50914] shadow-[0_6px_20px_rgba(229,9,20,0.42)]">
             <Image
               src={asset("/brand/pcmax-logo-96.webp")}
               alt=""

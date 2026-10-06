@@ -314,7 +314,7 @@ export function AppShowcase() {
               className={cn(
                 "press h-10 flex-none snap-center rounded-full px-4 text-[13.5px] font-bold transition-colors",
                 tab === key
-                  ? "bg-[#6734ff] text-white shadow-[0_8px_24px_rgba(103,52,255,0.35)]"
+                  ? "bg-[#e50914] text-white shadow-[0_8px_24px_rgba(229,9,20,0.35)]"
                   : "bg-[#1b1b21] text-muted-foreground ring-1 ring-inset ring-border hover:text-foreground"
               )}
             >

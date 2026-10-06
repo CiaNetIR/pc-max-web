@@ -9,30 +9,36 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ------------------------------------------------------------------ */
-/*  PC MAX DESIGN SYSTEM v2 — "GUARDIAN"                               */
-/*  Dark-only violet/gold/teal language modeled on the TweakFa          */
-/*  Phoenix-Guardian landing (see upload/Pasted Content_...txt).        */
+/*  PC MAX DESIGN SYSTEM v2.1 — "GUARDIAN, RED EDITION"                */
+/*  Structure modeled on the TweakFa Phoenix-Guardian landing; the      */
+/*  palette is the classic PC-Max crimson/black brand. Typography is    */
+/*  the exact TweakFa pair: IRANYekanX (fa) + Poppins (latin) + the      */
+/*  Poppins-digits unicode-range trick (see layout.tsx @font-face).     */
 /* ------------------------------------------------------------------ */
 
 @theme {
-  /* Violet ramp carried by the legacy `crimson` names — 165 call-sites
+  /* Crimson ramp carried by the legacy `crimson` names — 165 call-sites
      (text-crimson / bg-crimson/10 / border-crimson/25 …) re-skin to the
-     new brand without touching a single component file.
-       #a98cff ≈ 7:1 on #08080a (text) · #8b5cff vivid · #6734ff brand */
-  --color-crimson: #a98cff;
-  --color-crimson-bright: #8b5cff;
-  --color-crimson-deep: #6734ff;
+     brand without touching a single component file.
+       #ff3b30 ≈ 5.7:1 on #08080a (text, Task-25 approved hue) ·
+       #e50914 brand fill (white label 4.8:1) · #c1121f deep stop */
+  --color-crimson: #ff3b30;
+  --color-crimson-bright: #ff3b30;
+  --color-crimson-deep: #c1121f;
 
-  /* Named Guardian accents */
-  --color-violet-gc: #6734ff;
-  --color-violet-gc-soft: #a98cff;
+  /* Named Guardian accents (structure-identical to the reference, in the
+     PC-Max red/black brand instead of violet) */
+  --color-violet-gc: #e50914;
+  --color-violet-gc-soft: #ff6b61;
   --color-gold-gc: #fedb29;
   --color-success-gc: #1fbf9c;
   --color-warning-gc: #e08a00;
   --color-danger-gc: #e8352c;
 
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--font-sora), sans-serif;
+  /* TweakFa font pair — Poppins for the latin document, IRANYekanX takes
+     over under html[dir="rtl"] below (both self-hosted in /fonts). */
+  --font-sans: "Poppins", "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Poppins", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Radix accordion open/close — used by ui/accordion (data-[state] utilities) */
@@ -97,44 +103,37 @@
   --card-foreground: #ffffff;
   --popover: #1b1b21;
   --popover-foreground: #ffffff;
-  --primary: #6734ff;
+  --primary: #e50914;
   --primary-foreground: #ffffff;
   --secondary: #1b1b21;
   --secondary-foreground: #f5f5f7;
   --muted: #17171b;
   --muted-foreground: rgba(255, 255, 255, 0.64);
-  --accent: rgba(103, 52, 255, 0.16);
-  --accent-foreground: #c9b8ff;
+  --accent: rgba(229, 9, 20, 0.16);
+  --accent-foreground: #ffb3ab;
   --destructive: #e8352c;
   --border: rgba(255, 255, 255, 0.09);
   --input: rgba(255, 255, 255, 0.14);
-  --ring: #8b5cff;
+  --ring: #ff3b30;
 }
 
-/* Violet fill guard (unlayered wins over utilities): exact-class solid
-   crimson→violet fills pin to the brand #6734ff so white label text keeps
-   ~6:1. Tints (bg-crimson/10 …) intentionally ride the softer text token. */
+/* Crimson fill guard (unlayered wins over utilities): exact-class solid
+   crimson fills pin to the brand #e50914 so white label text keeps
+   ~4.8:1. Tints (bg-crimson/10 …) intentionally ride the softer text token. */
 .bg-crimson {
-  background-color: #6734ff;
+  background-color: #e50914;
 }
 .group-hover\:bg-crimson:is(:where(.group):hover *) {
-  background-color: #6734ff;
+  background-color: #e50914;
 }
 
-/* Persian font switching — Vazirmatn takes over in RTL.
-   Latin glyphs inside RTL text fall through to the native system stack. */
+/* Persian font switching — the TweakFa pair: IRANYekanX takes over in
+   RTL (self-hosted, declared in layout.tsx). Latin digits inside Persian
+   text still render in Poppins via the unicode-range digit overrides —
+   the signature TweakFa typographic move. */
 html[dir="rtl"] {
-  --font-sans: var(--font-vazirmatn), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
-  --font-display: var(--font-vazirmatn), var(--font-sora), "Segoe UI", Tahoma, sans-serif;
-}
-
-/* Ariobarzan (local, purchased) — activates the moment the files land in
-   public/fonts/ (detected server-side in layout.tsx, no 404s otherwise). */
-html[data-ariobarzan][dir="rtl"] {
-  --font-display: "Ariobarzan", var(--font-vazirmatn), var(--font-sora), "Segoe UI", Tahoma, sans-serif;
-}
-html[data-ariobarzan="full"][dir="rtl"] {
-  --font-sans: "Ariobarzan", var(--font-vazirmatn), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+  --font-sans: "IRANYekanX", "Segoe UI", Tahoma, sans-serif;
+  --font-display: "IRANYekanX", "Segoe UI", Tahoma, sans-serif;
 }
 
 /* ------------------------------------------------------------------ */
@@ -160,7 +159,7 @@ html:root {
     line-height: 1.9;
   }
   ::selection {
-    background: #6734ff;
+    background: #e50914;
     color: #ffffff;
   }
   :focus-visible {
@@ -204,7 +203,7 @@ html:root {
   transform: translateX(-50%);
   width: 1100px;
   height: 760px;
-  background: radial-gradient(closest-side, rgba(103, 52, 255, 0.3), rgba(103, 52, 255, 0.1) 55%, transparent 78%);
+  background: radial-gradient(closest-side, rgba(229, 9, 20, 0.3), rgba(229, 9, 20, 0.1) 55%, transparent 78%);
   filter: blur(30px);
 }
 
@@ -241,9 +240,9 @@ html:root {
   line-height: 1.6;
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(103, 52, 255, 0.16);
-  color: #b49bff;
-  border: 1px solid rgba(103, 52, 255, 0.32);
+  background: rgba(229, 9, 20, 0.16);
+  color: #ff8a80;
+  border: 1px solid rgba(229, 9, 20, 0.32);
 }
 .kicker::before {
   content: "";
@@ -265,18 +264,18 @@ html:root {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Buttons — Guardian pair: violet solid / hairline ghost             */
+/*  Buttons — Guardian pair: crimson solid / hairline ghost            */
 /* ------------------------------------------------------------------ */
 
 .gc-btn-primary {
-  background: #6734ff;
+  background: #e50914;
   color: #fff;
-  box-shadow: 0 10px 30px rgba(103, 52, 255, 0.36);
+  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.36);
   transition: transform 0.16s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .gc-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(103, 52, 255, 0.5);
+  box-shadow: 0 16px 40px rgba(229, 9, 20, 0.5);
 }
 .gc-btn-primary:active {
   transform: translateY(0) scale(0.97);
@@ -305,23 +304,23 @@ html:root {
   transform: translateY(0) scale(0.97);
 }
 
-/* Legacy convex/glass buttons — re-tuned to the violet language so older
+/* Legacy convex/glass buttons — re-tuned to the crimson language so older
    call-sites keep a coherent look until they are rebuilt. */
 .btn-convex {
-  background: linear-gradient(180deg, #7d4bff 0%, #6734ff 58%, #5426d6 100%);
+  background: linear-gradient(180deg, #ff4a42 0%, #e50914 58%, #a30812 100%);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -2px 5px rgba(20, 8, 66, 0.55),
-    0 8px 24px -8px rgba(103, 52, 255, 0.5);
+    inset 0 -2px 5px rgba(46, 2, 8, 0.55),
+    0 8px 24px -8px rgba(229, 9, 20, 0.5);
   transition: filter 160ms ease, box-shadow 160ms ease, transform 120ms cubic-bezier(0, 0, 0.2, 1);
 }
 .btn-convex:hover {
   filter: brightness(1.08);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.46),
-    inset 0 -2px 5px rgba(20, 8, 66, 0.55),
-    0 12px 32px -10px rgba(103, 52, 255, 0.6);
+    inset 0 -2px 5px rgba(46, 2, 8, 0.55),
+    0 12px 32px -10px rgba(229, 9, 20, 0.6);
 }
 .btn-convex:active {
   filter: brightness(0.96);
@@ -349,12 +348,12 @@ html:root {
   transform: translateY(-3px);
 }
 
-/* Violet gradient media frame (reference .frame) */
+/* Crimson gradient media frame (reference .frame) */
 .gc-frame {
   --fpad: clamp(4px, 0.55vw, 7px);
   border-radius: var(--radius);
   padding: var(--fpad);
-  background: linear-gradient(160deg, rgba(103, 52, 255, 0.3), rgba(103, 52, 255, 0.05));
+  background: linear-gradient(160deg, rgba(229, 9, 20, 0.3), rgba(229, 9, 20, 0.05));
   box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
 }
 .gc-frame > * {
@@ -477,19 +476,19 @@ html[lang="fa"] h4 {
   letter-spacing: 0 !important;
 }
 
-/* Brand gradient text — violet ramp (headline accent word) */
+/* Brand gradient text — crimson ramp (headline accent word) */
 .text-glow-crimson {
-  background: linear-gradient(120deg, #b49bff 0%, #8b5cff 45%, #6734ff 100%);
+  background: linear-gradient(120deg, #ff8a80 0%, #ff3b30 45%, #e50914 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* Violet glow for the accent headline */
+/* Crimson glow for the accent headline */
 .glow-crimson {
   box-shadow:
-    0 0 22px -8px rgba(139, 92, 255, 0.35),
-    0 0 72px -28px rgba(103, 52, 255, 0.4);
+    0 0 22px -8px rgba(255, 59, 48, 0.35),
+    0 0 72px -28px rgba(229, 9, 20, 0.4);
 }
 
 /* Hero word-reveal (reference .w/.wi): split headline words rise out of
@@ -572,14 +571,14 @@ html[lang="fa"] h4 {
   color: #fedb29;
 }
 .tick-violet {
-  background: rgba(103, 52, 255, 0.16);
-  color: #a98cff;
+  background: rgba(229, 9, 20, 0.16);
+  color: #ff6b61;
 }
 
-/* Stat tile numbers — Latin/Sora, teal */
+/* Stat tile numbers — Poppins (TweakFa latin face), teal */
 .gc-stat b,
 .gc-stat .stat-num {
-  font-family: var(--font-sora), ui-monospace, monospace;
+  font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
   font-weight: 700;
   color: #1fbf9c;
   font-variant-numeric: tabular-nums;
@@ -612,7 +611,7 @@ html[lang="fa"] h4 {
   border-radius: 50%;
   background: #1b1b21;
   border: 1px solid rgba(255, 255, 255, 0.09);
-  font-family: var(--font-sora), ui-monospace, monospace;
+  font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
   font-size: 18px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.56);
@@ -661,9 +660,9 @@ html[lang="fa"] h4 {
   10%,
   28% {
     color: #fff;
-    border-color: rgba(103, 52, 255, 0.75);
-    background: rgba(103, 52, 255, 0.16);
-    box-shadow: 0 0 0 6px rgba(103, 52, 255, 0.1);
+    border-color: rgba(229, 9, 20, 0.75);
+    background: rgba(229, 9, 20, 0.16);
+    box-shadow: 0 0 0 6px rgba(229, 9, 20, 0.1);
   }
   34%,
   100% {
@@ -727,7 +726,7 @@ html[lang="fa"] h4 {
   margin-inline: auto;
   border-radius: 22px;
   padding: 1px;
-  background: linear-gradient(210deg, rgba(254, 219, 41, 0.55), rgba(103, 52, 255, 0.5) 55%, rgba(31, 191, 156, 0.35));
+  background: linear-gradient(210deg, rgba(254, 219, 41, 0.55), rgba(229, 9, 20, 0.5) 55%, rgba(31, 191, 156, 0.35));
 }
 .shcard__in {
   position: relative;
@@ -736,7 +735,7 @@ html[lang="fa"] h4 {
   min-width: 0;
   border-radius: 21px;
   overflow: hidden;
-  background: #0d0b13;
+  background: #130b0d;
   padding: clamp(28px, 3.2vw, 42px) clamp(20px, 3.4vw, 44px);
 }
 .shcard__edge {
@@ -748,7 +747,7 @@ html[lang="fa"] h4 {
     from 0deg,
     transparent 0 52%,
     rgba(31, 191, 156, 0.55) 62%,
-    rgba(103, 52, 255, 0.95) 72%,
+    rgba(229, 9, 20, 0.95) 72%,
     rgba(254, 219, 41, 0.9) 80%,
     transparent 90% 100%
   );
@@ -772,7 +771,7 @@ html[lang="fa"] h4 {
   height: 420px;
   top: -190px;
   inset-inline-start: -100px;
-  background: rgba(103, 52, 255, 0.42);
+  background: rgba(229, 9, 20, 0.42);
   animation: shDriftA 25.1s ease-in-out infinite;
 }
 .shcard__gB {
@@ -829,7 +828,7 @@ html[lang="fa"] h4 {
   }
 }
 
-/* Breathing mark — three vertical bars (success/violet/gold) */
+/* Breathing mark — three vertical bars (success/crimson/gold) */
 .shmark {
   width: 54px;
   height: 54px;
@@ -837,14 +836,14 @@ html[lang="fa"] h4 {
   border-radius: 16px;
   border: 1px solid transparent;
   background:
-    linear-gradient(140deg, rgba(103, 52, 255, 0.4), rgba(13, 11, 19, 0.9)) padding-box,
-    conic-gradient(from 210deg, #fedb29, #6734ff, #1fbf9c, #fedb29) border-box;
+    linear-gradient(140deg, rgba(229, 9, 20, 0.4), rgba(19, 11, 13, 0.9)) padding-box,
+    conic-gradient(from 210deg, #fedb29, #e50914, #1fbf9c, #fedb29) border-box;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   gap: 3.8px;
   padding-bottom: 10.5px;
-  box-shadow: 0 0 32px rgba(103, 52, 255, 0.3);
+  box-shadow: 0 0 32px rgba(229, 9, 20, 0.3);
 }
 .shmark i {
   width: 7.5px;
@@ -860,7 +859,7 @@ html[lang="fa"] h4 {
 }
 .shmark .f2 {
   height: 25px;
-  background: #a07bff;
+  background: #ff5a50;
   --rot: 0deg;
   animation: shBreath 3.4s ease-in-out 0.18s infinite;
 }
@@ -941,7 +940,7 @@ html[lang="fa"] h4 {
   background: linear-gradient(160deg, #3fd6b4, #1fbf9c);
 }
 .shperks li:nth-child(3n + 2) b {
-  background: linear-gradient(160deg, #b79aff, #6734ff);
+  background: linear-gradient(160deg, #ff6b61, #e50914);
 }
 .shperks li:nth-child(3n + 3) b {
   background: linear-gradient(160deg, #ffe873, #fedb29);
@@ -971,9 +970,9 @@ html[lang="fa"] h4 {
 /*  marker classes (see faq.tsx / download-cta.client.tsx).            */
 /* ------------------------------------------------------------------ */
 
-/* FAQ disclosure card — violet border + plus→cross flip when open */
+/* FAQ disclosure card — crimson border + plus→cross flip when open */
 details.gc-q[open] {
-  border-color: rgba(169, 140, 255, 0.4);
+  border-color: rgba(255, 90, 80, 0.4);
 }
 details.gc-q[open] > summary .gc-glyph {
   transform: rotate(45deg);
@@ -1001,12 +1000,12 @@ details[open] > summary .gc-chevron {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Scrollbar — slim violet                                            */
+/*  Scrollbar — slim crimson                                           */
 /* ------------------------------------------------------------------ */
 
 .scrollbar-slim {
   scrollbar-width: thin;
-  scrollbar-color: rgba(139, 92, 255, 0.6) transparent;
+  scrollbar-color: rgba(255, 59, 48, 0.6) transparent;
 }
 .scrollbar-slim::-webkit-scrollbar {
   width: 6px;
@@ -1016,11 +1015,11 @@ details[open] > summary .gc-chevron {
   background: transparent;
 }
 .scrollbar-slim::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 255, 0.55);
+  background: rgba(255, 59, 48, 0.55);
   border-radius: 999px;
 }
 .scrollbar-slim::-webkit-scrollbar-thumb:hover {
-  background: #8b5cff;
+  background: #ff3b30;
 }
 
 /* content-visibility — per-section opt-in (LEAD DECISION, do not blanket-apply). */

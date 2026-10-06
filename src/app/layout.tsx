@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
-import fs from "node:fs";
-import path from "node:path";
-import { Sora, Vazirmatn } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/pcmax/language-context";
 import { HydrationMarker } from "@/components/pcmax/hydration-marker";
@@ -14,112 +11,53 @@ import { IS_STATIC_EXPORT, BASE_PATH } from "@/lib/gh-pages";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  display: "swap",
-  /* Preloaded (default): the ONLY webfont that renders above the fold on
-   * the canonical EN document (h1/headings via --font-display). On FA it
-   * rides along (~34 KB, preloaded but rarely paints a glyph — the navbar
-   * wordmark is an image and the RTL display stack resolves Latin through
-   * Vazirmatn's latin subset first); next/font preload links are emitted at
-   * build time, so per-locale switching is impossible — EN wins the tie. */
-});
-
-const vazirmatn = Vazirmatn({
-  subsets: ["arabic"],
-  variable: "--font-vazirmatn",
-  display: "swap",
-  /* FA-only above the fold — NEVER preloaded (was: default preload forced
-   * the 46 KB arabic cut onto every EN first paint, verified in the network
-   * log; EN renders zero Persian glyphs). Loading is fully usage-gated two
-   * ways: globals.css wires --font-vazirmatn into font stacks ONLY under
-   * html[dir="rtl"], and every @font-face carries a subset unicode-range —
-   * so the file is fetched exactly when RTL Persian text is styled, at
-   * stylesheet-resolution time (font-display:swap covers the gap; the
-   * metric-matched "Vazirmatn Fallback" face keeps CLS at zero). subsets
-   * is ignored while preload:false but kept as the correct default if
-   * preload is ever re-enabled. */
-  preload: false,
-});
-
 /* ---------------------------------------------------------------------
- * Ariobarzan — local Persian typeface (designer: Saeid Poonki, source:
- * spacedesign.ir — commercial font, must be purchased).
+ * The TweakFa font pair, self-hosted (downloaded from tweakfa.com
+ * phoenix-landing/fonts, woff2 only):
+ *   IRANYekanX — Persian face, 5 weights (400/500/600/700/800)
+ *   Poppins    — Latin face (400/600/700) + digit subsets
  *
- * Drop-in contract: place the purchased files in `public/fonts/` as
- *   ariobarzan-regular.woff2  (body text, weight 400)
- *   ariobarzan-bold.woff2     (display/titles, weight 700)
- * (.woff / .ttf variants are auto-detected too; convert with any
- *  ttf→woff2 tool — e.g. `fonttools ttLib.woff2 compress`.)
+ * The signature TweakFa move: Poppins DIGITS (U+0030-0039) are declared
+ * UNDER the 'IRANYekanX' family with a unicode-range, so Latin digits
+ * inside Persian text render in Poppins while every other glyph renders
+ * in IRANYekanX — byte-identical to the reference site's typography.
  *
- * The files are detected once at module scope (cached — never per-request;
- * zero fs cost on the hot path) — the <style> below is injected ONLY when
- * they exist, so the site never fires a 404 font request. Vazirmatn stays
- * as the interim fallback until then. font-display: swap keeps Persian
- * text paintable while the local file streams in. Arabic-script
- * unicode-range keeps Latin text on the system stack in both directions.
+ * @font-face lives in an injected <style> (not globals.css) because CSS
+ * url() refs to /public are NOT basePath-prefixed in the static export —
+ * the injected tag interpolates BASE_PATH explicitly (the proven pattern
+ * from the old Ariobarzan contract). font-display:swap throughout.
  * ------------------------------------------------------------------- */
-const ARIOBARZAN_DIR = path.join(process.cwd(), "public", "fonts");
-const ARIOBARZAN_RANGE =
-  "U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200F, U+2010-2011";
+type LocalFace = { family: string; file: string; weight: number; range?: string };
 
-function findAriobarzan(base: string): { file: string; format: string } | null {
-  for (const [ext, format] of [
-    ["woff2", "woff2"],
-    ["woff", "woff"],
-    ["ttf", "truetype"],
-  ] as const) {
-    const file = `${base}.${ext}`;
-    if (fs.existsSync(path.join(ARIOBARZAN_DIR, file))) return { file, format };
-  }
-  return null;
-}
+const LOCAL_FACES: LocalFace[] = [
+  { family: "IRANYekanX", file: "IRANYekanX-Regular.woff2", weight: 400 },
+  { family: "IRANYekanX", file: "IRANYekanX-Medium.woff2", weight: 500 },
+  { family: "IRANYekanX", file: "IRANYekanX-DemiBold.woff2", weight: 600 },
+  { family: "IRANYekanX", file: "IRANYekanX-Bold.woff2", weight: 700 },
+  { family: "IRANYekanX", file: "IRANYekanX-ExtraBold.woff2", weight: 800 },
+  /* digits AFTER the base faces — later declaration wins for U+0030-0039 */
+  { family: "IRANYekanX", file: "Poppins-Regular.digits.woff2", weight: 400, range: "U+0030-0039" },
+  { family: "IRANYekanX", file: "Poppins-Regular.digits.woff2", weight: 500, range: "U+0030-0039" },
+  { family: "IRANYekanX", file: "Poppins-SemiBold.digits.woff2", weight: 600, range: "U+0030-0039" },
+  { family: "IRANYekanX", file: "Poppins-Bold.digits.woff2", weight: 700, range: "U+0030-0039" },
+  { family: "IRANYekanX", file: "Poppins-Bold.digits.woff2", weight: 800, range: "U+0030-0039" },
+  { family: "Poppins", file: "Poppins-Regular.latin.woff2", weight: 400 },
+  { family: "Poppins", file: "Poppins-SemiBold.latin.woff2", weight: 600 },
+  { family: "Poppins", file: "Poppins-Bold.latin.woff2", weight: 700 },
+];
 
-const ariobarzanRegular = findAriobarzan("ariobarzan-regular");
-const ariobarzanBold = findAriobarzan("ariobarzan-bold");
-/* "full" = regular + bold present → body text may use it too (readable
- * 400 weight). "display-only" = just the Bold cut → titles only, body
- * text stays on Vazirmatn so long-form Persian is never forced bold. */
-const ariobarzanMode =
-  ariobarzanRegular && ariobarzanBold ? "full" : ariobarzanBold ? "display-only" : null;
+const localFontFace = LOCAL_FACES.map((f) => {
+  const range = f.range ? `unicode-range:${f.range};` : "";
+  return `@font-face{font-family:'${f.family}';font-weight:${f.weight};src:url('${BASE_PATH}/fonts/${f.file}') format('woff2');${range}font-display:swap;}`;
+}).join("");
 
-const ariobarzanFontFace = [ariobarzanRegular, ariobarzanBold]
-  .flatMap((face, i) =>
-    face
-      ? [
-          "@font-face{",
-          `font-family:'Ariobarzan';`,
-          `src:url('${BASE_PATH}/fonts/${face.file}') format('${face.format}');`,
-          `font-weight:${i === 0 ? 400 : 700};`,
-          "font-style:normal;",
-          "font-display:swap;",
-          `unicode-range:${ARIOBARZAN_RANGE};`,
-          "}",
-        ].join("")
-      : []
-  )
-  .join("");
-
-/* MIME for the <link rel="preload"> hints below (font preloads must carry
- * the exact type so the browser can skip incompatible cuts, and must be
- * CORS-mode — crossOrigin — or the preload misses and the font fetches twice). */
-const ARIOBARZAN_MIME: Record<string, string> = {
-  woff2: "font/woff2",
-  woff: "font/woff",
-  ttf: "font/ttf",
+/* Above-the-fold preloads per locale (tiny subsets): EN paints Poppins
+ * (canonical static document), FA paints IRANYekanX (SSR flavor only —
+ * the static flavor restores FA client-side after hydration). */
+const FONT_PRELOADS: Record<Locale, string[]> = {
+  en: ["Poppins-Regular.latin.woff2", "Poppins-SemiBold.latin.woff2", "Poppins-Bold.latin.woff2"],
+  fa: ["IRANYekanX-Regular.woff2", "IRANYekanX-Bold.woff2", "IRANYekanX-ExtraBold.woff2"],
 };
-/* FA-first-paint preloads for the local cut(s): Bold always (display/titles
- * are the above-the-fold unit), Regular only in "full" mode (body text).
- * EN never references these URLs — the @font-face unicode-range plus the
- * [dir="rtl"]-gated font stacks keep them fully dormant in LTR. */
-const ariobarzanPreload =
-  ariobarzanMode && ariobarzanBold
-    ? [
-        ariobarzanBold,
-        ...(ariobarzanMode === "full" && ariobarzanRegular ? [ariobarzanRegular] : []),
-      ]
-    : [];
 
 /**
  * Locale resolution order:
@@ -244,36 +182,39 @@ export default async function RootLayout({
   const dir = locale === "fa" ? "rtl" : "ltr";
 
   return (
-    // CRITICAL: font variables live on <html> so Tailwind 4's @theme (:root)
-    // can resolve var(--font-sora)/var(--font-vazirmatn). Body text uses the
-    // native system stack (SF Pro / Segoe UI) — Apple-style, zero download.
+    /* Fonts are self-hosted and resolved by family name ('Poppins' LTR /
+     * 'IRANYekanX' RTL — see globals.css @theme + html[dir="rtl"] stacks);
+     * no next/font variables are needed on <html> anymore. */
     <html
       lang={locale}
       dir={dir}
-      data-ariobarzan={ariobarzanMode ?? undefined}
       suppressHydrationWarning
       /* `dark` is pinned server-side so the very first paint (before
        * next-themes hydrates) already renders the Guardian dark palette;
        * forcedTheme="dark" below keeps it there permanently. */
-      className={`dark ${sora.variable} ${vazirmatn.variable}`}
+      className="dark"
     >
-      {/* Local Ariobarzan @font-face — injected only when the purchased
-          files exist in public/fonts (see the contract above). */}
-      {ariobarzanMode && <style dangerouslySetInnerHTML={{ __html: ariobarzanFontFace }} />}
-      {/* FA-only critical-font preloads (same files as the @font-face
-          above, so EN requests nothing and FA skips the CSS+glyph round
-          trip for the display cut). React hoists these into <head>. */}
-      {locale === "fa" &&
-        ariobarzanPreload.map((face) => (
-          <link
-            key={face.file}
-            rel="preload"
-            href={`${BASE_PATH}/fonts/${face.file}`}
-            as="font"
-            type={ARIOBARZAN_MIME[face.format]}
-            crossOrigin="anonymous"
-          />
-        ))}
+      {/* The TweakFa font pair — @font-face with BASE_PATH-aware urls so
+          both the SSR and static flavors resolve /fonts correctly.
+          href+precedence let React hoist this <style> into <head> (a raw
+          <style> inside <html> is invalid HTML + a hydration error). */}
+      <style
+        href="pcmax-local-fonts"
+        precedence="font-face"
+        dangerouslySetInnerHTML={{ __html: localFontFace }}
+      />
+      {/* Above-the-fold preloads for the active locale (tiny woff2 cuts,
+          CORS-mode so the preload matches the font fetch). */}
+      {FONT_PRELOADS[locale].map((file) => (
+        <link
+          key={file}
+          rel="preload"
+          href={`${BASE_PATH}/fonts/${file}`}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      ))}
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
         {/* Progressive enhancement: flags React as mounted — pairs with the
             `html:not(.hydrated)` override at the end of globals.css so the
