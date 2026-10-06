@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Globe, Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/components/pcmax/language-context";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { asset } from "@/lib/gh-pages";
 import { springFluid } from "@/components/pcmax/ui/motion";
@@ -174,23 +173,21 @@ export function Navbar() {
     wasOpen.current = open;
   }, [open]);
 
-  /* Section 44 — simple nav: Features · How it works · Benchmarks · FAQ */
+  /* Section 44 — simple nav: Features · How it works · Benchmarks · FAQ.
+   *
+   * Semantic anchors (audit 29-a D7 fix): every nav target is a real
+   * <a href="#…"> — crawlable in-page links, middle-click / copy-link /
+   * no-JS all work. The smooth scroll + its prefers-reduced-motion
+   * override come from CSS (html scroll-behavior) and the offset from the
+   * sections' scroll-mt-24 — no JS needed anywhere. The mobile menu links
+   * keep a single onClick to close the panel; the native anchor navigation
+   * still runs (hash + scroll), so Back works like on desktop. */
   const links = [
     { id: "features", label: t.nav.features },
     { id: "install", label: t.nav.install },
     { id: "benchmarks", label: t.nav.benchmarks },
     { id: "faq", label: t.nav.faq },
   ];
-
-  const go = (id: string) => {
-    setOpen(false);
-    requestAnimationFrame(() => {
-      /* Programmatic smooth scrolling ignores the CSS reduced-motion
-       * override, so respect the media query explicitly. */
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-    });
-  };
 
   return (
     /* Guardian header (reference .hdr): sticky full-width blurred bar with
@@ -219,7 +216,7 @@ export function Navbar() {
           </span>
         </a>
 
-        {/* desktop links — plain text links like the reference .nav (no
+        {/* desktop links — plain text anchors like the reference .nav (no
             underline affordance): scroll-spy highlights the active section
             via aria-current + full-foreground color */}
         <ul className="hidden items-center gap-6 lg:flex">
@@ -227,9 +224,8 @@ export function Navbar() {
             const isActive = active === link.id;
             return (
               <li key={link.id}>
-                <button
-                  type="button"
-                  onClick={() => go(link.id)}
+                <a
+                  href={`#${link.id}`}
                   aria-current={isActive ? "true" : undefined}
                   className={cn(
                     "press rounded-full px-1 py-2 text-sm/[14.5px] font-medium transition-colors",
@@ -239,7 +235,7 @@ export function Navbar() {
                   )}
                 >
                   {link.label}
-                </button>
+                </a>
               </li>
             );
           })}
@@ -248,13 +244,14 @@ export function Navbar() {
         {/* actions */}
         <div className="ms-auto flex items-center gap-2.5">
           <LanguageToggle />
-          <Button
-            size="sm"
-            onClick={() => go("download")}
-            className="gc-btn-primary press hidden h-9 rounded-xl px-5 font-bold sm:inline-flex"
+          {/* real anchor — same classes the shadcn Button rendered, so the
+              pixel result is unchanged; now a crawlable link */}
+          <a
+            href="#download"
+            className="gc-btn-primary press hidden h-9 items-center justify-center whitespace-nowrap rounded-xl px-5 text-sm font-bold text-white sm:inline-flex"
           >
             {t.nav.download}
-          </Button>
+          </a>
           <button
             type="button"
             ref={triggerRef}
@@ -291,9 +288,13 @@ export function Navbar() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ ...springFluid, delay: 0.03 * i }}
                     >
-                      <button
-                        type="button"
-                        onClick={() => go(link.id)}
+                      <a
+                        href={`#${link.id}`}
+                        onClick={() => {
+                          /* close the panel; the native anchor navigation
+                           * (hash + smooth scroll) still runs */
+                          setOpen(false);
+                        }}
                         aria-current={isActive ? "true" : undefined}
                         className={cn(
                           "press flex w-full items-center justify-between rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors hover:bg-accent hover:text-foreground",
@@ -308,17 +309,18 @@ export function Navbar() {
                             isActive ? "bg-crimson" : "bg-crimson/60"
                           )}
                         />
-                      </button>
+                      </a>
                     </motion.li>
                   );
                 })}
                 <li className="mt-2 border-t border-border/60 pt-3">
-                  <Button
-                    onClick={() => go("download")}
-                    className="gc-btn-primary press h-11 w-full rounded-xl text-[15px] font-bold"
+                  <a
+                    href="#download"
+                    onClick={() => setOpen(false)}
+                    className="gc-btn-primary press inline-flex h-11 w-full items-center justify-center whitespace-nowrap rounded-xl text-[15px] font-bold text-white"
                   >
                     {t.nav.download}
-                  </Button>
+                  </a>
                 </li>
               </ul>
             </div>

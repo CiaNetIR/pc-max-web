@@ -69,12 +69,6 @@ export function Hero() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  const scrollTo = (id: string) => {
-    /* Programmatic smooth scrolling ignores the CSS reduced-motion
-     * override, so respect the media query explicitly. */
-    document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-  };
-
   return (
     <section
       id="top"
@@ -129,9 +123,10 @@ export function Hero() {
           ))}
         </motion.div>
 
-        {/* CTAs — real anchors (#download / #install) so the buttons carry
-         * link semantics (middle-click / copy-link) while the click handler
-         * keeps the reduced-motion-aware smooth in-page scroll */}
+        {/* CTAs — real anchors (#download / #install): the browser's native
+         * in-page navigation does the scrolling — CSS scroll-behavior + its
+         * prefers-reduced-motion override + the sections' scroll-mt-24 — so
+         * no JS handler is needed (audit 29-a D7). */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -140,10 +135,6 @@ export function Hero() {
         >
           <a
             href="#download"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollTo("download");
-            }}
             className="gc-btn-primary press group inline-flex h-[52px] items-center gap-2.5 rounded-xl px-7 text-[15px] font-bold text-white"
           >
             <DownloadIcon className="h-5 w-5" aria-hidden="true" />
@@ -151,10 +142,6 @@ export function Hero() {
           </a>
           <a
             href="#install"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollTo("install");
-            }}
             className="gc-btn-ghost press group inline-flex h-[52px] items-center gap-2 rounded-xl px-7 text-[15px] font-bold"
           >
             {t.hero.secondary}
@@ -272,10 +259,10 @@ export function Hero() {
       </motion.div>
 
       {/* scroll hint — content-flow below the stage (hero is no longer
-       * 100svh), pointing at the first content section */}
-      <motion.button
-        type="button"
-        onClick={() => scrollTo("showcase")}
+       * 100svh), pointing at the first content section; a real anchor —
+       * native in-page navigation + CSS smooth scroll like the CTAs */}
+      <motion.a
+        href="#showcase"
         className="press type-eyebrow mx-auto mt-12 flex w-fit flex-col items-center gap-1.5 text-[10px] font-semibold uppercase text-muted-foreground transition-colors hover:text-foreground"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -290,7 +277,7 @@ export function Hero() {
         >
           <ArrowDown className="h-4 w-4" />
         </motion.span>
-      </motion.button>
+      </motion.a>
     </section>
   );
 }

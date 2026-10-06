@@ -29,20 +29,16 @@ export function Footer() {
   const [dialog, setDialog] = useState<LegalDialog | null>(null);
 
   /* Section 46 — trimmed to the nav set: Features · How it works ·
-   * Benchmarks · FAQ (deep-link anchors for the rest live in the page). */
+   * Benchmarks · FAQ (deep-link anchors for the rest live in the page).
+   * Real <a href="#…"> anchors (audit 29-a D7 fix) — crawlable in-page
+   * links; CSS scroll-behavior + scroll-mt-24 handle smoothness and the
+   * sticky-header offset, including the reduced-motion override. */
   const productLinks = [
     { id: "features", label: t.nav.features },
     { id: "install", label: t.nav.install },
     { id: "benchmarks", label: t.nav.benchmarks },
     { id: "faq", label: t.nav.faq },
   ];
-
-  const scrollTo = (id: string) => {
-    /* Programmatic smooth scrolling ignores the CSS reduced-motion
-     * override, so respect the media query explicitly. */
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-  };
 
   return (
     /* Guardian footer (reference .ftr): transparent over the fixed .bgfx
@@ -98,13 +94,12 @@ export function Footer() {
             <ul className="space-y-2.5">
               {productLinks.map((link) => (
                 <li key={link.id}>
-                  <button
-                    type="button"
-                    onClick={() => scrollTo(link.id)}
+                  <a
+                    href={`#${link.id}`}
                     className="press py-1.5 text-foreground/70 transition-colors hover:text-crimson"
                   >
                     {link.label}
-                  </button>
+                  </a>
                 </li>
               ))}
             </ul>

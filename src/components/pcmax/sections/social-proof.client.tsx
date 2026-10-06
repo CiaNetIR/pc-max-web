@@ -54,12 +54,7 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
     { value: t.social.stats.telemetry.value, suffix: t.social.stats.telemetry.suffix, label: t.social.stats.telemetry.label },
   ];
 
-  /* Reduced motion → jump, don't glide, to the anchored section. */
-  const scrollTo = (id: string) => {
-    document
-      .getElementById(id)
-      ?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-  };
+  /* Reduced motion → count-up jumps to its final value (AnimatedCounter). */
 
   return (
     <Section id="community" className="relative overflow-hidden">
@@ -152,15 +147,9 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
                   {card}
                 </a>
               ) : (
-                <a
-                  key={item.title}
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollTo(item.href.replace(/^#/, ""));
-                  }}
-                  className="group block"
-                >
+                /* in-page anchors (#…) — native navigation + CSS smooth
+                 * scroll (audit 29-a D7), no JS handler needed */
+                <a key={item.title} href={item.href} className="group block">
                   {card}
                 </a>
               )
@@ -173,26 +162,25 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
         </div>
       </Reveal>
 
-      {/* artifacts over words — real, checkable things on this very page */}
+      {/* artifacts over words — real, checkable things on this very page.
+          Plain anchors: crawlable in-page links (audit 29-a D7). */}
       <Reveal delay={0.1}>
         <p className="mt-10 text-center text-xs text-muted-foreground">
           {t.social.artifacts.title}
         </p>
         <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => scrollTo("benchmarks")}
+          <a
+            href="#benchmarks"
             className="gc-btn-ghost inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold"
           >
             {t.social.artifacts.benchmarks}
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollTo("download")}
+          </a>
+          <a
+            href="#download"
             className="gc-btn-ghost inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold"
           >
             {t.social.artifacts.changelog}
-          </button>
+          </a>
         </div>
       </Reveal>
     </Section>

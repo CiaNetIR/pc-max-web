@@ -48,9 +48,9 @@ function getSnapshot(): Locale {
  * prerendered Persian route) or `/` (EN canonical). Read as an external
  * store — subscribe to popstate, re-read on demand — so there is no
  * setState-in-effect and no hydration mismatch (the server snapshot is
- * always false; React swaps in the client snapshot post-hydration by
- * design). history.replaceState doesn't fire popstate, so the /fa
- * consolidation effect below dispatches it manually. */
+ * per-instance and document-aware — see getServerFaDoc below;
+ * history.replaceState doesn't fire popstate, so the /fa consolidation
+ * effect below dispatches it manually). */
 function subscribePath(onChange: () => void) {
   window.addEventListener("popstate", onChange);
   return () => window.removeEventListener("popstate", onChange);
@@ -60,12 +60,6 @@ function getFaDocumentSnapshot(): boolean {
   if (typeof window === "undefined") return false;
   const path = window.location.pathname.replace(/\/+$/, "");
   return path === `${BASE_PATH}/fa`;
-}
-
-/* Server/prerender snapshot — the EN document assumption; React swaps in
- * the real client snapshot right after hydration (no mismatch by design). */
-function getServerFaSnapshot(): boolean {
-  return false;
 }
 
 export function LanguageProvider({
@@ -79,11 +73,25 @@ export function LanguageProvider({
 
   const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  /* Static flavor only (audit 29-a — the /fa architecture). */
+  /* Static flavor only (audit 29-a — the /fa architecture).
+   *
+   * BUGFIX (Task 31): the store's server snapshot used the module-level
+   * EN-document assumption, so the PRERENDERED /fa document shipped with
+   * alternateHref="/fa" — a self-referential "English" toggle in the raw
+   * HTML (crawlers + no-JS visitors saw a dead link; only post-hydration
+   * did the href flip to "/"). The layout knows which document it is
+   * rendering (initialLocale — the same prop that bakes <html lang>), so
+   * the per-instance server snapshot below returns the true document: the
+   * prerendered /fa HTML now carries href="/" from the first byte AND
+   * hydration reads the same value the server rendered (no store swap, no
+   * re-render). The SSR/dev flavor is unaffected — alternateHref stays
+   * null there regardless of the store's value. */
+  const getServerFaDoc = useCallback(() => initialLocale === "fa", [initialLocale]);
+
   const onFaDocument = useSyncExternalStore(
     subscribePath,
     getFaDocumentSnapshot,
-    getServerFaSnapshot
+    getServerFaDoc
   );
 
   const alternateHref = IS_STATIC_EXPORT ? (onFaDocument ? `${BASE_PATH}/` : `${BASE_PATH}/fa`) : null;

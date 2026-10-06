@@ -4,6 +4,39 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.2.1] — 2026-10-06
+
+**Crawlable navigation + a dead language-toggle link fixed** — the final gap
+from the Task 29/30 product audit (D7) and one regression found while
+verifying it live (Task 31).
+
+### Fixed — the /fa document's "English" toggle was a self-link in raw HTML
+- The **prerendered Persian document shipped with
+  `href="/pc-max-web/fa"` on its "English" toggle** — a link to itself.
+  Browsers self-corrected one frame after hydration (the path store
+  re-read `location.pathname`), but **crawlers and no-JS visitors saw a
+  dead "English" link** — exactly the audience the v2.2.0 crawlable-`/fa`
+  work was for. Root cause: the document store's server snapshot assumed
+  the EN document unconditionally. It is now per-instance and
+  document-aware (`initialLocale` — the same prop that bakes
+  `<html lang="fa">`), so the raw HTML carries `href="/"` from the first
+  byte and hydration reads the same value the server rendered (no store
+  swap, no re-render). Verified in the exported `out/fa/index.html` and
+  live after deploy.
+
+### Changed — section navigation is now real crawlable anchors (audit D7)
+- **Navbar, footer, hero CTAs, scroll-hint and the community artifact
+  pills are `<a href="#…">` links** instead of `<button onClick>`
+  scroll-helpers: the in-page anchor graph is crawlable, middle-click /
+  copy-link / no-JS navigation all work, the hash lands in the URL, and
+  the browser Back button behaves natively. Smooth scrolling, the
+  96px sticky-header offset (`scroll-mt-24`) and the
+  `prefers-reduced-motion` override all come from CSS — ~30 lines of
+  per-component JS scroll handlers were deleted. The mobile menu keeps a
+  single `onClick` to close the panel; the native anchor navigation still
+  runs beneath it (verified: hash, 96px landing, menu close, repeat
+  same-hash clicks re-scroll).
+
 ## [2.2.0] — 2026-10-06
 
 **Product-level audit: truth, SEO and a crawlable Persian web** — a
