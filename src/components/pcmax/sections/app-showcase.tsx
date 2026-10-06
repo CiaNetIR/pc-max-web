@@ -16,19 +16,22 @@ type TabKey = "dashboard" | "multiframe" | "windows" | "settings";
 const tabOrder: TabKey[] = ["dashboard", "multiframe", "windows", "settings"];
 
 /* Responsive WebP key-arts (Task 24, Lighthouse "Improve image delivery":
- * −123 KiB mobile). The Pages export runs images unoptimized, so next/image
- * emits a bare src with NO srcset — every device downloaded the full 840px
- * art. The gallery now hand-rolls a srcSet (plain <img>): 480w serves DPR-1
- * desktop cards + the mock's thumbnails, 672w serves DPR-1.75 mobile
- * (~380 CSS × 1.75 = 662 px), 840w stays for high-DPR. Variants are
- * single-encoded from the git-tracked JPEGs by scripts/responsive-images.ts. */
+ * −123 KiB mobile; Task 33: famous-character swap). The Pages export runs
+ * images unoptimized, so next/image emits a bare src with NO srcset — every
+ * device downloaded the full 840px art. The gallery hand-rolls a srcSet
+ * (plain <img>): 480w serves DPR-1 desktop cards + the mock's thumbnails,
+ * 672w serves DPR-1.75 mobile (~380 CSS × 1.75 = 662 px), 840w stays for
+ * high-DPR. Every key art now carries an instantly recognizable character
+ * (user request): Johnny Silverhand, the GTA V trio, the Destined One,
+ * Kratos, Geralt, Arthur Morgan — generated one-shot by
+ * scripts/character-keyart.ts. */
 const gameFiles = [
   "cyberpunk",
   "gtav",
   "wukong",
-  "eldenring",
-  "alanwake2",
-  "bg3",
+  "kratos",
+  "geralt",
+  "rdr2",
 ].map((name) => {
   const master = asset(`/games/${name}.webp`);
   return {

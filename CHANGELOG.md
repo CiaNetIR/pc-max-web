@@ -4,6 +4,34 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.4.0] — 2026-10-06
+
+**Every image on the site now carries a character gamers instantly
+recognize** — Task 33 (user feedback: "use famous, well-known characters
+everywhere — including Ghost").
+
+### Changed — famous-character key art across the site
+- **Hero stage: Ghost.** The framed app-window stage above the fold now
+  shows Call of Duty's masked operator — skull-pattern mask, pitch-black
+  backdrop, the single most requested character — served as the existing
+  responsive trio (`ghost` 840/672/480 WebP, exact 16:10 crop).
+- **Gallery lineup re-cast with icons.** Elden Ring, Alan Wake 2 and
+  Baldur's Gate 3 key arts are replaced by **God of War** (Kratos vs
+  Thor), **The Witcher 3** (Geralt facing the Leshen) and **Red Dead
+  Redemption 2** (Arthur Morgan chiaroscuro portrait). Cyberpunk 2077,
+  GTA V and Black Myth: Wukong stay (benchmark/dashboard cross-references
+  intact) but their art now leads with the character — Johnny Silverhand
+  close-up, the official trio cover, the Destined One with his staff.
+- **Honest attribution.** The showcase footnote now states that characters
+  and key art belong to their respective publishers (EN + FA) — the art is
+  illustrative, not affiliated.
+- 21 new WebP assets (7 arts × 3 widths, 641 KB total) generated one-shot
+  from pristine downloads by `scripts/character-keyart.ts` (VLM-reviewed
+  candidates; the obsolete git-history variant script is retired).
+  Gallery game names/genres updated in both dictionaries; dashboard mock
+  metadata (Cyberpunk/Wukong) and the illustrative benchmark rows are
+  untouched.
+
 ## [2.3.0] — 2026-10-06
 
 **Real GitHub-release downloads + a gamer-recognizable hero + the red focus

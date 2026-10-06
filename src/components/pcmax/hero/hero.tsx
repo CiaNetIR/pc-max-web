@@ -177,9 +177,10 @@ export function Hero() {
        * verifiable product facts (version / platform / distribution source)
        * instead of fabricated FPS/GPU/PING telemetry (audit 29-b D2), and
        * the caption under the frame keeps the framing honest. The key art
-       * is GTA V's Los Santos at dusk — one of the most instantly
-       * recognizable vistas in gaming (Task 32) — served with a hand-rolled
-       * srcSet like the gallery (unoptimized static export). */}
+       * is Ghost — Call of Duty's masked operator, one of the most
+       * instantly recognizable characters in gaming (Task 33) — served
+       * with a hand-rolled srcSet like the gallery (unoptimized static
+       * export). */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -215,8 +216,8 @@ export function Hero() {
              * verbatim in the download card; chips are visual shorthand) */}
             <div className="relative aspect-[16/10] overflow-hidden">
               <img
-                src={asset("/games/gtav-city.webp")}
-                srcSet={`${asset("/games/gtav-city-480.webp")} 480w, ${asset("/games/gtav-city-672.webp")} 672w, ${asset("/games/gtav-city.webp")} 840w`}
+                src={asset("/games/ghost.webp")}
+                srcSet={`${asset("/games/ghost-480.webp")} 480w, ${asset("/games/ghost-672.webp")} 672w, ${asset("/games/ghost.webp")} 840w`}
                 sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 944px) calc(100vw - 3rem), 896px"
                 alt=""
                 loading="eager"
