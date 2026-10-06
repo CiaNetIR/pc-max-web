@@ -18,31 +18,31 @@ import { AnalyticsBeacon } from "@/components/pcmax/ui/analytics-beacon";
 import { MotionProvider } from "@/components/pcmax/ui/motion";
 
 /*
- * Apple-style single-page flow — one idea per view, all sections
- * server-rendered (SEO-safe, no placeholder gating; animation only is
- * deferred via whileInView triggers inside each section).
+ * Guardian flow (Task 26 redesign — modeled on the TweakFa Phoenix-Guardian
+ * landing): hero → what it is → the app (feature slider) → the three
+ * disciplines → frame generation → profiles → safety → proof (benchmarks /
+ * voices) → install steps → FAQ → the premium download card.
  *
- * Story order (Section 32): see the product → what it is → how it works
- * → the three disciplines → frame generation → profiles → safety →
- * proof (benchmarks / trust) → details (FAQ) → download.
+ * `.bgfx` mounts the fixed grid + violet top-glow background ONCE (z-0,
+ * pointer-events-none); every section sits above it (z-1 via .gc-sect's
+ * stacking in globals.css — sections are position:relative).
  */
 export default function Home() {
   return (
     <MotionProvider>
       <div className="relative min-h-screen overflow-x-clip">
         <AnalyticsBeacon />
+        {/* Fixed background fx — 64px grid (radial-masked) + violet glow */}
+        <div className="bgfx" aria-hidden="true" />
         <Navbar />
         {/* id="main-content" — target of the layout's skip-to-content link (a11y / SXO) */}
-        <main id="main-content">
+        <main id="main-content" className="relative z-[1]">
           <Hero />
-          <LazySection anchor="showcase">
-            <AppShowcase />
-          </LazySection>
           <LazySection anchor="what-is">
             <WhatIsPcMax />
           </LazySection>
-          <LazySection anchor="install">
-            <InstallFlow />
+          <LazySection anchor="showcase">
+            <AppShowcase />
           </LazySection>
           <LazySection anchor="features">
             <Features />
@@ -61,6 +61,9 @@ export default function Home() {
           </LazySection>
           <LazySection anchor="community">
             <SocialProof />
+          </LazySection>
+          <LazySection anchor="install">
+            <InstallFlow />
           </LazySection>
           <LazySection anchor="faq">
             <Faq />

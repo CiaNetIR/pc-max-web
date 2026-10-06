@@ -44,38 +44,38 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative mt-auto border-t border-border/70 bg-card/40">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+    /* Guardian footer (reference .ftr): transparent over the fixed .bgfx
+     * grid, single hairline top edge, quiet 13.5px muted text. */
+    <footer className="relative mt-auto border-t border-border bg-transparent text-[13.5px] text-muted-foreground">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
           {/* Brand — real anchor to #top (CSS scroll-behavior + its own
               reduced-motion override), mirroring the navbar brand link;
               the visible wordmark is the accessible name, logo decorative. */}
           <div>
-            <a href="#top" className="group flex items-center gap-3.5">
-              <span className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70 transition-all duration-300 group-hover:scale-105 group-hover:ring-crimson/50">
+            <a href="#top" className="group flex items-center gap-2.5">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#6734ff] to-[#a07bff] shadow-[0_6px_20px_rgba(103,52,255,0.42)] transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src={asset("/brand/pcmax-logo-96.webp")}
                   alt=""
-                  width={44}
-                  height={44}
-                  className="h-full w-full object-cover"
+                  width={36}
+                  height={36}
+                  className="h-full w-full object-contain p-1"
                 />
               </span>
               <span
                 dir="ltr"
-                className="font-display text-xl font-bold tracking-wide text-foreground"
+                className="font-display text-[17px] font-extrabold tracking-wide text-foreground"
               >
                 PC&nbsp;<span className="text-crimson">MAX</span>
               </span>
             </a>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              {t.footer.tagline}
-            </p>
-            <p className="mt-4 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <p className="mt-4 max-w-sm leading-relaxed">{t.footer.tagline}</p>
+            <p className="mt-4 flex items-center gap-2 text-xs font-medium">
               <WindowsIcon className="text-sm text-crimson/70" />
               {t.footer.madeFor}
             </p>
-            <p className="type-eyebrow mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase text-muted-foreground">
+            <p className="type-eyebrow mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] uppercase">
               {t.footer.platformItems.map((item, index) => (
                 <span key={item} className="flex items-center gap-2">
                   {index > 0 && (
@@ -100,7 +100,7 @@ export function Footer() {
                   <button
                     type="button"
                     onClick={() => scrollTo(link.id)}
-                    className="press text-sm text-foreground/70 transition-colors hover:text-crimson"
+                    className="press text-foreground/70 transition-colors hover:text-crimson"
                   >
                     {link.label}
                   </button>
@@ -123,7 +123,7 @@ export function Footer() {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group press inline-flex items-center gap-2.5 text-sm text-foreground/70 transition-colors hover:text-crimson"
+                      className="group press inline-flex items-center gap-2.5 text-foreground/70 transition-colors hover:text-crimson"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card/60 text-crimson/80 transition-colors group-hover:border-crimson/40">
                         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -148,7 +148,7 @@ export function Footer() {
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="group press inline-flex items-center gap-2.5 text-sm text-foreground/70 transition-colors hover:text-crimson"
+                      className="group press inline-flex items-center gap-2.5 text-foreground/70 transition-colors hover:text-crimson"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card/60 text-crimson/80 transition-colors group-hover:border-crimson/40">
                         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -169,7 +169,7 @@ export function Footer() {
                   <button
                     type="button"
                     onClick={() => setDialog("privacy")}
-                    className="press text-sm text-foreground/70 transition-colors hover:text-crimson"
+                    className="press text-foreground/70 transition-colors hover:text-crimson"
                   >
                     {t.footer.privacy}
                   </button>
@@ -178,7 +178,7 @@ export function Footer() {
                   <button
                     type="button"
                     onClick={() => setDialog("terms")}
-                    className="press text-sm text-foreground/70 transition-colors hover:text-crimson"
+                    className="press text-foreground/70 transition-colors hover:text-crimson"
                   >
                     {t.footer.terms}
                   </button>
@@ -189,7 +189,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-border/60 pb-10 pt-6">
+        <div className="mt-8 border-t border-border/60 pt-6">
           <p className="text-xs leading-relaxed text-muted-foreground">
             {t.footer.disclaimer}
           </p>

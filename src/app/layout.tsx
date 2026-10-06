@@ -224,18 +224,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f7f7" },
-    { media: "(prefers-color-scheme: dark)", color: "#070707" },
-  ],
+  /* Dark-only since the Guardian redesign (Task 26) — the light theme no
+   * longer exists; a single dark theme-color keeps the UA chrome matched. */
+  themeColor: "#08080a",
   width: "device-width",
   initialScale: 1,
-  /* Emits <meta name="color-scheme" content="light dark"> — tells the UA
-   * up-front (before globals.css parses) that this document supports both
-   * schemes, so native scrollbars/form controls + the canvas background
-   * render in the active scheme with no flash. The CSS-level color-scheme
-   * (html/.dark in globals.css) stays the per-theme source of truth. */
-  colorScheme: "light dark",
+  /* Emits <meta name="color-scheme" content="dark"> — native scrollbars,
+   * form controls and the canvas background render dark from the first
+   * frame with no flash. :root/.dark in globals.css are identical values. */
+  colorScheme: "dark",
 };
 
 export default async function RootLayout({
@@ -255,7 +252,10 @@ export default async function RootLayout({
       dir={dir}
       data-ariobarzan={ariobarzanMode ?? undefined}
       suppressHydrationWarning
-      className={`${sora.variable} ${vazirmatn.variable}`}
+      /* `dark` is pinned server-side so the very first paint (before
+       * next-themes hydrates) already renders the Guardian dark palette;
+       * forcedTheme="dark" below keeps it there permanently. */
+      className={`dark ${sora.variable} ${vazirmatn.variable}`}
     >
       {/* Local Ariobarzan @font-face — injected only when the purchased
           files exist in public/fonts (see the contract above). */}

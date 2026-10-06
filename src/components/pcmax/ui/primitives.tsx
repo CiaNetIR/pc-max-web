@@ -17,9 +17,13 @@ export function Section({
   children: ReactNode;
   className?: string;
 }) {
+  /* gc-sect — pairs with `.gc-sect + .gc-sect::before` in globals.css to
+   * draw the centered gradient hairline separator between adjacent
+   * sections (Guardian language). LazySection is a pass-through, so the
+   * Section elements are direct siblings inside <main>. */
   return (
-    <section id={id} className={cn("relative w-full scroll-mt-24 py-20 sm:py-28 lg:py-36", className)}>
-      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
+    <section id={id} className={cn("gc-sect relative w-full scroll-mt-24 py-20 sm:py-28 lg:py-32", className)}>
+      <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">{children}</div>
     </section>
   );
 }
@@ -42,31 +46,27 @@ export function SectionHeading({
   return (
     <div
       className={cn(
-        "mb-10 max-w-3xl sm:mb-14",
+        "mb-10 max-w-2xl sm:mb-12",
         align === "center" && "mx-auto text-center",
         className
       )}
     >
+      {/* Kicker pill — Guardian eyebrow (violet dim bg, #b49bff text) */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "0px 0px -80px 0px" }}
         transition={springFluid}
-        className={cn(
-          "type-eyebrow mb-4 inline-flex items-center gap-2.5 text-xs font-semibold uppercase text-crimson",
-          align === "center" && "justify-center"
-        )}
+        className={cn("mb-5", align === "center" && "flex justify-center")}
       >
-        <span className="inline-block h-px w-8 bg-crimson/70" aria-hidden="true" />
-        {eyebrow}
-        {align === "center" && <span className="inline-block h-px w-8 bg-crimson/70" aria-hidden="true" />}
+        <span className="kicker">{eyebrow}</span>
       </motion.div>
       <motion.h2
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "0px 0px -80px 0px" }}
         transition={{ ...springFluid, delay: 0.05 }}
-        className="type-display font-display text-3xl font-bold text-foreground sm:text-4xl lg:text-5xl"
+        className="type-title font-display text-2xl font-bold leading-tight text-foreground sm:text-3xl lg:text-4xl"
       >
         {title}
       </motion.h2>
@@ -76,7 +76,7 @@ export function SectionHeading({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={{ ...springFluid, delay: 0.1 }}
-          className={cn("type-lead mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg", align === "center" && "mx-auto")}
+          className={cn("mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg", align === "center" && "mx-auto")}
         >
           {desc}
         </motion.p>

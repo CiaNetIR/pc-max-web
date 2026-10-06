@@ -10,9 +10,15 @@ const en = {
     menu: "Menu",
   },
   hero: {
+    kicker: "Version 1.2.5 · Windows 10 & 11",
     title1: "Your PC.",
     title2: "Optimized.",
     sub: "PC MAX intelligently optimizes Windows, installs advanced frame-generation workflows, and prepares your games for maximum performance.",
+    bullets: [
+      "Per-game graphics settings, delivered from the server",
+      "Frame generation tuned to your exact GPU",
+      "Snapshot & one-click rollback before every change",
+    ],
     primary: "Download PC MAX",
     secondary: "See how it works",
     hint: "Scroll to explore",
@@ -487,9 +493,15 @@ const fa: Dictionary = {
     menu: "منو",
   },
   hero: {
+    kicker: "نسخه ۱.۲.۵ · ویندوز ۱۰ و ۱۱",
     title1: "رایانه‌ی شما.",
     title2: "بهینه‌سازی‌شده.",
     sub: "پی‌سی‌مکس ویندوز را هوشمندانه بهینه می‌کند، جریان‌کاری پیشرفته‌ی فریم‌ساخت را نصب می‌کند و بازی‌های شما را برای حداکثر عملکرد آماده می‌سازد.",
+    bullets: [
+      "تنظیمات گرافیکی اختصاصی هر بازی، تحویل از سرور",
+      "فریم‌ساخت متناسب با دقیقاً همان کارت گرافیک شما",
+      "اسنپ‌شات و بازگشت با یک کلیک، پیش از هر تغییر",
+    ],
     primary: "دانلود PC MAX",
     secondary: "نحوه‌ی کار را ببینید",
     hint: "برای کاوش اسکرول کنید",

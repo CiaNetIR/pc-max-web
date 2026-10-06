@@ -9,22 +9,26 @@ import { springFluid } from "@/components/pcmax/ui/motion";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
-/*  Benchmarks — one number that matters, a few examples, then the   */
-/*  rest one tap away. Section 37: +34% → few samples → view-all.     */
+/*  Benchmarks — the headline numbers as Guardian stat tiles, then    */
+/*  the per-game chart with violet gradient bars on elevated tracks.  */
+/*  Section 37: +34% → few samples → view-all.                        */
 /* ------------------------------------------------------------------ */
 
 const VISIBLE = 3;
 
-const BEFORE_BAR =
-  "h-2.5 rounded-full bg-foreground/15 dark:bg-foreground/20 sm:h-3";
-const AFTER_BAR =
-  "h-2.5 rounded-full bg-gradient-to-r from-crimson-deep via-crimson to-crimson-bright rtl:bg-gradient-to-l sm:h-3";
+/* bar tracks sit on the elevated surface, fills are violet ramp / dim */
+const BAR_TRACK =
+  "h-2.5 min-w-0 flex-1 rounded-full bg-[#1b1b21] ring-1 ring-inset ring-white/[0.06] sm:h-3";
+const BEFORE_FILL = "h-full rounded-full bg-foreground/20";
+const AFTER_FILL =
+  "h-full rounded-full bg-gradient-to-r from-crimson-deep via-crimson to-crimson-bright rtl:bg-gradient-to-l";
 const CHIP =
-  "glass inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold text-foreground";
+  "inline-flex items-center gap-2 rounded-full bg-[#1b1b21] px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-inset ring-white/[0.09]";
 const VALUE =
   "w-16 shrink-0 whitespace-nowrap text-end font-mono text-[11px] font-bold tabular-nums";
 
-/** A single animated bar. Renders its final width when reduced motion is on. */
+/** A single animated bar filling its track. Renders its final width when
+ *  reduced motion is on. */
 function Bar({
   pct,
   delay,
@@ -72,16 +76,16 @@ function BenchRow({
   const gain = Math.round(((game.after - game.before) / game.before) * 100);
 
   return (
-    <li className="card-ios grid grid-cols-1 gap-3 rounded-2xl bg-background/40 p-4 sm:grid-cols-[180px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
+    <li className="gc-card grid grid-cols-1 gap-3 p-4 sm:grid-cols-[180px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
       <h3 className="type-title min-w-0 truncate font-display text-sm font-bold text-foreground sm:text-base">
         {game.name}
       </h3>
 
-      {/* Stacked before / after bars */}
+      {/* Stacked before / after bars on elevated tracks */}
       <div className="flex min-w-0 flex-col">
         <div className="flex items-center gap-2">
-          <div className="min-w-0 flex-1">
-            <Bar pct={pctBefore} delay={delay} className={BEFORE_BAR} reduce={reduce} />
+          <div className={BAR_TRACK}>
+            <Bar pct={pctBefore} delay={delay} className={BEFORE_FILL} reduce={reduce} />
           </div>
           <span className={`${VALUE} text-muted-foreground`}>
             <span className="sr-only">{t.bench.beforeLabel}: </span>
@@ -90,8 +94,8 @@ function BenchRow({
         </div>
 
         <div className="mt-1.5 flex items-center gap-2">
-          <div className="min-w-0 flex-1">
-            <Bar pct={pctAfter} delay={delay + 0.12} className={AFTER_BAR} reduce={reduce} />
+          <div className={BAR_TRACK}>
+            <Bar pct={pctAfter} delay={delay + 0.12} className={AFTER_FILL} reduce={reduce} />
           </div>
           <span className={`${VALUE} text-crimson`}>
             <span className="sr-only">{t.bench.afterLabel}: </span>
@@ -121,6 +125,16 @@ export function Benchmarks() {
   const toPct = (value: number): string =>
     `${Math.round((value / maxAfter) * 1000) / 10}%`;
 
+  /* Headline tiles: the average uplift plus the top games' measured gains —
+   * every number derives from the same bench data the rows below chart. */
+  const headline: { value: string; label: string }[] = [
+    { value: t.bench.avg, label: t.bench.avgLabel },
+    ...games.slice(0, 3).map((game) => ({
+      value: `+${Math.round(((game.after - game.before) / game.before) * 100)}%`,
+      label: game.name,
+    })),
+  ];
+
   return (
     <Section id="benchmarks">
       <SectionHeading
@@ -130,31 +144,43 @@ export function Benchmarks() {
         align="center"
       />
 
-      {/* Hero stat — the one number that matters (dir=ltr keeps "+34%" intact in RTL) */}
-      <Reveal y={16} className="mb-12 text-center sm:mb-16">
-        <p className="type-eyebrow text-[11px] font-semibold uppercase text-muted-foreground">
-          {t.bench.avgLabel}
-        </p>
-        <p dir="ltr" className="type-display mt-3 font-display text-5xl font-extrabold text-crimson sm:text-7xl">
-          {t.bench.avg}
-        </p>
-      </Reveal>
+      {/* Headline numbers — reference .stats grid (teal Sora numerals) */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {headline.map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={reduce ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "0px 0px -40px 0px" }}
+            transition={{ ...springFluid, delay: i * 0.06 }}
+            className="gc-stat gc-card p-6 text-center"
+          >
+            {/* dir="ltr" keeps "+34%" / "+38%" intact inside RTL copy */}
+            <b dir="ltr" className="block font-display text-3xl font-bold">
+              {stat.value}
+            </b>
+            <span className="mt-1 block text-[13px] text-muted-foreground">
+              {stat.label}
+            </span>
+          </motion.div>
+        ))}
+      </div>
 
       {/* Chart canvas */}
-      <div className="relative">
-        {/* ambient — a very soft crimson halo behind the card */}
+      <div className="relative mt-10 sm:mt-12">
+        {/* ambient — a very soft violet halo behind the card */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -inset-4 rounded-[3rem] bg-crimson/[0.04] blur-[100px] sm:-inset-6"
         />
 
         <Reveal y={32}>
-          <div className="card-ios relative rounded-3xl bg-card p-6 sm:p-10">
+          <div className="gc-card relative p-6 sm:p-10">
             {/* Legend */}
             <div className="mb-6 flex flex-wrap items-center gap-2 sm:mb-8 sm:gap-3">
               <span className={CHIP}>
                 <span
-                  className="h-2 w-2 rounded-full bg-foreground/30 dark:bg-foreground/40"
+                  className="h-2 w-2 rounded-full bg-foreground/30"
                   aria-hidden="true"
                 />
                 {t.bench.beforeLabel}
@@ -217,7 +243,7 @@ export function Benchmarks() {
                 onClick={() => setShowAll((v) => !v)}
                 aria-expanded={showAll}
                 aria-controls="bench-extra"
-                className="press group mx-auto mt-7 flex items-center gap-2 rounded-full border border-border/70 bg-background/40 px-5 py-2.5 text-xs font-bold text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson"
+                className="gc-btn-ghost mx-auto mt-7 flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold"
               >
                 {showAll ? t.bench.viewLess : t.bench.viewAll}
                 <ChevronDown
@@ -228,7 +254,7 @@ export function Benchmarks() {
             )}
 
             {/* Methodology */}
-            <p className="card-ios mt-8 max-w-2xl rounded-2xl bg-background/40 p-4 text-xs leading-relaxed text-muted-foreground sm:p-5">
+            <p className="mt-8 max-w-2xl rounded-xl bg-[#1b1b21]/70 p-4 text-xs leading-relaxed text-muted-foreground ring-1 ring-inset ring-white/[0.08] sm:p-5">
               {t.bench.note}
             </p>
           </div>

@@ -21,27 +21,13 @@ export type SocialProofClientProps = {
   stats: StatsResponse | null;
 };
 
-/*
- * Stats strip dividers — the grid is 2×2 below lg and a single row of 4 at lg.
- * Manual logical borders (instead of divide-*) so every breakpoint reads
- * correctly and mirrors automatically in RTL:
- *   base (2×2):  0: e | 1: — | 2: e+t | 3: t
- *   lg   (1×4):  0: e | 1: e | 2: e   | 3: —
- */
-const STAT_CELL_BORDERS = [
-  "border-e",
-  "lg:border-e",
-  "border-e border-t lg:border-t-0",
-  "border-t lg:border-t-0",
-];
-
 /* Code-signed · VirusTotal clean (dated + linked) · zero telemetry */
 const TRUST_ICONS = [FileCheck2, ShieldCheck, WifiOff];
 
-/* Same UI/behavior as the pre-SSR version minus the mount-time /api/stats
- * fetch: the live-downloads pill now renders with the server HTML (real
- * number in the initial document — crawlers and no-JS see it), and the
- * AnimatedCounter stats keep their SSR-final-value behavior. */
+/* Same data as the pre-SSR version minus the mount-time /api/stats fetch:
+ * the live-downloads pill renders with the server HTML (real number in the
+ * initial document), the gc-stat tiles keep their SSR-final-value counters,
+ * and the trust claims read as reference-style voices cards. */
 export function SocialProofClient({ stats }: SocialProofClientProps) {
   const { t } = useLanguage();
   const reduce = useReducedMotion();
@@ -92,41 +78,40 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
         </motion.div>
       )}
 
-      {/* stats strip — Apple-style divided row (2×2 → 1×4) */}
-      <Reveal className="relative">
-        {/* the one ambient — soft crimson halo behind the numbers */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -inset-x-16 -inset-y-12 rounded-full bg-crimson/[0.05] blur-[110px]"
-        />
-        <div className="relative grid grid-cols-2 overflow-hidden rounded-3xl card-ios bg-card lg:grid-cols-4">
-          {t.social.stats.map((stat, i) => (
-            <div
-              key={stat.label}
-              className={`border-border/60 p-6 text-center sm:p-8 ${STAT_CELL_BORDERS[i] ?? ""}`}
-            >
-              {/* dir="ltr" keeps digits + suffix ("290K+", "99.9%") intact in RTL;
-                  reduced motion → the counter settles on its first frame */}
-              <span dir="ltr">
-                <AnimatedCounter
-                  value={stat.value}
-                  suffix={stat.suffix}
-                  duration={reduce ? 1 : 1400}
-                  className="font-display text-3xl font-extrabold tabular-nums text-foreground sm:text-4xl"
-                />
-              </span>
-              <p className="mt-2 text-xs text-muted-foreground sm:text-sm">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-      </Reveal>
+      {/* stats — reference .stats grid of Guardian stat tiles (teal Sora
+          numerals; AnimatedCounter drives the count-up inside the <b>) */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {t.social.stats.map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={reduce ? false : { opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "0px 0px -40px 0px" }}
+            transition={{ ...springFluid, delay: i * 0.06 }}
+            className="gc-stat gc-card p-6 text-center"
+          >
+            <b className="block font-display text-3xl font-bold">
+              <AnimatedCounter
+                value={stat.value}
+                suffix={stat.suffix}
+                duration={reduce ? 1 : 1400}
+              />
+            </b>
+            <span className="mt-1 block text-[13px] text-muted-foreground">
+              {stat.label}
+            </span>
+          </motion.div>
+        ))}
+      </div>
 
-      {/* trust claims — every provable one carries its evidence (date, result, link) */}
+      {/* trust claims — reference .voices grid. Every provable claim keeps
+          its evidence (date, result, link); icon badge in the avatar slot,
+          claim title as the caption name, evidence meta as the handle chip. */}
       <Reveal delay={0.05}>
         <h3 className="type-eyebrow mt-12 text-center text-sm font-bold uppercase text-muted-foreground">
           {t.social.trust.title}
         </h3>
-        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="mt-5 grid gap-5 md:grid-cols-3">
           {t.social.trust.items.map((item, i) => {
             const Icon = TRUST_ICONS[i] ?? ShieldCheck;
             const hasEvidence = Boolean(item.href);
@@ -137,31 +122,31 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
                 {...(hasEvidence
                   ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
                   : {})}
-                className="card-ios group flex items-start gap-3.5 rounded-2xl bg-card/60 p-5 transition-colors hover:border-crimson/40"
+                className="group block"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson">
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-                    {item.title}
+                <figure className="gc-card m-0 flex h-full flex-col justify-between gap-5 p-6">
+                  <p className="m-0 text-[15px] leading-[2] text-foreground">
+                    {item.desc}
+                  </p>
+                  <figcaption className="flex flex-wrap items-center gap-3 text-[13px] text-muted-foreground">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-crimson/15 font-bold text-crimson">
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <b className="text-foreground/85">{item.title}</b>
+                    {item.meta && (
+                      <span className="rounded-full bg-[#1b1b21] px-2.5 py-0.5 text-[11px] text-muted-foreground ring-1 ring-inset ring-border">
+                        {item.meta}
+                        {hasEvidence && ` · ${t.social.trust.viewReport}`}
+                      </span>
+                    )}
                     {hasEvidence && (
                       <ArrowUpRight
                         className="h-3.5 w-3.5 text-crimson/70 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                         aria-hidden="true"
                       />
                     )}
-                  </span>
-                  <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
-                    {item.desc}
-                  </span>
-                  {item.meta && (
-                    <span className="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-crimson">
-                      {item.meta}
-                      {hasEvidence && ` · ${t.social.trust.viewReport}`}
-                    </span>
-                  )}
-                </span>
+                  </figcaption>
+                </figure>
               </Wrapper>
             );
           })}
@@ -177,14 +162,14 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
           <button
             type="button"
             onClick={() => scrollTo("benchmarks")}
-            className="press glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-foreground/80 transition-colors hover:border-crimson/40 hover:text-crimson"
+            className="gc-btn-ghost inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold"
           >
             {t.social.artifacts.benchmarks}
           </button>
           <button
             type="button"
             onClick={() => scrollTo("download")}
-            className="press glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-foreground/80 transition-colors hover:border-crimson/40 hover:text-crimson"
+            className="gc-btn-ghost inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold"
           >
             {t.social.artifacts.changelog}
           </button>

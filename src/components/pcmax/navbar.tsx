@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
-import { Globe, Menu, Moon, Sun, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Globe, Menu, X } from "lucide-react";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { asset } from "@/lib/gh-pages";
-import { springBounce, springFluid } from "@/components/pcmax/ui/motion";
+import { springFluid } from "@/components/pcmax/ui/motion";
 
 /* Id of the collapsible mobile menu — pairs the trigger's aria-controls
    with the menu container so assistive tech can associate them. */
@@ -20,76 +19,22 @@ const MENU_ID = "pcmax-mobile-menu";
    keep an empty dep array and never resubscribes on re-renders. */
 const SPY_IDS = ["top", "features", "install", "benchmarks", "faq"] as const;
 
-/* ------------------------------ Theme toggle ------------------------- */
-
-function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const { t } = useLanguage();
-  const timerRef = useRef<number | null>(null);
-
-  /* The theme-anim class is dropped by a timer — clear it when the toggle
-   * is hit again (no mid-animation snap from a stale timer) and on
-   * unmount (no dangling callback on a dead root). */
-  useEffect(
-    () => () => {
-      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-    },
-    []
-  );
-
-  const toggle = () => {
-    const next = resolvedTheme === "dark" ? "light" : "dark";
-    const root = document.documentElement;
-    root.classList.add("theme-anim");
-    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-    setTheme(next);
-    timerRef.current = window.setTimeout(
-      () => root.classList.remove("theme-anim"),
-      460
-    );
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={toggle}
-      aria-label={`${t.common.themeLight} / ${t.common.themeDark}`}
-      /* 44px on touch, 36px from sm up — a11y touch-target rule.
-         Solid pill (no backdrop-filter): tiny always-mounted blur
-         surfaces cost a composite layer each on weak GPUs. */
-      className="press flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-card/80 text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson sm:h-9 sm:w-9"
-    >
-      <motion.span
-        key="theme-icon"
-        initial={{ rotate: -60, opacity: 0, scale: 0.6 }}
-        animate={{ rotate: 0, opacity: 1, scale: 1 }}
-        transition={springBounce}
-        className="relative flex"
-      >
-        <Sun className="h-4 w-4 rotate-0 scale-100 transition-all duration-500 dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all duration-500 dark:rotate-0 dark:scale-100" />
-      </motion.span>
-    </button>
-  );
-}
-
 /* ---------------------------- Language toggle ------------------------ */
 
-function LanguageToggle({ compact = false }: { compact?: boolean }) {
+function LanguageToggle() {
   const { t, toggleLocale } = useLanguage();
   return (
     <button
       type="button"
       onClick={toggleLocale}
       aria-label={t.common.switchTo}
-      className={cn(
-        "press flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 text-foreground/80 transition-colors hover:border-crimson/40 hover:text-crimson",
-        /* 44px hit area on touch, compact from sm up (a11y touch target) */
-        compact ? "h-11 w-11 sm:h-9 sm:w-9" : "h-11 px-4 text-xs font-bold sm:h-9"
-      )}
+      /* Ghost hairline pill (reference .hdr-cta ghost): transparent bg,
+       * hairline border, muted text lifting to foreground on hover.
+       * 44px hit area on touch, compact pill from sm up (a11y touch target). */
+      className="press flex h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-transparent px-4 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:h-9 sm:px-3.5"
     >
       <Globe className="h-4 w-4" />
-      {!compact && <span>{t.common.switchTo}</span>}
+      <span>{t.common.switchTo}</span>
     </button>
   );
 }
@@ -98,32 +43,11 @@ function LanguageToggle({ compact = false }: { compact?: boolean }) {
 
 export function Navbar() {
   const { t, isRTL } = useLanguage();
-  const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const scrolledRef = useRef(false);
   const headerRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const wasOpen = useRef(false);
-
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 28, mass: 0.4 });
-
-  useEffect(() => {
-    /* Near-zero work per scroll event: one boolean compare against the
-     * last known state — setState (and with it a React render) fires only
-     * when the threshold is actually crossed, never per event. */
-    const onScroll = () => {
-      const next = window.scrollY > 24;
-      if (next !== scrolledRef.current) {
-        scrolledRef.current = next;
-        setScrolled(next);
-      }
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   /* Scroll-spy (UX polish): ONE IntersectionObserver over the hero + the
    * four nav-target sections. The highlight follows the last section that
@@ -151,9 +75,9 @@ export function Navbar() {
   }, []);
 
   /* Scroll-lock with scrollbar compensation: hiding the viewport scrollbar
-   * would shift the fixed chrome by its width otherwise. The scrollbar sits
-   * at the inline-end edge in both LTR and RTL, so padding-inline-end
-   * compensates in both directions. */
+   * would shift the page by its width otherwise. The scrollbar sits at the
+   * inline-end edge in both LTR and RTL, so padding-inline-end compensates
+   * in both directions. */
   useEffect(() => {
     if (open) {
       const scrollbar = window.innerWidth - document.documentElement.clientWidth;
@@ -240,163 +164,138 @@ export function Navbar() {
   };
 
   return (
-    <>
-      {/* scroll progress */}
-      <motion.div
-        style={{ scaleX: progress, transformOrigin: isRTL ? "right" : "left" }}
-        className="fixed inset-x-0 top-0 z-[70] h-[2px] bg-gradient-to-r from-crimson-deep via-crimson to-crimson-bright"
-        aria-hidden="true"
-      />
-
-      <header
-        ref={headerRef}
-        className={cn(
-          "fixed inset-x-0 top-0 z-[60] transition-all duration-500",
-          scrolled ? "py-2" : "py-4"
-        )}
+    /* Guardian header (reference .hdr): sticky full-width blurred bar with
+     * a hairline bottom edge — always-on chrome, no scrolled state needed. */
+    <header ref={headerRef} className="gc-hdr sticky top-0 z-[60]">
+      <nav
+        aria-label="PC MAX"
+        className="mx-auto flex h-[68px] max-w-6xl items-center gap-7 px-4 sm:px-6 lg:px-8"
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <nav
-            aria-label="PC MAX"
-            className={cn(
-              "flex items-center justify-between gap-4 rounded-2xl px-4 py-2.5 transition-all duration-500 sm:px-5",
-              /* Scrolled: solid "lit material" chrome — card-ios hairline
-               * border + specular top edge + soft shadow over a 95%-opaque
-               * card. backdrop-filter on a full-width always-mounted bar is
-               * a per-frame composite cost on weak GPUs; this keeps the
-               * dark-chrome aesthetic for free. Top of page: fully
-               * transparent over the hero, exactly as before. */
-              scrolled
-                ? "card-ios bg-card/95"
-                : "border border-transparent bg-transparent"
-            )}
+        {/* brand — real link to #top (CSS scroll-behavior handles smooth
+            scrolling + its own reduced-motion override); the visible
+            "PC MAX" wordmark is the accessible name, the logo is decorative */}
+        <a href="#top" className="flex shrink-0 items-center gap-2.5">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#6734ff] to-[#a07bff] shadow-[0_6px_20px_rgba(103,52,255,0.42)]">
+            <Image
+              src={asset("/brand/pcmax-logo-96.webp")}
+              alt=""
+              width={36}
+              height={36}
+              priority
+              className="h-full w-full object-contain p-1"
+            />
+          </span>
+          <span className="font-display text-[17px] font-extrabold text-foreground">
+            PC&nbsp;<span className="text-crimson">MAX</span>
+          </span>
+        </a>
+
+        {/* desktop links — plain text links like the reference .nav (no
+            underline affordance): scroll-spy highlights the active section
+            via aria-current + full-foreground color */}
+        <ul className="hidden items-center gap-6 lg:flex">
+          {links.map((link) => {
+            const isActive = active === link.id;
+            return (
+              <li key={link.id}>
+                <button
+                  type="button"
+                  onClick={() => go(link.id)}
+                  aria-current={isActive ? "true" : undefined}
+                  className={cn(
+                    "press rounded-full px-1 py-2 text-sm/[14.5px] font-medium transition-colors",
+                    isActive
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {link.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* actions */}
+        <div className="ms-auto flex items-center gap-2.5">
+          <LanguageToggle />
+          <Button
+            size="sm"
+            onClick={() => go("download")}
+            className="gc-btn-primary press hidden h-9 rounded-xl px-5 font-bold sm:inline-flex"
           >
-            {/* brand — real link to #top (CSS scroll-behavior handles smooth
-                scrolling + its own reduced-motion override); the visible
-                "PC MAX" wordmark is the accessible name, the logo is decorative */}
-            <a href="#top" className="group flex items-center gap-3">
-              <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/70 transition-all duration-300 group-hover:scale-105 group-hover:ring-crimson/50 group-hover:shadow-[0_0_18px_rgba(229,9,20,0.35)]">
-                <Image
-                  src={asset("/brand/pcmax-logo-96.webp")}
-                  alt=""
-                  width={40}
-                  height={40}
-                  priority
-                  className="h-full w-full object-cover"
-                />
-              </span>
-              <span className="type-title font-display text-lg font-bold text-foreground">
-                PC&nbsp;<span className="text-crimson">MAX</span>
-              </span>
-            </a>
-
-            {/* desktop links */}
-            <ul className="hidden items-center gap-1 lg:flex">
-              {links.map((link) => {
-                const isActive = active === link.id;
-                return (
-                  <li key={link.id}>
-                    <button
-                      type="button"
-                      onClick={() => go(link.id)}
-                      aria-current={isActive ? "true" : undefined}
-                      className={cn(
-                        "press relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors after:absolute after:bottom-0.5 after:start-3.5 after:h-px after:bg-crimson after:transition-all after:duration-300",
-                        isActive
-                          ? "text-crimson after:w-[calc(100%-1.75rem)]"
-                          : "text-foreground/80 hover:text-foreground hover:after:w-[calc(100%-1.75rem)]"
-                      )}
-                    >
-                      {link.label}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-
-            {/* actions */}
-            <div className="flex items-center gap-2">
-              <LanguageToggle />
-              <ThemeToggle />
-              <Button
-                size="sm"
-                onClick={() => go("download")}
-                className="btn-convex press hidden h-9 rounded-full px-5 text-sm font-semibold text-white sm:inline-flex"
-              >
-                {t.nav.download}
-              </Button>
-              <button
-                type="button"
-                ref={triggerRef}
-                onClick={() => setOpen((v) => !v)}
-                aria-expanded={open}
-                aria-controls={MENU_ID}
-                aria-label={t.nav.menu}
-                className="press flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-card/80 text-foreground transition-colors hover:border-crimson/40 hover:text-crimson lg:hidden"
-              >
-                {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              </button>
-            </div>
-          </nav>
+            {t.nav.download}
+          </Button>
+          <button
+            type="button"
+            ref={triggerRef}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls={MENU_ID}
+            aria-label={t.nav.menu}
+            className="press flex h-11 w-11 items-center justify-center rounded-full border border-border bg-transparent text-muted-foreground transition-colors hover:text-foreground lg:hidden"
+          >
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
         </div>
+      </nav>
 
-        {/* mobile menu */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, y: -12, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -12, scale: 0.98 }}
-              transition={springFluid}
-              id={MENU_ID}
-              className="fixed inset-x-4 top-[72px] z-[59] rounded-3xl lg:hidden"
-            >
-              <div className="glass overflow-hidden rounded-3xl">
-                <ul className="flex flex-col p-3">
-                  {links.map((link, i) => {
-                    const isActive = active === link.id;
-                    return (
-                      <motion.li
-                        key={link.id}
-                        initial={{ opacity: 0, x: isRTL ? 16 : -16 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ ...springFluid, delay: 0.03 * i }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => go(link.id)}
-                          aria-current={isActive ? "true" : undefined}
-                          className={cn(
-                            "press flex w-full items-center justify-between rounded-2xl px-4 py-3.5 text-base font-semibold transition-colors hover:bg-accent hover:text-foreground",
-                            isActive ? "text-crimson" : "text-foreground/85"
-                          )}
-                        >
-                          {link.label}
-                          <span
-                            aria-hidden="true"
-                            className={cn(
-                              "h-1.5 w-1.5 rounded-full",
-                              isActive ? "bg-crimson" : "bg-crimson/60"
-                            )}
-                          />
-                        </button>
-                      </motion.li>
-                    );
-                  })}
-                  <li className="mt-2 border-t border-border/60 pt-3">
-                    <Button
-                      onClick={() => go("download")}
-                      className="btn-convex press h-11 w-full rounded-full text-sm font-semibold text-white"
+      {/* mobile menu — hud-style glass panel floating below the sticky bar */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+            transition={springFluid}
+            id={MENU_ID}
+            className="fixed inset-x-4 top-[76px] z-[59] lg:hidden"
+          >
+            <div className="rounded-2xl border border-border bg-[#121216]/95 p-3 shadow-[0_24px_60px_rgba(0,0,0,0.6)]">
+              <ul className="flex flex-col">
+                {links.map((link, i) => {
+                  const isActive = active === link.id;
+                  return (
+                    <motion.li
+                      key={link.id}
+                      initial={{ opacity: 0, x: isRTL ? 16 : -16 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ ...springFluid, delay: 0.03 * i }}
                     >
-                      {t.nav.download}
-                    </Button>
-                  </li>
-                </ul>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
-    </>
+                      <button
+                        type="button"
+                        onClick={() => go(link.id)}
+                        aria-current={isActive ? "true" : undefined}
+                        className={cn(
+                          "press flex w-full items-center justify-between rounded-xl px-4 py-3 text-[15px] font-semibold transition-colors hover:bg-accent hover:text-foreground",
+                          isActive ? "text-crimson" : "text-foreground/85"
+                        )}
+                      >
+                        {link.label}
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            "h-1.5 w-1.5 rounded-full",
+                            isActive ? "bg-crimson" : "bg-crimson/60"
+                          )}
+                        />
+                      </button>
+                    </motion.li>
+                  );
+                })}
+                <li className="mt-2 border-t border-border/60 pt-3">
+                  <Button
+                    onClick={() => go("download")}
+                    className="gc-btn-primary press h-11 w-full rounded-xl text-[15px] font-bold"
+                  >
+                    {t.nav.download}
+                  </Button>
+                </li>
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }

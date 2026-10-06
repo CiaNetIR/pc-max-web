@@ -4,6 +4,79 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — 2026-10-06
+
+The **Guardian redesign** — the whole visual language rebuilt after the TweakFa
+"Phoenix Guardian" landing (tweakfa.com/guardian), per user request
+("وب سایت شبیه این بشه"). Dark-only violet/gold/teal gaming aesthetic; the
+light theme, the crimson palette, and the WebGL hero are retired.
+
+### Changed — design system (globals.css)
+- **Dark-only**: `:root`/`.dark` carry identical Guardian values (#08080a base /
+  #121216 surface / #1b1b21 elevated). next-themes is pinned with
+  `forcedTheme="dark"`, `<html class="dark">` is set server-side, and the theme
+  toggle is removed. Viewport `color-scheme: dark`, single theme-color #08080a.
+- **Violet ramp on the legacy crimson names** — 165 `text-crimson` /
+  `bg-crimson/10` / `border-crimson/25` call-sites re-skin automatically
+  (#a98cff text ≈7:1 / #8b5cff / #6734ff; solid fills pinned to #6734ff for
+  6:1 white labels). Gold #fedb29 and teal #1fbf9c join as premium/success
+  accents; warning #e08a00 for caveats.
+- New Guardian utilities: `.bgfx` (fixed 64px grid + violet top glow, mounted
+  once), `.kicker`/`-gold`/`-teal` pills, `.gc-sect` hairline separators,
+  `.gc-btn-primary/-gold/-ghost`, `.gc-card`, `.gc-frame`, `.gc-hud-chip`,
+  `.gc-hdr` sticky blur, `.word/.wi` hero word-reveal, `.media-sheen` sweep,
+  `.tick/-gold/-violet`, `.gc-stat`, `.gc-steps/.gc-step` counters, the full
+  `.shcard` premium-card family (conic orbit border, drifting glows, sheen,
+  breathing mark, staggered perks), hud-drift floats, and hand-rolled
+  `details[open]` helpers (Tailwind 4 here does not emit `group-open:` —
+  found by browser verification and fixed with `.gc-q/.gc-glyph/.gc-chevron`).
+
+### Changed — sections
+- **Navbar**: sticky blurred 68px bar (reference .hdr), violet-gradient brand
+  box, plain nav links with scroll-spy, violet CTA; theme toggle + scroll
+  progress bar removed; all a11y logic kept (focus trap, Escape, scroll lock).
+- **Hero**: centered kicker pill → word-reveal headline (per-word `--wd`
+  stagger, title2 in violet gradient) → lead → tick bullets → violet/ghost
+  CTAs → framed app-window stage with game art, LIVE chip and three drifting
+  HUD stat chips. The ~860KB three.js GPU scene and canvas constellation are
+  retired (never imported on any viewport — pure CSS/SVG life instead).
+- **App showcase** → reference feature slider: pill tabs (violet active) +
+  text/media slide grid, media in `.gc-frame media-sheen` panels with HUD
+  overlays. Game key-arts keep the Task-24 responsive srcSet (sizes updated to
+  the new panel width). App-window chrome mocks folded into frame panels.
+- **What-is**: connector-spine timeline (the v1.2.5 "line crossing" bug
+  surface) structurally removed — 5 numbered gc-cards, gold outcome node.
+- **Install flow**: the 280vh scroll-hijack cinematic rail is replaced by the
+  reference steps grid — 7 CSS-counter circles (01–07) with icon chips,
+  staggered whileInView entrance, download CTA.
+- **FAQ**: Radix accordion → reference 2-col grid of native `<details>` cards
+  (SSR/no-JS safe, plus→cross flip + violet border on open, CSS-only).
+- **Download** → the reference premium card (shcard): animated conic gradient
+  border, drifting glows, sheen sweep, breathing 3-bar mark, staggered perk
+  feathers, gold download button; edition rows, changelog disclosure and
+  waitlist kept; all /api/download logic untouched.
+- **Features / Multi-frame / Profiles / Safety / Benchmarks / Voices**:
+  re-skinned to gc-cards, tri-color tick rotation, accent pills (violet/teal/
+  gold), teal Sora stat numerals, gold caveat callout, voices grid.
+- **Footer / mobile CTA bar**: hairline top, violet brand box, blurred
+  floating CTA card (behavior unchanged).
+
+### Kept (non-visual)
+- i18n EN/FA (RTL) with logical CSS throughout, SEO metadata + JSON-LD,
+  static GitHub-Pages export (basePath, asset()), service worker (bumped to
+  v2.0.0 so repeat visitors drop the old crimson cache), analytics beacon,
+  API routes, all section anchors and the skip-link.
+
+### Verified
+- `tsc --noEmit` 0 · `eslint` clean · dev SSR 200 (EN + `?lang=fa`).
+- Browser golden path: word-reveal lands (EN+FA), tab switching, gallery
+  thumb swap with responsive srcSet intact, FAQ open-state (border + glyph
+  rotation — fixed after finding `group-open:` never compiled), 7 install
+  counters, shcard `.in` perks stagger, navbar CTA smooth-scroll, language
+  toggle both directions, 412px mobile with zero horizontal overflow, VLM
+  review of hero/showcase/shcard/install/mobile/RTL screenshots — no
+  strikethrough lines, no pink tint, no dead zones.
+
 ## [1.2.5] — 2026-10-05
 
 Persian-language design review follow-up ("a line crosses these items — bug;

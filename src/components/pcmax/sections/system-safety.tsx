@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Gauge, Info } from "lucide-react";
+import { Gauge, TriangleAlert } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading, AnimatedCounter } from "@/components/pcmax/ui/primitives";
 import { BackupIcon } from "@/components/pcmax/icons";
@@ -9,16 +9,22 @@ import { springFluid } from "@/components/pcmax/ui/motion";
 import { cn } from "@/lib/utils";
 
 /*
- * System Safety — one calm two-pane section.
- * Pane A: Windows Optimizer (inset stat tiles + reversible-note footnote).
+ * System Safety — one calm two-pane section on Guardian surface cards.
+ * Pane A: Windows Optimizer (inset gc-stat tiles).
  * Pane B: Backup & Restore (numbered vertical safety timeline, 01→04).
- * Replaces the old windows-optimizer bento + backup-restore timeline.
+ * Below both panes: the gold caveat strip (reference .caveat) carrying the
+ * package-security warning.
  *
  * Timeline geometry (logical props, RTL-safe): each li carries `ps-8` so the
  * absolutely-positioned node (`start-0` resolves against the li's padding box,
  * i.e. the gutter start) sits at 0px while text starts at 32px; the connector
  * `start-[13px]` on the <ol> threads the 28px node centers (0..28 → 14px).
  */
+
+/* the terminal "Restore" node — the one solid violet circle on the line */
+const NODE_LAST = "specular border border-crimson bg-crimson text-white";
+const NODE_STEP =
+  "bg-[#1b1b21] text-crimson ring-1 ring-inset ring-crimson/25";
 
 export function SystemSafety() {
   const { t } = useLanguage();
@@ -49,10 +55,10 @@ export function SystemSafety() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px 0px -60px 0px" }}
           transition={springFluid}
-          className="card-ios rounded-3xl bg-card p-6 sm:p-8 lg:p-10"
+          className="gc-card p-6 sm:p-8 lg:p-10"
         >
           <div className="flex items-start gap-4 sm:gap-5">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
               <Gauge className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -68,28 +74,22 @@ export function SystemSafety() {
             </div>
           </div>
 
-          {/* Apple-style inset stat tiles */}
-          <div className="mt-8 grid grid-cols-2 gap-4">
+          {/* inset stat tiles — Guardian stat language (teal Sora numerals) */}
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4">
             {t.safety.optimizer.stats.map((stat) => (
               <div
                 key={stat.label}
-                className="card-ios rounded-3xl bg-background/40 p-5"
+                className="gc-stat rounded-xl bg-[#1b1b21]/70 p-4 text-center ring-1 ring-inset ring-white/[0.08] sm:p-5"
               >
-                <AnimatedCounter
-                  value={stat.value}
-                  suffix={stat.suffix}
-                  className="font-display text-3xl font-extrabold tabular-nums text-foreground"
-                />
-                <p className="mt-1 text-xs text-muted-foreground">{stat.label}</p>
+                <b className="block font-display text-3xl font-bold">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                </b>
+                <span className="mt-1 block text-[13px] text-muted-foreground">
+                  {stat.label}
+                </span>
               </div>
             ))}
           </div>
-
-          {/* reversibility footnote */}
-          <p className="mt-6 flex items-center gap-2 border-t border-border/60 pt-4 text-xs text-muted-foreground">
-            <Info className="h-3.5 w-3.5 shrink-0 text-crimson/60" aria-hidden="true" />
-            {t.safety.optimizer.note}
-          </p>
         </motion.div>
 
         {/* ----------------------- Pane B · Backup & Restore ------------------------ */}
@@ -98,10 +98,10 @@ export function SystemSafety() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px 0px -60px 0px" }}
           transition={{ ...springFluid, delay: 0.1 }}
-          className="card-ios rounded-3xl bg-card p-6 sm:p-8 lg:p-10"
+          className="gc-card p-6 sm:p-8 lg:p-10"
         >
           <div className="flex items-start gap-4 sm:gap-5">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
               <BackupIcon className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -135,9 +135,7 @@ export function SystemSafety() {
                 <span
                   className={cn(
                     "absolute start-0 top-0 flex h-7 w-7 items-center justify-center rounded-full font-mono text-[11px] font-bold",
-                    i === lastStep
-                      ? "specular border border-crimson bg-crimson text-white"
-                      : "glass text-crimson"
+                    i === lastStep ? NODE_LAST : NODE_STEP
                   )}
                 >
                   {String(i + 1).padStart(2, "0")}
@@ -151,6 +149,21 @@ export function SystemSafety() {
           </ol>
         </motion.div>
       </div>
+
+      {/* caveat — the gold warning strip (reference .caveat). Reuses the
+          package-security note; gold + warning ring per the Guardian
+          palette, no invented copy. */}
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "0px 0px -60px 0px" }}
+        transition={{ ...springFluid, delay: 0.2 }}
+        role="note"
+        className="mt-6 flex items-start gap-3 rounded-xl bg-[rgba(224,138,0,0.14)] px-4 py-3.5 text-[13.5px] leading-relaxed text-[#f3c07a] ring-1 ring-inset ring-[rgba(224,138,0,0.26)]"
+      >
+        <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <p className="min-w-0">{t.safety.optimizer.note}</p>
+      </motion.div>
     </Section>
   );
 }

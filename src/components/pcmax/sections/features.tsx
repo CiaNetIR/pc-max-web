@@ -10,10 +10,16 @@ import { cn } from "@/lib/utils";
 
 /*
  * Features — three disciplines, told as three quiet editorial rows instead
- * of a wall of cards: Detect → Optimize → Protect. Server-rendered content,
- * whileInView animation only (opacity / small y). Split layout alternates
- * sides on lg+, stacks on mobile. Whitespace does the heavy lifting.
+ * of a wall of cards: Detect → Optimize → Protect. Guardian re-skin
+ * (Task 26-d1): hairline-separated rows, ring-inset icon chips, display
+ * numerals, and a tri-color tick rhythm — teal / gold / violet per group.
+ * Server-rendered content, whileInView animation only (opacity / small y).
+ * Split layout alternates sides on lg+, stacks on mobile.
  */
+
+/* Guardian tri-color rhythm — each discipline's checklist keeps its own
+ * tick accent: Detect → teal (default), Optimize → gold, Protect → violet. */
+const tickTone = ["", "tick-gold", "tick-violet"] as const;
 
 export function Features() {
   const { t } = useLanguage();
@@ -39,7 +45,7 @@ export function Features() {
               viewport={{ once: true, margin: "0px 0px -60px 0px" }}
               transition={{ ...springFluid, delay: 0.04 }}
               className={cn(
-                "relative py-10 sm:py-14",
+                "relative py-10 sm:py-12",
                 i > 0 && "border-t border-border/60"
               )}
             >
@@ -47,10 +53,10 @@ export function Features() {
                 {/* intro side */}
                 <div className={cn(flip && "lg:order-2")}>
                   <div className="flex items-center gap-4">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-crimson/25 bg-crimson/10 text-crimson">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
                       <Icon className="h-6 w-6" />
                     </span>
-                    <span className="font-mono text-xs font-bold text-crimson">
+                    <span className="font-display text-[13px] font-bold tabular-nums text-crimson">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                   </div>
@@ -71,10 +77,10 @@ export function Features() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "0px 0px -40px 0px" }}
                       transition={{ ...springFluid, delay: 0.08 + j * 0.06 }}
-                      className="flex items-start gap-3.5 text-sm leading-relaxed text-foreground/85 sm:text-[15px]"
+                      className="flex items-start gap-3.5 text-sm leading-relaxed text-muted-foreground sm:text-[15px]"
                     >
-                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-crimson/25 bg-crimson/10 text-crimson">
-                        <Check className="h-3 w-3" strokeWidth={3} />
+                      <span className={cn("tick mt-0.5", tickTone[i % tickTone.length])}>
+                        <Check className="h-3 w-3" strokeWidth={3.5} />
                       </span>
                       {item}
                     </motion.li>

@@ -1,21 +1,19 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, Cloud, Lock, Minus, Square, X } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useEffect, useId, useRef, useState, type ComponentProps } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, Cloud, Lock } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading, AnimatedCounter } from "@/components/pcmax/ui/primitives";
 import { asset } from "@/lib/gh-pages";
-import { GpuIcon, PerformanceIcon, BackupIcon, SettingsIcon, ShieldIcon, AiIcon, LogoMark } from "@/components/pcmax/icons";
-import { springFluid, whileHoverLift, whileTapPress } from "@/components/pcmax/ui/motion";
+import { AiIcon, BackupIcon, GpuIcon, PerformanceIcon, ShieldIcon } from "@/components/pcmax/icons";
+import { springFluid } from "@/components/pcmax/ui/motion";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 type TabKey = "dashboard" | "multiframe" | "windows" | "settings";
 
 const tabOrder: TabKey[] = ["dashboard", "multiframe", "windows", "settings"];
-const tabIcons = [PerformanceIcon, GpuIcon, ShieldIcon, SettingsIcon];
 
 /* Responsive WebP key-arts (Task 24, Lighthouse "Improve image delivery":
  * −123 KiB mobile). The Pages export runs images unoptimized, so next/image
@@ -56,6 +54,7 @@ const panelDetails = {
       tasks: "Scheduled tasks",
       gameFiles: "Game files",
       snapshot: "Snapshot saved before changes — one-click rollback.",
+      rollbackChip: "1-click rollback",
     },
     settings: {
       sync: "Sync",
@@ -77,6 +76,7 @@ const panelDetails = {
       tasks: "وظایف زمان‌بندی‌شده",
       gameFiles: "فایل‌های بازی",
       snapshot: "پیش از تغییرات Snapshot ذخیره می‌شود — بازگردانی با یک کلیک.",
+      rollbackChip: "بازگردانی با یک کلیک",
     },
     settings: {
       sync: "همگام‌سازی",
@@ -98,13 +98,12 @@ function localizeNum(locale: string, value: number | string): string {
   return locale === "fa" ? s.replace(/\d/g, (d) => FA_DIGITS.charAt(Number(d))) : s;
 }
 
-/* Dashboard mock rows — the app's Home: per-game cards with a performance
- * rating (0–100), tech badges and the recommended profile + target FPS.
- * Names/genres come from the dictionary library; cover art matches it. */
+/* Dashboard mock data — per-game metadata for the titles the product mock
+ * has full ratings for (names/genres come from the dictionary library;
+ * cover art matches it via dictIndex). */
 const dashboardGames = [
   {
-    art: gameFiles[0], // Cyberpunk 2077
-    dictIndex: 0,
+    dictIndex: 0, // Cyberpunk 2077
     year: 2020,
     rating: 78,
     tech: ["DLSS", "FG", "RT"],
@@ -112,8 +111,7 @@ const dashboardGames = [
     isNew: false,
   },
   {
-    art: gameFiles[2], // Black Myth: Wukong
-    dictIndex: 2,
+    dictIndex: 2, // Black Myth: Wukong
     year: 2024,
     rating: 85,
     tech: ["DLSS", "FG"],
@@ -122,18 +120,30 @@ const dashboardGames = [
   },
 ] as const;
 
+/* Glassy stat chip floating over a media panel (`.gc-hud-chip` + drift).
+ * Position classes come from the caller — each panel places its own HUD. */
+function HudChip({ className, children, ...props }: ComponentProps<"div">) {
+  return (
+    <div className={cn("gc-hud-chip absolute z-10 flex items-center gap-2 px-3 py-2 text-[11px] font-bold", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
 /* ------------------------------ Section ------------------------------ */
 
 export function AppShowcase() {
   const { t, locale, isRTL } = useLanguage();
-  const { resolvedTheme } = useTheme();
   const { toast } = useToast();
   /* Tab state lives on STABLE INTERNAL IDs (TabKey: "dashboard" | "multiframe"
    * | "windows" | "settings") — never on translated labels. Switching
    * language re-renders labels only; state, keys and comparisons are
    * language-independent by construction. */
   const [tab, setTab] = useState<TabKey>("dashboard");
-  const reduce = useReducedMotion();
+  /* Gallery selection for the Dashboard media panel (click a thumbnail to
+   * swap the key art — the Guardian media panel keeps the old gallery's
+   * informational content in a single focused surface). */
+  const [gameIdx, setGameIdx] = useState(0);
   /* Unique panel id — stays unique even if this section ever mounts twice. */
   const panelId = useId();
   /* Local mock-data copy for the current locale. */
@@ -198,16 +208,71 @@ export function AppShowcase() {
     toast({ title: "PC MAX", description: t.showcase.disclaimer });
   };
 
-  const tabs = tabOrder.map((key, i) => ({
+  const tabs = tabOrder.map((key) => ({
     key,
     label: t.showcase.tabs[key], // label only — the ID is the identity
-    Icon: tabIcons[i],
   }));
 
+  /* Slide copy per tab — every string is REUSED dictionary content
+   * (library / multiframe / features / safety / social-trust), the mock's
+   * own local state copy, or bench numbers. No new keys, no new copy. */
+  const slides: Record<TabKey, { title: string; bullets: string[] }> = {
+    dashboard: {
+      title: t.library.title,
+      bullets: [
+        t.hero.bullets[0],
+        t.features.groups[0].items[1],
+        t.features.groups[1].items[1],
+        t.features.groups[0].items[2],
+      ],
+    },
+    multiframe: {
+      title: t.multiframe.title,
+      bullets: [
+        t.multiframe.cards[0].bullets[0],
+        t.multiframe.cards[1].bullets[0],
+        t.multiframe.cards[2].bullets[0],
+        t.multiframe.note,
+      ],
+    },
+    windows: {
+      title: t.safety.optimizer.title,
+      bullets: [
+        t.features.groups[1].items[0],
+        t.features.groups[2].items[0],
+        t.features.groups[2].items[1],
+      ],
+    },
+    settings: {
+      title: t.social.trust.title,
+      bullets: [
+        t.social.trust.items[2].desc,
+        t.features.groups[2].items[2],
+        t.safety.desc,
+      ],
+    },
+  };
+  const slide = slides[tab];
+
+  const gameInfo = t.library.games[gameIdx];
+  const gameMeta = dashboardGames.find((g) => g.dictIndex === gameIdx);
+  /* Streamline card — the only workflow carrying a hardware warning. */
+  const streamlineCard = t.multiframe.cards[2];
+  /* OptiScaler card — carries the upscaler compatibility badges. */
+  const optiCard = t.multiframe.cards[0];
+  const badgeLabel = "badges" in optiCard ? (optiCard.badges ?? []).join(" · ") : "";
+
+  /* Frame + surface shared by every media panel: violet gradient frame,
+   * diagonal sheen sweep, dark app surface, gentle hover scale. */
+  const frameClass = "gc-frame media-sheen transition-transform duration-500 ease-out hover:scale-[1.012]";
+  const surfaceClass =
+    "relative overflow-hidden rounded-[calc(var(--radius)-4px)] bg-[#0d0d11] p-5 pt-16 sm:p-6 sm:pt-16";
+
   return (
-    <Section id="showcase" className="relative overflow-hidden">
+    <Section id="showcase" className="overflow-hidden">
+      {/* ambient violet glow behind the slider */}
       <div
-        className="pointer-events-none absolute start-1/2 top-1/3 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.08] blur-[130px]"
+        className="pointer-events-none absolute start-1/2 top-24 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.07] blur-[130px]"
         aria-hidden="true"
       />
 
@@ -218,229 +283,192 @@ export function AppShowcase() {
         align="center"
       />
 
-      {/* floating product window.
-          NO 3D tilt on this element — root fix for the Persian/RTL tab bug
-          (and an English one hiding behind it): a persistently rotated plane
-          + perspective collapses the projected hit quads of the tabs at the
-          far end of the strip (elementFromPoint returned the parent panel
-          there — zero clickable area for the end tabs; in RTL the mirrored
-          order put the FIRST tabs in that dead zone, so it looked
-          language-specific). The window keeps its float (a pure translation,
-          which never skews hit areas), glass, reflection sweep and entrance —
-          everything a user sees — while every tab now keeps its full,
-          layout-true hit box in both directions. */}
-      <div className="relative mx-auto mt-10 max-w-4xl">
-        {/* ground glow */}
+      {/* Tab strip — Guardian .ftabs language: pill tabs on a hairline-
+          scrollable strip, hidden scrollbar, centered when it fits. The
+          whole <button> is the hit area; snap keeps pills readable mid-scroll. */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "0px 0px -60px 0px" }}
+        transition={springFluid}
+      >
         <div
-          className="absolute -bottom-10 start-1/2 h-24 w-3/4 -translate-x-1/2 rounded-[100%] bg-crimson/20 blur-3xl"
-          aria-hidden="true"
-        />
-
-        <motion.div
-          animate={reduce ? {} : { y: [0, -12, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          ref={tablistRef}
+          role="tablist"
+          aria-label={t.showcase.eyebrow}
+          onKeyDown={onTablistKeyDown}
+          className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:justify-center"
         >
-          <motion.div
-            className="card-ios relative rounded-[28px] bg-card dark:bg-[#0d0d0e]"
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "0px 0px -80px 0px" }}
-            transition={springFluid}
-          >
-            {/* glass reflection sweep */}
-            <div
-              className="pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-[28px]"
-              aria-hidden="true"
+          {tabs.map(({ key, label }) => (
+            <button
+              key={key}
+              data-tab={key}
+              id={`${panelId}-${key}`}
+              type="button"
+              role="tab"
+              tabIndex={tab === key ? 0 : -1}
+              aria-selected={tab === key}
+              aria-controls={panelId}
+              ref={tab === key ? activeTabRef : undefined}
+              onClick={() => setTab(key)}
+              className={cn(
+                "press h-10 flex-none snap-center rounded-full px-4 text-[13.5px] font-bold transition-colors",
+                tab === key
+                  ? "bg-[#6734ff] text-white shadow-[0_8px_24px_rgba(103,52,255,0.35)]"
+                  : "bg-[#1b1b21] text-muted-foreground ring-1 ring-inset ring-border hover:text-foreground"
+              )}
             >
-              <div className="absolute -inset-y-16 -start-1/3 w-1/2 rotate-12 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent dark:via-white/[0.04]" />
-            </div>
+              <span className="whitespace-nowrap">{label}</span>
+            </button>
+          ))}
+        </div>
+      </motion.div>
 
-            {/* title bar — Windows style */}
-            <div className="flex items-center justify-between border-b border-border/70 px-4 py-2.5">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-crimson text-white">
-                  <LogoMark className="h-3.5 w-3.5" />
-                </span>
-                <span className="font-display text-xs font-bold tracking-wide text-foreground">
-                  PC MAX
-                </span>
-                <span className="rounded bg-secondary px-1.5 py-0.5 font-mono text-[9px] font-bold text-muted-foreground">
-                  v2.4
-                </span>
-              </div>
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <span className="press flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-secondary hover:text-foreground"><Minus className="h-3 w-3" /></span>
-                <span className="press flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-secondary hover:text-foreground"><Square className="h-3 w-3" /></span>
-                <span className="press flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-crimson/80 hover:text-white"><X className="h-3 w-3" /></span>
-              </div>
-            </div>
-
-            <div className="flex">
-              {/* sidebar */}
-              {/* Mock app sidebar — decorative content inside the product
-                  mockup, NOT a real page landmark (spans only, no links). */}
-              <div className="hidden w-16 flex-col items-center gap-2 border-e border-border/70 py-4 sm:flex">
-                {[GpuIcon, PerformanceIcon, BackupIcon, SettingsIcon].map((Icon, i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      "flex h-10 w-10 items-center justify-center rounded-xl transition-colors",
-                      tabOrder.indexOf(tab) === i
-                        ? "border border-crimson/40 bg-crimson/10 text-crimson"
-                        : "text-muted-foreground/70 hover:text-foreground"
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                ))}
-              </div>
-
-              {/* main panel */}
-              <div className="min-w-0 flex-1 p-4 sm:p-6">
-                {/* tab bar — floating glass chrome strip with pill tabs.
-                    Hit area = the whole <button> (event lives on the button,
-                    never on the text node); shrink-0 + whitespace-nowrap keep
-                    every tab its full, overlap-free target in both langs. */}
-                <div
-                  ref={tablistRef}
-                  onKeyDown={onTablistKeyDown}
-                  className="glass mb-5 flex min-w-0 gap-1 overflow-x-auto rounded-full p-1 scrollbar-slim"
-                  role="tablist"
-                  aria-label={t.showcase.eyebrow}
-                >
-                  {tabs.map(({ key, label, Icon }) => (
-                    <button
-                      key={key}
-                      data-tab={key}
-                      id={`${panelId}-${key}`}
-                      role="tab"
-                      tabIndex={tab === key ? 0 : -1}
-                      aria-selected={tab === key}
-                      aria-controls={panelId}
-                      ref={tab === key ? activeTabRef : undefined}
-                      onClick={() => setTab(key)}
-                      className={cn(
-                        "showcase-tab press relative flex shrink-0 items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold transition-colors sm:px-4 sm:text-sm",
-                        tab === key ? "text-crimson" : "text-foreground/60 hover:text-foreground"
-                      )}
-                    >
-                      {tab === key && (
-                        <motion.span
-                          layoutId="showcase-tab-pill"
-                          aria-hidden="true"
-                          className="pointer-events-none absolute inset-0 rounded-full border border-crimson/25 bg-crimson/10"
-                          transition={springFluid}
-                        />
-                      )}
-                      <Icon className="relative h-4 w-4" />
-                      <span className="relative whitespace-nowrap">{label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* tab content — quick, controlled swap (no long transitions):
-                 * a fast fade+rise in, a faster fade out; the pill keeps the
-                 * signature glide, the content never keeps the user waiting. */}
-                <div id={panelId} role="tabpanel" aria-labelledby={`${panelId}-${tab}`} className="min-h-[270px]">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={tab}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6, transition: { duration: 0.12, ease: "easeIn" } }}
-                      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-                    >
-                      {/* App Home — sync status + per-game optimized cards
-                          (performance rating 0–100, tech badges, recommended
-                          profile + target FPS), as the real product shows. */}
-                      {tab === "dashboard" && (
-                        <div className="space-y-3">
-                          {/* offline-first cache — online, auto-resync */}
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-crimson/30 bg-crimson/[0.07] px-4 py-3">
-                            <span className="flex items-center gap-3 text-sm font-bold text-foreground">
-                              <Cloud className="h-5 w-5 text-crimson" />
-                              {copy.sync.label}
-                            </span>
-                            <span className="flex items-center gap-2 text-xs font-bold text-crimson">
-                              <span className="h-2 w-2 shrink-0 rounded-full bg-crimson" aria-hidden="true" />
-                              {copy.sync.status}
-                            </span>
+      {/* Slider — only the active tab's panel is rendered; a quick fade+rise
+          swaps slides. Mobile stacks media above the copy (reference order). */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "0px 0px -60px 0px" }}
+        transition={springFluid}
+      >
+        <div id={panelId} role="tabpanel" aria-labelledby={`${panelId}-${tab}`}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={tab}
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8, transition: { duration: 0.14, ease: "easeIn" } }}
+              transition={{ duration: 0.32, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] lg:gap-14">
+                {/* MEDIA */}
+                <div className="min-w-0 lg:order-2">
+                  {/* Dashboard — the game gallery as the media panel: key art
+                       with caption + floating HUD stats, thumbnail strip below
+                       (click to swap art; 480w variant serves the 92px thumbs). */}
+                  {tab === "dashboard" && (
+                    <div className={frameClass}>
+                      <div className="relative overflow-hidden rounded-[calc(var(--radius)-4px)] bg-[#0d0d11]">
+                        <div className="relative aspect-[16/10] overflow-hidden">
+                          {/* plain <img>: unoptimized export strips next/image's
+                              srcset pipeline — srcSet is hand-rolled here instead.
+                              sizes mirrors the media panel: full-width below lg
+                              (column padding + frame), ~592px column at lg+. */}
+                          <img
+                            src={gameFiles[gameIdx].src}
+                            srcSet={gameFiles[gameIdx].srcSet}
+                            sizes="(max-width: 640px) calc(100vw - 2.5rem), (max-width: 1024px) calc(100vw - 3.5rem), 592px"
+                            alt={`${gameInfo.name} — key art`}
+                            loading="lazy"
+                            decoding="async"
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                          <div
+                            className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"
+                            aria-hidden="true"
+                          />
+                          {/* floating HUD stats */}
+                          <HudChip className="hud-drift start-3 top-3 sm:start-4 sm:top-4">
+                            <Cloud className="h-3.5 w-3.5 text-crimson" />
+                            <span className="text-foreground">{copy.sync.label}</span>
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#1fbf9c]" aria-hidden="true" />
+                            <span className="font-medium text-muted-foreground">{copy.sync.status}</span>
+                          </HudChip>
+                          <HudChip className="hud-drift-2 end-3 top-3 sm:end-4 sm:top-4">
+                            <PerformanceIcon className="h-3.5 w-3.5 text-crimson" />
+                            <b className="font-display tabular-nums text-[#1fbf9c]">{t.bench.avg}</b>
+                            <span className="font-medium text-muted-foreground">{t.bench.unit}</span>
+                          </HudChip>
+                          {gameMeta && (
+                            <HudChip className="hud-drift-3 end-3 top-[4.25rem] sm:end-4 sm:top-[4.5rem]">
+                              <GpuIcon className="h-3.5 w-3.5 text-crimson" />
+                              <b className="font-display tabular-nums text-foreground">
+                                {localizeNum(locale, `${gameMeta.rating}/100`)}
+                              </b>
+                              <span className="font-medium text-muted-foreground">{copy.rating}</span>
+                            </HudChip>
+                          )}
+                          {/* art caption */}
+                          <div className="absolute inset-x-0 bottom-0 p-4 pt-12">
+                            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                              <h3 className="font-display text-lg font-bold text-white drop-shadow-lg">
+                                {gameInfo.name}
+                              </h3>
+                              {gameMeta?.isNew && (
+                                <span className="rounded-full border border-crimson/40 bg-crimson/15 px-2 py-0.5 text-[10px] font-bold text-crimson">
+                                  {copy.newOpt}
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-0.5 text-[11px] font-medium text-white/70">
+                              {gameInfo.genre}
+                              {gameMeta ? ` · ${localizeNum(locale, gameMeta.year)}` : ""}
+                            </p>
+                            {gameMeta && (
+                              <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                <span className="text-[11px] font-bold text-[#fedb29]">{gameMeta.profile[locale]}</span>
+                                {gameMeta.tech.map((tech) => (
+                                  <span
+                                    key={tech}
+                                    className="rounded border border-white/20 bg-black/40 px-1.5 py-0.5 font-mono text-[9px] font-bold text-white/70"
+                                  >
+                                    {tech}
+                                  </span>
+                                ))}
+                              </p>
+                            )}
                           </div>
-
-                          {dashboardGames.map((g, i) => {
-                            const game = t.library.games[g.dictIndex];
-                            return (
-                              <motion.div
-                                key={g.dictIndex}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ ...springFluid, delay: 0.1 + i * 0.08 }}
-                                className="glass rounded-2xl p-3"
-                              >
-                                <div className="flex items-center gap-3.5">
-                                  <div className="relative h-[52px] w-[92px] shrink-0 overflow-hidden rounded-lg">
-                                    {/* 480w variant — the full 840px master is 5× oversized for a 92px thumb */}
-                                    <img
-                                      src={g.art.thumb}
-                                      alt=""
-                                      loading="lazy"
-                                      decoding="async"
-                                      className="absolute inset-0 h-full w-full object-cover"
-                                    />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                      <h3 className="truncate font-display text-sm font-bold text-foreground">
-                                        {game.name}
-                                      </h3>
-                                      {g.isNew && (
-                                        <span className="rounded-full border border-crimson/40 bg-crimson/10 px-2 py-0.5 text-[10px] font-bold text-crimson">
-                                          {copy.newOpt}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                                      {game.genre} · {localizeNum(locale, g.year)}
-                                    </p>
-                                    <div className="mt-1.5 flex flex-wrap gap-1.5">
-                                      {g.tech.map((tech) => (
-                                        <span
-                                          key={tech}
-                                          className="rounded border border-border/80 bg-secondary/60 px-1.5 py-0.5 font-mono text-[10px] font-bold text-muted-foreground"
-                                        >
-                                          {tech}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                  <div className="flex shrink-0 flex-col items-center gap-1">
-                                    <span className="font-display text-lg font-bold leading-none tabular-nums text-foreground">
-                                      {localizeNum(locale, `${g.rating}/100`)}
-                                    </span>
-                                    <div className="h-1.5 w-14 overflow-hidden rounded-full bg-border/70">
-                                      <motion.div
-                                        className="h-full rounded-full bg-gradient-to-r from-crimson to-crimson-bright"
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${g.rating}%` }}
-                                        transition={{ ...springFluid, delay: 0.2 + i * 0.08 }}
-                                      />
-                                    </div>
-                                    <span className="type-eyebrow text-[9px] font-semibold uppercase text-muted-foreground">
-                                      {copy.rating}
-                                    </span>
-                                  </div>
-                                </div>
-                                <p className="mt-2.5 border-t border-border/60 pt-2 text-[11px] font-bold text-crimson">
-                                  {g.profile[locale]}
-                                </p>
-                              </motion.div>
-                            );
-                          })}
                         </div>
-                      )}
+                        {/* thumbnail strip — 92px thumbs, active gets the violet ring */}
+                        <div className="flex snap-x gap-2 overflow-x-auto border-t border-white/[0.07] p-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {gameFiles.map((g, i) => (
+                            <button
+                              key={g.src}
+                              type="button"
+                              onClick={() => setGameIdx(i)}
+                              aria-label={t.library.games[i].name}
+                              aria-pressed={i === gameIdx}
+                              className={cn(
+                                "press relative h-[52px] w-[92px] flex-none snap-start overflow-hidden rounded-lg transition-opacity duration-200",
+                                i === gameIdx
+                                  ? "ring-2 ring-crimson-bright ring-offset-2 ring-offset-[#0d0d11]"
+                                  : "opacity-55 hover:opacity-90"
+                              )}
+                            >
+                              {/* 480w variant — the full 840px master is 5× oversized for a 92px thumb */}
+                              <img
+                                src={g.thumb}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                className="absolute inset-0 h-full w-full object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-                      {tab === "multiframe" && (
-                        <div className="space-y-3">
+                  {/* Multi-Frame — the three workflows the engine installs,
+                      with live per-game counter. */}
+                  {tab === "multiframe" && (
+                    <div className={frameClass}>
+                      <div className={surfaceClass}>
+                        {badgeLabel && (
+                          <HudChip className="hud-drift start-4 top-4">
+                            <AiIcon className="h-3.5 w-3.5 text-crimson" />
+                            <span className="text-foreground">{badgeLabel}</span>
+                          </HudChip>
+                        )}
+                        {"warning" in streamlineCard && (
+                          <HudChip className="hud-drift-2 end-4 top-4">
+                            <Lock className="h-3.5 w-3.5 text-[#fedb29]" />
+                            <span className="font-medium text-muted-foreground">{streamlineCard.warning}</span>
+                          </HudChip>
+                        )}
+                        <div className="space-y-2.5">
                           {[
                             { name: "OptiScaler", status: t.showcase.mf.status.installed, ok: true },
                             { name: "AI Optical Flow", status: t.showcase.mf.status.ready, ok: true },
@@ -448,26 +476,35 @@ export function AppShowcase() {
                           ].map((wf, i) => (
                             <motion.div
                               key={wf.name}
-                              initial={{ opacity: 0, x: -14 }}
+                              initial={{ opacity: 0, x: isRTL ? 14 : -14 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ ...springFluid, delay: 0.08 * i }}
                               className={cn(
                                 "flex items-center justify-between rounded-xl border px-4 py-3.5",
-                                wf.ok ? "border-border/70 bg-secondary/40" : "border-crimson/30 bg-crimson/[0.05]"
+                                wf.ok ? "border-white/[0.06] bg-[#15151a]" : "border-crimson/30 bg-crimson/[0.06]"
                               )}
                             >
                               <div className="flex items-center gap-3">
-                                {wf.ok ? <Check className="h-4 w-4 text-crimson" strokeWidth={3} /> : <Lock className="h-4 w-4 text-crimson" />}
+                                {wf.ok ? (
+                                  <Check className="h-4 w-4 text-crimson" strokeWidth={3} />
+                                ) : (
+                                  <Lock className="h-4 w-4 text-crimson" />
+                                )}
                                 <span className={cn("text-sm font-semibold", wf.ok ? "text-foreground" : "text-muted-foreground")}>
                                   {wf.name}
                                 </span>
                               </div>
-                              <span className={cn("type-eyebrow text-[10px] font-bold uppercase", wf.ok ? "text-crimson" : "text-muted-foreground")}>
+                              <span
+                                className={cn(
+                                  "type-eyebrow text-[10px] font-bold uppercase",
+                                  wf.ok ? "text-crimson" : "text-muted-foreground"
+                                )}
+                              >
                                 {wf.status}
                               </span>
                             </motion.div>
                           ))}
-                          <div className="flex items-center justify-between rounded-xl border border-dashed border-border/70 px-4 py-3.5">
+                          <div className="flex items-center justify-between rounded-xl border border-dashed border-white/[0.12] px-4 py-3.5">
                             <span className="flex items-center gap-3 text-sm font-semibold text-muted-foreground">
                               <AiIcon className="h-4 w-4 text-crimson" />
                               {t.showcase.mf.perGame}
@@ -477,18 +514,33 @@ export function AppShowcase() {
                             </span>
                           </div>
                         </div>
-                      )}
+                      </div>
+                    </div>
+                  )}
 
-                      {tab === "windows" && (
+                  {/* Optimized Windows — applied progress, the four change
+                      types, snapshot + one-click rollback. */}
+                  {tab === "windows" && (
+                    <div className={frameClass}>
+                      <div className={surfaceClass}>
+                        <HudChip className="hud-drift start-4 top-4">
+                          <BackupIcon className="h-3.5 w-3.5 text-[#fedb29]" />
+                          <span className="text-[#fedb29]">{copy.win.rollbackChip}</span>
+                        </HudChip>
+                        <HudChip className="hud-drift-2 end-4 top-4">
+                          <span className="font-display tabular-nums text-[#1fbf9c]">{localizeNum(locale, "6/8")}</span>
+                          <span className="font-medium text-muted-foreground">{t.showcase.win.modules}</span>
+                        </HudChip>
                         <div className="space-y-4">
-                          <div className="rounded-xl border border-border/70 p-4">
+                          <div className="rounded-xl border border-white/[0.06] bg-[#15151a] p-4">
                             <div className="mb-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground">
                               <span>{t.showcase.win.applied}</span>
                               <span className="text-foreground">
-                                6 <span className="text-muted-foreground">{t.showcase.win.of}</span> 8 {t.showcase.win.modules}
+                                {localizeNum(locale, 6)} <span className="text-muted-foreground">{t.showcase.win.of}</span>{" "}
+                                {localizeNum(locale, 8)} {t.showcase.win.modules}
                               </span>
                             </div>
-                            <div className="h-2 overflow-hidden rounded-full bg-border/70">
+                            <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
                               <motion.div
                                 className="h-full rounded-full bg-gradient-to-r from-crimson to-crimson-bright"
                                 initial={{ width: 0 }}
@@ -507,7 +559,7 @@ export function AppShowcase() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ ...springFluid, delay: 0.1 + i * 0.07 }}
-                                className="flex items-center gap-2.5 rounded-lg border border-border/70 bg-secondary/40 px-3.5 py-2.5 text-xs font-semibold text-foreground"
+                                className="flex items-center gap-2.5 rounded-lg border border-white/[0.06] bg-[#15151a] px-3.5 py-2.5 text-xs font-semibold text-foreground"
                               >
                                 <Check className="h-3.5 w-3.5 text-crimson" strokeWidth={3} />
                                 {m.label}
@@ -516,7 +568,7 @@ export function AppShowcase() {
                           </div>
 
                           {/* snapshot taken BEFORE any change — one-click rollback */}
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-dashed border-border/70 px-4 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl border border-dashed border-white/[0.12] px-4 py-3">
                             <span className="flex min-w-0 items-center gap-2.5 text-xs font-semibold text-muted-foreground">
                               <BackupIcon className="h-4 w-4 shrink-0 text-crimson" />
                               {copy.win.snapshot}
@@ -524,31 +576,44 @@ export function AppShowcase() {
                             <button
                               type="button"
                               onClick={mockToast}
-                              className="press shrink-0 rounded-lg border border-border/80 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson"
+                              className="press shrink-0 rounded-lg border border-white/10 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson"
                             >
                               {t.showcase.win.revert}
                             </button>
                           </div>
                         </div>
-                      )}
+                      </div>
+                    </div>
+                  )}
 
-                      {tab === "settings" && (
+                  {/* Settings — language, default profile, offline-first sync,
+                      cache, telemetry off. */}
+                  {tab === "settings" && (
+                    <div className={frameClass}>
+                      <div className={surfaceClass}>
+                        <HudChip className="hud-drift start-4 top-4">
+                          <Cloud className="h-3.5 w-3.5 text-[#1fbf9c]" />
+                          <span className="font-medium text-muted-foreground">{copy.settings.offlineValue}</span>
+                        </HudChip>
+                        <HudChip className="hud-drift-2 end-4 top-4">
+                          <ShieldIcon className="h-3.5 w-3.5 text-[#1fbf9c]" />
+                          <span className="text-[#1fbf9c]">{t.footer.platformItems[3]}</span>
+                        </HudChip>
                         <div className="space-y-2.5">
                           {[
                             { id: "set-language", label: t.showcase.settings.language, value: locale === "fa" ? "فارسی" : "English" },
-                            { id: "set-theme", label: t.showcase.settings.theme, value: resolvedTheme === "light" ? t.common.themeLight : t.common.themeDark },
                             { id: "set-profile", label: t.showcase.settings.profile, value: copy.settings.profileValue },
                           ].map((row) => (
                             <div
                               key={row.id}
-                              className="flex items-center justify-between rounded-xl border border-border/70 bg-secondary/40 px-4 py-3.5"
+                              className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-[#15151a] px-4 py-3.5"
                             >
                               <span className="text-sm font-semibold text-foreground">{row.label}</span>
                               <span className="text-xs font-bold text-muted-foreground">{row.value}</span>
                             </div>
                           ))}
                           {/* offline-first sync — last-sync time + manual sync */}
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-border/70 bg-secondary/40 px-4 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-white/[0.06] bg-[#15151a] px-4 py-3">
                             <div className="flex min-w-0 flex-col">
                               <span className="text-sm font-semibold text-foreground">{copy.settings.sync}</span>
                               <span className="text-[11px] text-muted-foreground">{copy.settings.lastSync}</span>
@@ -556,28 +621,28 @@ export function AppShowcase() {
                             <button
                               type="button"
                               onClick={mockToast}
-                              className="press shrink-0 rounded-lg border border-border/80 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson"
+                              className="press shrink-0 rounded-lg border border-white/10 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson"
                             >
                               {copy.settings.syncNow}
                             </button>
                           </div>
                           {/* offline cache — clearable from settings */}
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-border/70 bg-secondary/40 px-4 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-white/[0.06] bg-[#15151a] px-4 py-3">
                             <span className="text-sm font-semibold text-foreground">{copy.settings.cache}</span>
                             <button
                               type="button"
                               onClick={mockToast}
-                              className="press shrink-0 rounded-lg border border-border/80 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson"
+                              className="press shrink-0 rounded-lg border border-white/10 px-3.5 py-1.5 text-xs font-bold text-muted-foreground transition-colors hover:border-crimson/40 hover:text-crimson"
                             >
                               {copy.settings.clearCache}
                             </button>
                           </div>
                           {/* offline behavior — cached data, auto-resync */}
-                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-border/70 bg-secondary/40 px-4 py-3">
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl border border-white/[0.06] bg-[#15151a] px-4 py-3">
                             <span className="text-sm font-semibold text-foreground">{copy.settings.offline}</span>
                             <span className="text-[11px] font-semibold text-muted-foreground">{copy.settings.offlineValue}</span>
                           </div>
-                          <div className="flex items-center justify-between rounded-xl border border-crimson/30 bg-crimson/[0.05] px-4 py-3.5">
+                          <div className="flex items-center justify-between rounded-xl border border-crimson/30 bg-crimson/[0.06] px-4 py-3.5">
                             <span className="flex items-center gap-2.5 text-sm font-semibold text-foreground">
                               <ShieldIcon className="h-4 w-4 text-crimson" />
                               {t.showcase.settings.telemetry}
@@ -587,86 +652,62 @@ export function AppShowcase() {
                             </span>
                           </div>
                         </div>
-                      )}
-                    </motion.div>
-                  </AnimatePresence>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* TEXT */}
+                <div className="min-w-0 lg:order-1">
+                  <span className="kicker">{t.showcase.tabs[tab]}</span>
+                  <h2 className="type-title font-display mt-4 text-2xl font-bold text-foreground sm:text-3xl">
+                    {slide.title}
+                  </h2>
+                  <ul className="mt-6 grid gap-3.5">
+                    {slide.bullets.map((b) => (
+                      <li key={b} className="flex items-start gap-3 text-[14.5px] leading-relaxed text-muted-foreground">
+                        <span className="tick mt-0.5">
+                          <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                        </span>
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      </motion.div>
 
-        {/* library — recognized titles, folded into the product story */}
-        <div className="mt-16 sm:mt-20">
-          <div className="mb-2 flex items-center justify-center gap-3" aria-hidden="true">
-            <span className="h-px w-10 bg-border/80" />
-            <span className="type-eyebrow text-[11px] font-bold uppercase text-crimson">{t.library.eyebrow}</span>
-            <span className="h-px w-10 bg-border/80" />
-          </div>
-          <p className="mx-auto mb-8 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">
-            {t.library.desc}
-          </p>
+      {/* library — recognized titles, folded into the product story as a
+          compact strip under the slider (the art grid itself now lives in
+          the Dashboard media panel). */}
+      <div className="mt-16 sm:mt-20">
+        <div className="mb-2 flex items-center justify-center gap-3" aria-hidden="true">
+          <span className="h-px w-10 bg-border/80" />
+          <span className="type-eyebrow text-[11px] font-bold uppercase text-crimson">{t.library.eyebrow}</span>
+          <span className="h-px w-10 bg-border/80" />
+        </div>
+        <p className="mx-auto mb-6 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">
+          {t.library.desc}
+        </p>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-            {t.library.games.map((game, i) => (
-              <motion.article
-                key={game.name}
-                initial={{ opacity: 0, y: 26 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "0px 0px -40px 0px" }}
-                transition={{ ...springFluid, delay: (i % 3) * 0.08 }}
-                whileHover={whileHoverLift}
-                whileTap={whileTapPress}
-                className="card-ios group relative overflow-hidden rounded-2xl bg-card"
-              >
-                {/* card-ios' hairline lives in unlayered CSS, so the crimson
-                    hover edge rides on a pointer-inert overlay instead */}
-                <div
-                  className="pointer-events-none absolute inset-0 z-10 rounded-2xl border border-crimson/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                  aria-hidden="true"
-                />
-                <div className="relative aspect-[16/9] overflow-hidden">
-                  {/* plain <img>: unoptimized export strips next/image's
-                      srcset pipeline — srcSet is hand-rolled here instead.
-                      sizes mirrors the grid exactly: 1-col (100vw − 2×px-4),
-                      2-col capped by the max-w-4xl block (27.5rem), 3-col is
-                      a constant ~285px card inside max-w-4xl. */}
-                  <img
-                    src={gameFiles[i].src}
-                    srcSet={gameFiles[i].srcSet}
-                    sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) min(calc(50vw - 2rem), 27.5rem), 286px"
-                    alt={`${game.name} — key art`}
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" aria-hidden="true" />
-                  <div className="absolute inset-x-0 bottom-0 p-4">
-                    <p className="type-title font-display text-lg font-bold text-white drop-shadow-lg">
-                      {game.name}
-                    </p>
-                    <p className="mt-0.5 text-[11px] font-medium text-white/70">{game.genre}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between px-4 py-2.5">
-                  <span className="type-eyebrow flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase text-muted-foreground">
-                    <Check className="h-3 w-3 text-crimson" strokeWidth={3} />
-                    {t.library.badges.exe} · {t.library.badges.icon}
-                  </span>
-                  <span className="type-eyebrow font-mono text-[10px] font-semibold uppercase text-crimson">
-                    {t.library.badges.ready}
-                  </span>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-
-          <p className="mt-5 text-center text-xs text-muted-foreground">{t.library.footnote}</p>
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <span className="type-eyebrow flex items-center gap-1.5 rounded-full border border-border bg-[#121216] px-3 py-1 font-mono text-[10px] font-semibold uppercase text-muted-foreground">
+            <Check className="h-3 w-3 text-crimson" strokeWidth={3} />
+            {t.library.badges.exe} · {t.library.badges.icon}
+          </span>
+          <span className="type-eyebrow flex items-center gap-1.5 rounded-full border border-crimson/25 bg-crimson/10 px-3 py-1 font-mono text-[10px] font-semibold uppercase text-crimson">
+            {t.library.badges.ready}
+          </span>
         </div>
 
-        {/* disclaimer */}
-        <p className="mt-14 text-center text-xs text-muted-foreground">{t.showcase.disclaimer}</p>
+        <p className="mt-5 text-center text-xs text-muted-foreground">{t.library.footnote}</p>
       </div>
+
+      {/* disclaimer */}
+      <p className="mt-10 text-center text-xs text-muted-foreground">{t.showcase.disclaimer}</p>
     </Section>
   );
 }

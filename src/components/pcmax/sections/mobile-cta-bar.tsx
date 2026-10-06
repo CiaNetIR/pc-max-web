@@ -40,8 +40,8 @@ export function MobileCtaBar() {
     dismissedRef.current = dismissed;
     if (dismissed) return;
 
-    /* Past the hero: measure the real #top section (100svh) so the bar
-     * only surfaces once the hero is actually behind the user. */
+    /* Past the hero: measure the real #top section so the bar only
+     * surfaces once the hero is actually behind the user. */
     const heroEl = document.getElementById("top");
     const showAfter = heroEl
       ? Math.max(1, heroEl.offsetHeight - 80)
@@ -106,15 +106,20 @@ export function MobileCtaBar() {
     <div
       inert={!visible}
       className={cn(
-        /* z-40: below the mobile nav menu (z-[59]), header (z-[60]) and
-         * modal dialogs (z-50), above in-page content. sm:hidden — phones
-         * only; never renders on ≥sm viewports. */
-        "fixed inset-x-0 bottom-0 z-40 transition-transform duration-300 ease-out motion-reduce:transition-none sm:hidden",
+        /* z-[70]: floats above page content and the sticky header (it is a
+         * dismissible phones-only bar and the page auto-hides it around the
+         * dialog-bearing #download/footer zones). sm:hidden — phones only;
+         * never renders on ≥sm viewports. */
+        "fixed inset-x-0 bottom-0 z-[70] transition-transform duration-300 ease-out motion-reduce:transition-none sm:hidden",
         visible ? "translate-y-0" : "pointer-events-none translate-y-full"
       )}
     >
-      <div className="glass-chrome pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-        <div className="flex items-center justify-between gap-3 px-4 py-3">
+      {/* Floating hud panel (inset-x-3 bottom-3 card): the wrapper keeps
+       * the full-height slide-away honest (translate-y-full hides it
+       * completely) while the padding floats the card 12px clear of the
+       * viewport edge AND the home-indicator safe area on notch phones. */}
+      <div className="px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-[#121216]/90 p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-lg">
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold leading-tight text-foreground">
               {t.cta.bottomBar.label}
@@ -127,7 +132,7 @@ export function MobileCtaBar() {
           <a
             href={installerHref()}
             aria-label={t.cta.bottomBar.label}
-            className="btn-convex press inline-flex h-11 shrink-0 items-center gap-2 rounded-full px-5 text-sm font-semibold text-white"
+            className="gc-btn-primary press inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-5 text-sm font-bold text-white"
           >
             <DownloadIcon className="h-4 w-4" aria-hidden="true" />
             {t.cta.bottomBar.label}

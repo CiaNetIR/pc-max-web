@@ -2,18 +2,20 @@
 
 import { useId, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, Check, ChevronDown, FileText } from "lucide-react";
+import { Check, ChevronDown, FileText, TriangleAlert } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading } from "@/components/pcmax/ui/primitives";
 import { springFluid } from "@/components/pcmax/ui/motion";
 import { cn } from "@/lib/utils";
 
 /*
- * Frame Generation — concise by design. Three calm cards carry only the
- * essential (name, tagline, compatibility, two short bullets); the deep
- * technical detail lives one tap away in an expandable disclosure below
- * (Section 35: landing page ≠ technical manual). Content is fully
- * server-rendered — the disclosure only toggles animation, never mounts.
+ * Frame Generation — Guardian cards (Task 26-d1). Three surface cards carry
+ * only the essential (name, tagline, compatibility pills, two tick bullets);
+ * the Streamline hardware guard becomes a gold warning chip (reference
+ * .caveat tone). Below the grid sits a .compat-style strip — the
+ * "Compatibility" label plus teal-dotted platform items — then the
+ * expandable technical disclosure and the note. Content is fully
+ * server-rendered; the disclosure only toggles animation, never mounts.
  */
 
 const cardEnter = [
@@ -27,6 +29,14 @@ const cardEnter = [
  * cards/tech entries: OptiScaler, AI Optical Flow, Streamline. */
 const CARD_IDS = ["optiscaler", "ai-optical-flow", "streamline"] as const;
 
+/* Guardian tri-color rhythm — badge pills carry their card's own accent:
+ * OptiScaler violet, AI Optical Flow teal, Streamline gold. */
+const badgeTone = [
+  "bg-crimson/10 text-crimson ring-crimson/25",
+  "bg-[rgba(31,191,156,0.14)] text-[#1fbf9c] ring-[rgba(31,191,156,0.32)]",
+  "bg-[rgba(254,219,41,0.13)] text-[#fedb29] ring-[rgba(254,219,41,0.3)]",
+] as const;
+
 export function MultiFrame() {
   const { t } = useLanguage();
   const [techOpen, setTechOpen] = useState(false);
@@ -36,11 +46,17 @@ export function MultiFrame() {
    * (reducedMotion="user") alone won't still it — gate it explicitly. */
   const reduce = useReducedMotion();
 
+  /* Compatibility strip items (reference .compat) — the platform badges
+   * across all three cards, deduped; each renders with a teal dot. */
+  const compatItems = Array.from(
+    new Set(t.multiframe.cards.flatMap((card) => ("badges" in card ? card.badges ?? [] : [])))
+  );
+
   return (
     <Section id="multiframe" className="relative overflow-hidden">
-      {/* ambient crimson aura — one quiet wash, nothing rotating */}
+      {/* ambient violet aura — one quiet wash, nothing rotating */}
       <div
-        className="pointer-events-none absolute start-1/2 top-0 h-[380px] w-[720px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.07] blur-[120px]"
+        className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-[380px] w-[720px] max-w-none rounded-full bg-crimson/[0.07] blur-[120px]"
         aria-hidden="true"
       />
 
@@ -54,7 +70,6 @@ export function MultiFrame() {
       <div className="grid gap-6 lg:grid-cols-3 lg:gap-7">
         {t.multiframe.cards.map((card, i) => {
           const isStreamline = i === 2;
-          const hasBadges = "badges" in card;
           return (
             <motion.article
               key={CARD_IDS[i]}
@@ -63,52 +78,50 @@ export function MultiFrame() {
               whileInView="show"
               viewport={{ once: true, margin: "0px 0px -60px 0px" }}
               transition={{ ...springFluid, delay: 0.1 + i * 0.1 }}
-              className={cn(
-                "card-ios group relative flex flex-col rounded-3xl bg-card p-6 sm:p-7",
-                isStreamline && "border-crimson/40 bg-gradient-to-b from-crimson/[0.05] to-transparent dark:from-crimson/[0.08]"
-              )}
+              className="gc-card flex flex-col p-6"
             >
               {/* header */}
               <div className="mb-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <h3 className="type-title font-display text-xl font-bold text-foreground sm:text-2xl">
+                  <h3 className="type-title font-display text-lg font-bold text-foreground">
                     {card.name}
                   </h3>
                   {isStreamline && "warning" in card && (
-                    <span className="type-eyebrow inline-flex items-center gap-1.5 rounded-full border border-crimson/50 bg-crimson/10 px-3 py-1 text-[10px] font-bold uppercase text-crimson">
-                      <AlertTriangle className="h-3.5 w-3.5" />
+                    <span className="inline-flex items-center gap-2 rounded-lg bg-[rgba(224,138,0,0.14)] px-3 py-1.5 text-[12.5px] font-bold text-[#f3c07a] ring-1 ring-inset ring-[rgba(224,138,0,0.26)]">
+                      <TriangleAlert className="h-3.5 w-3.5" />
                       {card.warning}
                     </span>
                   )}
                 </div>
-                <p className="mt-1.5 text-sm font-medium text-crimson">{card.tagline}</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">{card.tagline}</p>
               </div>
 
-              {/* compatibility badges */}
-              {hasBadges && "badges" in card && (
-                <div className="mb-5">
-                  <p className="type-eyebrow mb-2.5 text-[10px] font-bold uppercase text-muted-foreground">
-                    {t.multiframe.compatibility}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {(card.badges ?? []).map((badge) => (
-                      <span
-                        key={badge}
-                        className="rounded-full border border-crimson/30 bg-crimson/[0.06] px-3 py-1.5 font-mono text-xs font-bold tracking-wide text-crimson dark:bg-crimson/10"
-                      >
-                        {badge}
-                      </span>
-                    ))}
-                  </div>
+              {/* compatibility pills — this card's own accent tone */}
+              {"badges" in card && (
+                <div className="mb-5 flex flex-wrap gap-2">
+                  {(card.badges ?? []).map((badge) => (
+                    <span
+                      key={badge}
+                      className={cn(
+                        "rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset",
+                        badgeTone[i % badgeTone.length]
+                      )}
+                    >
+                      {badge}
+                    </span>
+                  ))}
                 </div>
               )}
 
               {/* the two essentials */}
               <ul className="mt-auto flex-1 space-y-3">
                 {card.bullets.map((bullet) => (
-                  <li key={bullet} className="type-lead flex gap-3 text-sm text-muted-foreground">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-crimson/25 bg-crimson/10 text-crimson">
-                      <Check className="h-3 w-3" strokeWidth={3} />
+                  <li
+                    key={bullet}
+                    className="flex gap-3 text-sm leading-relaxed text-muted-foreground"
+                  >
+                    <span className="tick mt-0.5">
+                      <Check className="h-3 w-3" strokeWidth={3.5} />
                     </span>
                     {bullet}
                   </li>
@@ -117,6 +130,22 @@ export function MultiFrame() {
             </motion.article>
           );
         })}
+      </div>
+
+      {/* compatibility strip (reference .compat) — platform matrix at a glance */}
+      <div className="gc-card mt-6 flex flex-wrap items-center gap-x-7 gap-y-3 px-6 py-5">
+        <span className="text-[12.5px] font-bold text-muted-foreground">
+          {t.multiframe.compatibility}
+        </span>
+        {compatItems.map((item) => (
+          <span
+            key={item}
+            className="inline-flex items-center gap-2 text-[13.5px] text-muted-foreground"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-[#1fbf9c]" aria-hidden="true" />
+            {item}
+          </span>
+        ))}
       </div>
 
       {/* expandable technical documentation */}
@@ -129,7 +158,7 @@ export function MultiFrame() {
           className="press group flex w-full items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card/60 px-5 py-4 text-start transition-colors hover:border-crimson/40"
         >
           <span className="flex items-center gap-3 text-sm font-bold text-foreground">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
               <FileText className="h-4.5 w-4.5" />
             </span>
             {t.multiframe.tech.title}
@@ -162,7 +191,10 @@ export function MultiFrame() {
                       key={detail}
                       className="flex items-start gap-2.5 text-sm leading-relaxed text-muted-foreground"
                     >
-                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-crimson/70" aria-hidden="true" />
+                      <span
+                        className="mt-2 h-1 w-1 shrink-0 rounded-full bg-crimson/70"
+                        aria-hidden="true"
+                      />
                       {detail}
                     </li>
                   ))}

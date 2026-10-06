@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
-import { Check, HardDrive, Loader2, Mail, MemoryStick, Sparkles } from "lucide-react";
+import { useRef, useState, type FormEvent } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { Check, ChevronDown, Loader2, Mail, Sparkles } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
-import { MagneticButton, Section } from "@/components/pcmax/ui/primitives";
+import { Section } from "@/components/pcmax/ui/primitives";
 import { springFluid } from "@/components/pcmax/ui/motion";
-import { GpuIcon, CpuIcon, WindowsIcon, DownloadIcon, ShieldIcon, PerformanceIcon } from "@/components/pcmax/icons";
+import { DownloadIcon, PerformanceIcon, ShieldIcon } from "@/components/pcmax/icons";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { installerHref, IS_STATIC_EXPORT, GITHUB_REPO_URL, asset } from "@/lib/gh-pages";
+import { installerHref, IS_STATIC_EXPORT, GITHUB_REPO_URL } from "@/lib/gh-pages";
+import { cn } from "@/lib/utils";
 
 /* Prop payloads — serialized server → client. The server wrapper
  * (download-cta.tsx) queries the DB directly and seeds these, so no
@@ -51,6 +51,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /* ------------------------------ Sub-blocks ---------------------------- */
 
+/* Release meta chips — version / size / channel / released / checksum.
+ * Rendered with the initial HTML (SSR-seeded props), aria-live announces
+ * the defensive loading/error states. */
 function ReleaseChips({ state, release, locale }: { state: DataState; release: ReleaseInfo | null; locale: "en" | "fa" }) {
   const { t } = useLanguage();
 
@@ -62,39 +65,33 @@ function ReleaseChips({ state, release, locale }: { state: DataState; release: R
       })
     : "";
 
+  const chip = "rounded-full border border-border bg-[#121216] px-3 py-1 font-medium text-foreground/80";
+
   return (
-    <div className="mt-8 flex min-h-8 flex-wrap items-center justify-center gap-2.5 text-xs" aria-live="polite">
-      {state === "loading" && (
-        <span className="glass rounded-full px-4 py-1.5 font-medium text-foreground/80">
-          {t.cta.fetching}
-        </span>
-      )}
-      {state === "error" && (
-        <span className="glass rounded-full px-4 py-1.5 font-medium text-foreground/80">
-          {t.cta.error}
-        </span>
-      )}
+    <div className="mt-5 flex min-h-8 flex-wrap items-center justify-center gap-2 text-xs" aria-live="polite">
+      {state === "loading" && <span className={chip}>{t.cta.fetching}</span>}
+      {state === "error" && <span className={chip}>{t.cta.error}</span>}
       {/* Chips render for the live release OR the static fallback — the
           error pill above stays honest about which one it is. */}
       {release && (
         <>
-          <span className="glass rounded-full px-4 py-1.5 font-mono font-bold text-crimson">
+          <span className="rounded-full border border-crimson/25 bg-crimson/10 px-3 py-1 font-mono font-bold text-crimson">
             {t.cta.versionLabel} {release.version}
           </span>
-          <span className="glass rounded-full px-4 py-1.5 font-medium text-foreground/80">
+          <span className={chip}>
             {t.cta.sizeLabel} {release.size}
           </span>
-          <span className="glass flex items-center gap-1.5 rounded-full px-4 py-1.5 font-medium text-foreground/80">
-            <ShieldIcon className="h-4 w-4 text-crimson" />
+          <span className={cn(chip, "flex items-center gap-1.5")}>
+            <ShieldIcon className="h-3.5 w-3.5 text-crimson" />
             {t.cta.channelLabel}: {release.channel}
           </span>
-          <span className="glass rounded-full px-4 py-1.5 font-medium text-foreground/80">
+          <span className={chip}>
             {t.cta.releasedLabel}: {date}
           </span>
           {release.checksum && (
             <span
               dir="ltr"
-              className="glass rounded-full px-4 py-1.5 font-mono text-[11px] text-foreground/80"
+              className="rounded-full border border-border bg-[#121216] px-3 py-1 font-mono text-[11px] text-foreground/80"
               title={release.checksum}
             >
               {t.cta.checksumLabel}: {release.checksum}
@@ -106,54 +103,23 @@ function ReleaseChips({ state, release, locale }: { state: DataState; release: R
   );
 }
 
-function RequirementsCard() {
-  const { t } = useLanguage();
-  const rows = [
-    { Icon: WindowsIcon, label: t.cta.requirements.os, value: t.cta.requirements.osValue },
-    { Icon: CpuIcon, label: t.cta.requirements.arch, value: t.cta.requirements.archValue },
-    { Icon: MemoryStick, label: t.cta.requirements.ram, value: t.cta.requirements.ramValue },
-    { Icon: HardDrive, label: t.cta.requirements.disk, value: t.cta.requirements.diskValue },
-    { Icon: GpuIcon, label: t.cta.requirements.gpu, value: t.cta.requirements.gpuValue },
-  ];
-
-  return (
-    <div className="card-ios flex h-full flex-col rounded-3xl bg-card p-6 sm:p-8">
-      <h3 className="type-eyebrow flex items-center gap-2.5 text-sm font-semibold uppercase text-muted-foreground">
-        <WindowsIcon className="h-4 w-4 text-crimson" />
-        {t.cta.requirements.title}
-      </h3>
-      <dl className="mt-6 flex-1 space-y-0 divide-y divide-border/60">
-        {rows.map(({ Icon, label, value }) => (
-          <div key={label} className="flex items-center justify-between gap-4 py-3.5 first:pt-0 last:pb-0">
-            <dt className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-crimson/10 text-crimson">
-                <Icon className="h-4 w-4" />
-              </span>
-              {label}
-            </dt>
-            <dd dir="ltr" className="text-end text-sm font-bold text-foreground">
-              {value}
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
-
-function ChangelogCard({ state, groups }: { state: DataState; groups: ChangelogGroup[] }) {
+/* Changelog — kept as real content (SSR-seeded from the DB), folded into a
+ * collapsible hairline panel so the premium card stays focused on the
+ * download action. Tag pills reuse the existing changelog.tags strings. */
+function Changelog({ state, groups }: { state: DataState; groups: ChangelogGroup[] }) {
   const { t } = useLanguage();
 
   return (
-    <div className="card-ios flex h-full flex-col rounded-3xl bg-card p-6 sm:p-8">
-      <h3 className="type-eyebrow flex items-center gap-2.5 text-sm font-semibold uppercase text-muted-foreground">
+    <details className="mt-8">
+      <summary className="press flex cursor-pointer list-none items-center justify-center gap-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
         <PerformanceIcon className="h-4 w-4 text-crimson" />
         {t.cta.changelog.title}
-      </h3>
+        <ChevronDown className="gc-chevron h-4 w-4 transition-transform duration-300" aria-hidden="true" />
+      </summary>
 
       {/* aria-live announces state swaps; the skeleton only ever shows for a
           defensive "loading" state — server seeding renders entries at SSR. */}
-      <div className="mt-6 max-h-96 flex-1 space-y-6 overflow-y-auto pe-2 scrollbar-slim" aria-live="polite">
+      <div className="mt-5 max-h-80 space-y-6 overflow-y-auto pe-2 scrollbar-slim" aria-live="polite">
         {state === "loading" && (
           <div className="space-y-3" aria-hidden="true">
             {[0, 1, 2].map((i) => (
@@ -192,48 +158,57 @@ function ChangelogCard({ state, groups }: { state: DataState; groups: ChangelogG
             </div>
           ))}
       </div>
-    </div>
+    </details>
   );
 }
 
-function EditionsCard({ downloadHref }: { downloadHref: string }) {
+/* Editions — Free (current, the download itself) and Pro (coming, waitlist).
+ * Restyled as dark selectable rows inside the premium card's action column. */
+function EditionPicker({ onPro }: { onPro: () => void }) {
   const { t } = useLanguage();
 
   return (
-    <div className="card-ios rounded-3xl bg-card p-6 sm:p-8">
-      <h3 className="type-eyebrow text-sm font-semibold uppercase text-muted-foreground">{t.cta.editions.title}</h3>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {/* Free — current */}
-        <div className="relative flex flex-col rounded-2xl border border-crimson/40 bg-crimson/[0.04] p-5">
-          <span className="type-eyebrow absolute end-4 top-4 rounded-full border border-crimson/30 bg-crimson/10 px-2.5 py-0.5 text-[10px] font-bold uppercase text-crimson">
-            {t.cta.editions.free.badge}
+    <div className="grid gap-2.5">
+      {/* Free — current */}
+      <div className="relative flex items-center justify-between gap-3 rounded-xl border border-crimson/40 bg-crimson/[0.08] px-4 py-3.5">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="tick">
+            <Check className="h-3.5 w-3.5" strokeWidth={3} />
           </span>
-          <span className="font-display text-lg font-bold text-foreground">{t.cta.editions.free.name}</span>
-          <span className="mt-1 font-display text-3xl font-extrabold text-crimson">{t.cta.editions.free.price}</span>
-          <p className="mt-2.5 flex-1 text-sm leading-relaxed text-muted-foreground">{t.cta.editions.free.tagline}</p>
-          <a
-            href={downloadHref}
-            className="press mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-crimson px-5 text-sm font-semibold text-white transition-colors hover:bg-crimson-bright"
-          >
-            <DownloadIcon className="h-4 w-4" />
-            {t.cta.editions.free.cta}
-          </a>
+          <div className="min-w-0">
+            <span className="flex flex-wrap items-center gap-2 font-display text-sm font-bold text-foreground">
+              {t.cta.editions.free.name}
+              <span className="type-eyebrow rounded-full border border-crimson/30 bg-crimson/10 px-2 py-0.5 text-[10px] font-bold uppercase text-crimson">
+                {t.cta.editions.free.badge}
+              </span>
+            </span>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.cta.editions.free.tagline}</p>
+          </div>
         </div>
-        {/* Pro — coming */}
-        <div className="relative flex flex-col rounded-2xl border border-border/70 p-5">
-          <span className="type-eyebrow absolute end-4 top-4 rounded-full border border-border/70 px-2.5 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
-            {t.cta.editions.pro.badge}
+        <span className="shrink-0 font-display text-lg font-extrabold text-crimson">{t.cta.editions.free.price}</span>
+      </div>
+      {/* Pro — coming */}
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-[#121216] px-4 py-3.5">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex h-[21px] w-[21px] flex-none items-center justify-center text-crimson/70">
+            <Sparkles className="h-4 w-4" />
           </span>
-          <span className="flex items-center gap-2 font-display text-lg font-bold text-foreground">
-            {t.cta.editions.pro.name}
-            <Sparkles className="h-4 w-4 text-crimson/70" />
-          </span>
-          <span className="mt-1 font-display text-3xl font-extrabold text-muted-foreground">{t.cta.editions.pro.price}</span>
-          <p className="mt-2.5 flex-1 text-sm leading-relaxed text-muted-foreground">{t.cta.editions.pro.tagline}</p>
+          <div className="min-w-0">
+            <span className="flex flex-wrap items-center gap-2 font-display text-sm font-bold text-foreground">
+              {t.cta.editions.pro.name}
+              <span className="type-eyebrow rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
+                {t.cta.editions.pro.badge}
+              </span>
+            </span>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.cta.editions.pro.tagline}</p>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <span className="font-display text-lg font-extrabold text-muted-foreground">{t.cta.editions.pro.price}</span>
           <button
             type="button"
-            onClick={() => document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth", block: "center" })}
-            className="press mt-5 inline-flex h-11 items-center justify-center rounded-full border border-crimson/40 px-5 text-sm font-semibold text-crimson transition-colors hover:bg-crimson/10"
+            onClick={onPro}
+            className="gc-btn-ghost press rounded-full px-3.5 py-1.5 text-[11px] font-bold"
           >
             {t.cta.editions.pro.cta}
           </button>
@@ -277,19 +252,19 @@ function WaitlistCard() {
   const done = state === "success" || state === "duplicate";
 
   return (
-    <div id="waitlist" className="card-ios flex h-full flex-col rounded-3xl bg-crimson/[0.04] p-6 sm:p-8">
-      <h3 className="type-eyebrow flex items-center gap-2.5 text-sm font-semibold uppercase text-crimson">
+    <div id="waitlist" className="gc-card mx-auto mt-10 w-full max-w-2xl p-6 sm:p-8">
+      <h3 className="type-eyebrow flex items-center justify-center gap-2.5 text-sm font-semibold uppercase text-crimson">
         <Mail className="h-4 w-4" />
         {t.cta.waitlist.title}
       </h3>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{t.cta.waitlist.desc}</p>
+      <p className="mx-auto mt-3 max-w-md text-center text-sm leading-relaxed text-muted-foreground">{t.cta.waitlist.desc}</p>
 
       {done ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={springFluid}
-          className="mt-6 flex flex-1 flex-col items-center justify-center rounded-2xl border border-crimson/25 bg-card px-6 py-6 text-center"
+          className="mx-auto mt-6 flex max-w-md flex-1 flex-col items-center justify-center rounded-2xl border border-crimson/25 bg-[#121216] px-6 py-6 text-center"
           role="status"
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-crimson/10 text-crimson">
@@ -305,19 +280,19 @@ function WaitlistCard() {
       ) : IS_STATIC_EXPORT ? (
         /* Static GitHub Pages mirror: there is no server to submit to —
          * point Pro-curious visitors at the GitHub releases instead. */
-        <div className="mt-6 flex flex-1 flex-col items-center justify-center gap-4 rounded-2xl border border-crimson/25 bg-card px-6 py-8 text-center">
+        <div className="mx-auto mt-6 flex max-w-md flex-1 flex-col items-center justify-center gap-4 rounded-2xl border border-crimson/25 bg-[#121216] px-6 py-8 text-center">
           <p className="text-sm leading-relaxed text-muted-foreground">{t.cta.waitlist.staticNote}</p>
           <a
             href={`${GITHUB_REPO_URL}/releases`}
             target="_blank"
             rel="noopener noreferrer"
-            className="press inline-flex h-11 items-center justify-center gap-2 rounded-full border border-crimson/40 px-6 text-sm font-semibold text-crimson transition-colors hover:bg-crimson/10"
+            className="gc-btn-ghost press inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-semibold"
           >
             GitHub <span aria-hidden="true">↗</span>
           </a>
         </div>
       ) : (
-        <form onSubmit={onSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row" noValidate>
+        <form onSubmit={onSubmit} className="mx-auto mt-6 flex max-w-md flex-col gap-3 sm:flex-row" noValidate>
           <label className="sr-only" htmlFor="waitlist-email">
             {t.cta.waitlist.placeholder}
           </label>
@@ -332,13 +307,13 @@ function WaitlistCard() {
               if (state === "error") setState("idle");
             }}
             placeholder={t.cta.waitlist.placeholder}
-            className="h-12 flex-1 rounded-full border-border/80 bg-card text-sm"
+            className="h-12 flex-1 rounded-full border-border bg-[#121216] text-sm"
             autoComplete="email"
           />
           <button
             type="submit"
             disabled={state === "submitting"}
-            className="press inline-flex h-12 items-center justify-center gap-2 rounded-full bg-crimson px-6 text-sm font-semibold text-white transition-colors hover:bg-crimson-bright disabled:opacity-60"
+            className="gc-btn-primary press inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-bold disabled:opacity-60"
           >
             {state === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {t.cta.waitlist.button}
@@ -346,7 +321,7 @@ function WaitlistCard() {
         </form>
       )}
       {state === "error" && (
-        <p className="mt-3 text-xs font-medium text-crimson" role="alert">
+        <p className="mt-3 text-center text-xs font-medium text-crimson" role="alert">
           {t.cta.waitlist.error}
         </p>
       )}
@@ -356,11 +331,11 @@ function WaitlistCard() {
 
 /* ------------------------------ Section ------------------------------- */
 
-/* Same UI/behavior as the pre-SSR version minus the two mount-time fetches
+/* Same data/behavior as the pre-SSR version minus the two mount-time fetches
  * (release + changelog): the data arrives as props from the server render,
  * so chips + changelog paint with the HTML — no HTML → JS → fetch → render
  * waterfall. Waitlist submit stays a client POST; the download button keeps
- * its real /api/download href. */
+ * its real href (SSR: /api/download counting route, static: the artifact). */
 export function DownloadCtaClient({
   release,
   releaseState,
@@ -370,32 +345,54 @@ export function DownloadCtaClient({
   const { t, locale } = useLanguage();
   const reduce = useReducedMotion();
 
-  return (
-    <section id="download" className="relative scroll-mt-24 overflow-hidden py-24 sm:py-32">
-      {/* ambient layers */}
-      <div className="absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]" aria-hidden="true" />
-      <div className="absolute start-1/2 top-1/2 h-[420px] w-[820px] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full bg-crimson/[0.12] blur-[130px]" aria-hidden="true" />
+  /* `.shcard.in` — lands the perks' staggered entrance once the card enters
+   * the viewport (the orbit/glow/sheen run continuously via pure CSS). */
+  const cardRef = useRef<HTMLDivElement>(null);
+  const cardInView = useInView(cardRef, { once: true, margin: "0px 0px -100px 0px" });
 
-      <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
-        {/* official emblem — reduced motion skips the scale/blur entrance */}
+  const scrollToWaitlist = () =>
+    document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+  /* Perks — 100% reused dictionary strings: hero bullets, platform facts,
+   * and the Free edition's own tagline. */
+  const perks = [
+    t.hero.bullets[0],
+    t.hero.bullets[1],
+    t.hero.bullets[2],
+    t.footer.platformItems[2],
+    t.footer.platformItems[3],
+    t.cta.editions.free.tagline,
+  ];
+
+  /* Requirements meta row (reference .instal__foot) — OS / arch / memory /
+   * disk / GPU with the teal compatibility dots. */
+  const requirements = [
+    { label: t.cta.requirements.os, value: t.cta.requirements.osValue },
+    { label: t.cta.requirements.arch, value: t.cta.requirements.archValue },
+    { label: t.cta.requirements.ram, value: t.cta.requirements.ramValue },
+    { label: t.cta.requirements.disk, value: t.cta.requirements.diskValue },
+    { label: t.cta.requirements.gpu, value: t.cta.requirements.gpuValue },
+  ];
+
+  return (
+    <Section id="download" className="overflow-hidden">
+      {/* ambient violet glow behind the card */}
+      <div
+        className="pointer-events-none absolute start-1/2 top-16 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.1] blur-[130px]"
+        aria-hidden="true"
+      />
+
+      {/* heading — gold kicker (built manually: SectionHeading renders the
+          violet kicker; the premium card section calls for the gold variant) */}
+      <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-12">
         <motion.div
-          initial={reduce ? false : { opacity: 0, scale: 0.82, filter: "blur(10px)" }}
-          whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: "0px 0px -60px 0px" }}
+          initial={reduce ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={springFluid}
-          className="relative mx-auto mb-9 h-24 w-24 sm:h-28 sm:w-28"
+          className="mb-5 flex justify-center"
         >
-          <div
-            className="absolute -inset-5 rounded-full bg-crimson/25 blur-2xl dark:bg-crimson/30"
-            aria-hidden="true"
-          />
-          <Image
-            src={asset("/brand/pcmax-logo-256.webp")}
-            alt="PC MAX"
-            width={112}
-            height={112}
-            className="relative h-full w-full rounded-full ring-1 ring-border/60"
-          />
+          <span className="kicker kicker-gold">{t.nav.download}</span>
         </motion.div>
 
         <motion.h2
@@ -403,7 +400,7 @@ export function DownloadCtaClient({
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={springFluid}
-          className="type-display font-display text-4xl font-extrabold text-foreground sm:text-6xl"
+          className="type-display font-display text-[clamp(24px,2.9vw,34px)] font-extrabold text-foreground"
         >
           {t.cta.title.split(".").map((part, i, arr) =>
             part.trim() ? (
@@ -420,44 +417,99 @@ export function DownloadCtaClient({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={{ ...springFluid, delay: 0.12 }}
-          className="type-lead mx-auto mt-5 max-w-xl text-base text-muted-foreground sm:text-lg"
+          className="type-lead mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg"
         >
           {t.cta.sub}
         </motion.p>
-
-        {/* REAL download — streams the installer from /api/download */}
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "0px 0px -80px 0px" }}
-          transition={{ ...springFluid, delay: 0.2 }}
-          className="mt-10"
-        >
-          <MagneticButton
-            size="lg"
-            strength={18}
-            asChild
-            className="btn-convex group press h-12 rounded-full px-8 text-base font-semibold text-white"
-          >
-            <a href={installerHref(release.fileName)} aria-label={t.cta.button}>
-              <DownloadIcon className="me-2.5 h-5 w-5 transition-transform duration-300 group-hover:translate-y-0.5" />
-              {t.cta.button}
-            </a>
-          </MagneticButton>
-        </motion.div>
-
-        <ReleaseChips state={releaseState} release={release} locale={locale} />
-
-        <p className="mt-4 text-xs text-muted-foreground">{t.cta.meta}</p>
       </div>
 
-      {/* detail cards — requirements / changelog / editions / waitlist */}
-      <div className="relative mx-auto mt-16 grid max-w-6xl gap-5 px-4 sm:px-6 lg:grid-cols-2">
-        <RequirementsCard />
-        <ChangelogCard state={changelogState} groups={changelog} />
-        <EditionsCard downloadHref={installerHref(release.fileName)} />
-        <WaitlistCard />
+      {/* premium card — animated conic orbit border, drifting glows, sheen
+          sweep and the breathing three-bar mark (all pure CSS in globals) */}
+      <div ref={cardRef} className={cn("shcard", cardInView && "in")}>
+        <span className="shcard__edge" aria-hidden="true" />
+        <span className="shcard__gA" aria-hidden="true" />
+        <span className="shcard__gB" aria-hidden="true" />
+        <span className="shcard__sheen" aria-hidden="true" />
+
+        <div className="shcard__in">
+          {/* top grid — brand lock + perks ⇄ editions + download */}
+          <div className="grid items-center gap-8 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
+            {/* LEFT — brand lock + perks */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-4">
+                <div className="shmark" aria-hidden="true">
+                  <i className="f1" />
+                  <i className="f2" />
+                  <i className="f3" />
+                </div>
+                <div className="min-w-0">
+                  <span
+                    dir="ltr"
+                    className="block bg-gradient-to-r from-[#fedb29] via-[#8b5cff] to-[#1fbf9c] bg-clip-text text-[11px] font-bold tracking-[0.22em] text-transparent"
+                  >
+                    PC MAX
+                  </span>
+                  <h3 className="type-title font-display mt-1 text-[clamp(21px,2.2vw,26px)] font-black leading-snug text-foreground">
+                    {t.footer.tagline}
+                  </h3>
+                </div>
+              </div>
+
+              <div className="shperks mt-7">
+                <ul>
+                  {perks.map((perk) => (
+                    <li key={perk}>
+                      <b aria-hidden="true" />
+                      {perk}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* RIGHT — editions + the download action */}
+            <div className="min-w-0">
+              <EditionPicker onPro={scrollToWaitlist} />
+
+              {/* REAL download — streams the installer from /api/download
+                  (SSR flavor) / the deployed artifact (static flavor) */}
+              <a
+                href={installerHref(release.fileName)}
+                aria-label={t.cta.button}
+                className="gc-btn-gold press mt-6 flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl text-[15px] font-extrabold"
+              >
+                <DownloadIcon className="h-5 w-5" />
+                {t.cta.button}
+              </a>
+
+              <ReleaseChips state={releaseState} release={release} locale={locale} />
+              <p className="mt-3 text-center text-xs text-muted-foreground">{t.cta.meta}</p>
+            </div>
+          </div>
+
+          {/* changelog — collapsible */}
+          <Changelog state={changelogState} groups={changelog} />
+
+          {/* foot — compatibility row (reference .instal__foot) */}
+          <div className="mt-8 border-t border-border pt-6">
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
+              {requirements.map(({ label, value }) => (
+                <span key={label} className="flex items-center gap-2">
+                  <i className="h-1.5 w-1.5 flex-none rounded-full bg-[#1fbf9c]" aria-hidden="true" />
+                  <span className="flex flex-wrap items-baseline gap-1.5">
+                    <span>{label}</span>
+                    <b className="font-semibold text-foreground">{value}</b>
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+
+      {/* waitlist — Pro early access, kept as its own compact card so the
+          premium card stays a single focused download surface */}
+      <WaitlistCard />
+    </Section>
   );
 }
