@@ -43,11 +43,12 @@ export function InstallFlow() {
        * the mobile "tx" grid area holds the whole text stack — icon, title,
        * desc — beside the circle instead of stacking the children on top of
        * each other. The counter is reset inline so this grid stays
-       * self-contained wherever it is rendered. */}
+       * self-contained wherever it is rendered. `steps-ambient` wires the
+       * staggered ring pulse on the counter circles (Task 28). */}
       <ol
         role="list"
         style={{ counterReset: "gcstep" }}
-        className="grid gap-x-6 min-[821px]:grid-cols-2 min-[821px]:gap-y-10 lg:grid-cols-4"
+        className="steps-ambient grid gap-x-6 min-[821px]:grid-cols-2 min-[821px]:gap-y-10 lg:grid-cols-4"
       >
         {t.install.steps.map((step, i) => {
           const Icon = stepIcons[i] ?? PerformanceIcon;

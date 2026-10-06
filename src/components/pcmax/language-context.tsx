@@ -11,6 +11,7 @@ import {
 } from "react";
 import { dictionary, type Dictionary, type Locale } from "./i18n/dictionary";
 import { IS_STATIC_EXPORT } from "@/lib/gh-pages";
+import { getLocaleMeta } from "@/lib/seo";
 
 type LanguageContextValue = {
   locale: Locale;
@@ -58,6 +59,14 @@ export function LanguageProvider({
     }
     document.documentElement.lang = next;
     document.documentElement.dir = next === "fa" ? "rtl" : "ltr";
+    /* Keep the tab in sync with the active locale (Task 28-a/A7): the SSR
+     * document carries the server locale's title/description — a client-side
+     * toggle swaps them so the tab/branding never shows the wrong language. */
+    const meta = getLocaleMeta(next);
+    document.title = meta.title;
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute("content", meta.description);
     window.dispatchEvent(new Event(LOCALE_EVENT));
   }, []);
 

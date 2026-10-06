@@ -59,6 +59,10 @@ export function Profiles() {
   const { t } = useLanguage();
   const [active, setActive] = useState<ProfileKey>("yellow");
 
+  /* C4/Task 28-c: this is a 2-option segmented switch, not a tab set — the
+   * radiogroup/radio semantics (aria-checked, no tabpanel needed) match
+   * what it actually does and satisfy the ARIA pattern it declares. */
+
   const profiles: Array<{ key: ProfileKey; data: typeof t.profiles.yellow }> = [
     { key: "yellow", data: t.profiles.yellow },
     { key: "green", data: t.profiles.green },
@@ -87,7 +91,7 @@ export function Profiles() {
         className="mb-10 flex justify-center"
       >
         <div
-          role="tablist"
+          role="radiogroup"
           aria-label={t.profiles.eyebrow}
           className="glass relative flex rounded-full p-1.5"
         >
@@ -97,8 +101,8 @@ export function Profiles() {
               <motion.button
                 key={key}
                 type="button"
-                role="tab"
-                aria-selected={active === key}
+                role="radio"
+                aria-checked={active === key}
                 onClick={() => setActive(key)}
                 whileTap={whileTapPress}
                 className={cn(
@@ -143,6 +147,9 @@ export function Profiles() {
               key={key}
               type="button"
               onClick={() => setActive(key)}
+              /* B8/Task 28-c: the whole card is one control — give it a real
+               * accessible name instead of the 60-word card contents. */
+              aria-label={`${data.name} · ${data.mode}`}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "0px 0px -60px 0px" }}

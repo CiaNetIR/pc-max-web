@@ -107,11 +107,11 @@ function ReleaseChips({ state, release, locale }: { state: DataState; release: R
  * collapsible hairline panel so the premium card stays focused on the
  * download action. Tag pills reuse the existing changelog.tags strings. */
 function Changelog({ state, groups }: { state: DataState; groups: ChangelogGroup[] }) {
-  const { t } = useLanguage();
+  const { t, locale } = useLanguage();
 
   return (
     <details className="mt-8">
-      <summary className="press flex cursor-pointer list-none items-center justify-center gap-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+      <summary className="press flex min-h-11 cursor-pointer list-none items-center justify-center gap-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
         <PerformanceIcon className="h-4 w-4 text-crimson" />
         {t.cta.changelog.title}
         <ChevronDown className="gc-chevron h-4 w-4 transition-transform duration-300" aria-hidden="true" />
@@ -128,13 +128,18 @@ function Changelog({ state, groups }: { state: DataState; groups: ChangelogGroup
           </div>
         )}
         {state === "error" && <p className="text-sm text-muted-foreground">{t.cta.changelog.error}</p>}
+        {/* ready + empty — a real state on a fresh DB (C5/Task 28-c): say so
+            instead of rendering a silently blank open panel. */}
+        {state === "ready" && groups.length === 0 && (
+          <p className="text-sm text-muted-foreground">{t.cta.changelog.empty}</p>
+        )}
         {state === "ready" &&
           groups.map((group) => (
             <div key={group.version}>
               <div className="flex items-baseline gap-2.5">
                 <span className="font-mono text-sm font-bold text-crimson">v{group.version}</span>
                 <span className="text-xs text-muted-foreground">
-                  {new Date(group.releasedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  {new Date(group.releasedAt).toLocaleDateString(locale === "fa" ? "fa-IR" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </span>
               </div>
               <ul className="mt-2.5 space-y-2">
@@ -168,7 +173,12 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
   const { t } = useLanguage();
 
   return (
-    <div className="grid gap-2.5">
+    /* D1/Task 28-d (critical): `grid-cols-1` emits minmax(0,1fr) — the bare
+       `grid gap-2.5` implicit auto track sized rows to their min-content
+       (~588px, inflated by the nowrap tagline), pushing the price column
+       and the Pro waitlist CTA out of the card where .shcard__in's
+       overflow:hidden silently clipped them on phones AND 1024–1279px. */
+    <div className="grid grid-cols-1 gap-2.5">
       {/* Free — current */}
       <div className="relative flex items-center justify-between gap-3 rounded-xl border border-crimson/40 bg-crimson/[0.08] px-4 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
@@ -208,7 +218,7 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
           <button
             type="button"
             onClick={onPro}
-            className="gc-btn-ghost press rounded-full px-3.5 py-1.5 text-[11px] font-bold"
+            className="gc-btn-ghost press min-h-11 rounded-full px-3.5 py-1.5 text-[11px] font-bold"
           >
             {t.cta.editions.pro.cta}
           </button>
@@ -294,7 +304,7 @@ function WaitlistCard() {
       ) : (
         <form onSubmit={onSubmit} className="mx-auto mt-6 flex max-w-md flex-col gap-3 sm:flex-row" noValidate>
           <label className="sr-only" htmlFor="waitlist-email">
-            {t.cta.waitlist.placeholder}
+            {t.cta.waitlist.emailLabel}
           </label>
           <Input
             id="waitlist-email"
@@ -351,7 +361,11 @@ export function DownloadCtaClient({
   const cardInView = useInView(cardRef, { once: true, margin: "0px 0px -100px 0px" });
 
   const scrollToWaitlist = () =>
-    document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    /* C8/Task 28-c: respect prefers-reduced-motion like every other
+       programmatic scroll on the page. */
+    document
+      .getElementById("waitlist")
+      ?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
 
   /* Perks — 100% reused dictionary strings: hero bullets, platform facts,
    * and the Free edition's own tagline. */
@@ -376,14 +390,16 @@ export function DownloadCtaClient({
 
   return (
     <Section id="download" className="overflow-hidden">
-      {/* ambient violet glow behind the card */}
+      {/* ambient crimson glow behind the card — physical centering (D2/Task
+          28-d): start-1/2 + a physical -translate-x-1/2 never flips in RTL and
+          pushed this glow fully off-screen in FA. */}
       <div
-        className="pointer-events-none absolute start-1/2 top-16 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.1] blur-[130px]"
+        className="pointer-events-none absolute left-1/2 top-16 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.1] blur-[130px]"
         aria-hidden="true"
       />
 
       {/* heading — gold kicker (built manually: SectionHeading renders the
-          violet kicker; the premium card section calls for the gold variant) */}
+          crimson kicker; the premium card section calls for the gold variant) */}
       <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-12">
         <motion.div
           initial={reduce ? false : { opacity: 0, y: 16 }}
@@ -449,7 +465,7 @@ export function DownloadCtaClient({
                   >
                     PC MAX
                   </span>
-                  <h3 className="type-title font-display mt-1 text-[clamp(21px,2.2vw,26px)] font-black leading-snug text-foreground">
+                  <h3 className="type-title font-display mt-1 text-[clamp(21px,2.2vw,26px)] font-extrabold leading-snug text-foreground">
                     {t.footer.tagline}
                   </h3>
                 </div>

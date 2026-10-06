@@ -17,7 +17,9 @@ type FaqItem = { q: string; a: string };
 
 /** One native disclosure card (reference .q). `.gc-q` + `.gc-glyph` are
  *  hand-rolled in globals.css (details[open] state) — the plus flips into
- *  a cross and the border warms violet while the details is open. */
+ *  a cross and the border warms crimson while the details is open; the
+ *  height animates via interpolate-size/::details-content where the
+ *  engine supports it (Task 28-b/B3). */
 function FaqCard({ item }: { item: FaqItem }) {
   return (
     <details className="gc-card gc-q overflow-hidden p-0">
@@ -30,9 +32,9 @@ function FaqCard({ item }: { item: FaqItem }) {
           +
         </span>
       </summary>
-      <div className="px-6 pb-5 text-sm leading-relaxed text-muted-foreground">
+      <p className="px-6 pb-5 text-sm leading-relaxed text-muted-foreground">
         {item.a}
-      </div>
+      </p>
     </details>
   );
 }

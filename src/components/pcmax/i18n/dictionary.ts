@@ -10,7 +10,9 @@ const en = {
     menu: "Menu",
   },
   hero: {
-    kicker: "Version 1.2.5 · Windows 10 & 11",
+    /* {version} is replaced with APP_VERSION at render (hero.tsx) — keep in
+       sync with INSTALLER_FILE via lib/gh-pages.ts, never hardcode it here. */
+    kicker: "Version {version} · Windows 10 & 11",
     title1: "Your PC.",
     title2: "Optimized.",
     sub: "PC MAX intelligently optimizes Windows, installs advanced frame-generation workflows, and prepares your games for maximum performance.",
@@ -22,8 +24,6 @@ const en = {
     primary: "Download PC MAX",
     secondary: "See how it works",
     hint: "Scroll to explore",
-    gpuAlt:
-      "Interactive 3D model of the NVIDIA GeForce RTX 5090 Founders Edition — a dual-fan, dual flow-through graphics card shown as a visual reference for the modern hardware PC MAX is built for.",
   },
   pipeline: {
     eyebrow: "What is PC MAX",
@@ -268,7 +268,6 @@ const en = {
     },
     settings: {
       language: "Language",
-      theme: "Theme",
       profile: "Default profile",
       telemetry: "Telemetry",
       off: "Off",
@@ -416,11 +415,13 @@ const en = {
       title: "What's new",
       tags: { feature: "New", improvement: "Improved", fix: "Fixed" },
       error: "Changelog unavailable right now.",
+      empty: "No release notes yet.",
     },
     waitlist: {
       title: "Get Pro early",
       desc: "One email when Pro lands. Nothing else — ever.",
       placeholder: "you@example.com",
+      emailLabel: "Email address",
       button: "Notify me",
       success: "You're on the list.",
       successDesc: "We'll email you the moment PC MAX Pro ships.",
@@ -465,8 +466,6 @@ const en = {
   },
   common: {
     switchTo: "فارسی",
-    themeLight: "Light",
-    themeDark: "Dark",
     skipToContent: "Skip to main content",
   },
   error404: {
@@ -493,7 +492,7 @@ const fa: Dictionary = {
     menu: "منو",
   },
   hero: {
-    kicker: "نسخه ۱.۲.۵ · ویندوز ۱۰ و ۱۱",
+    kicker: "نسخه {version} · ویندوز 10 و 11",
     title1: "رایانه‌ی شما.",
     title2: "بهینه‌سازی‌شده.",
     sub: "پی‌سی‌مکس ویندوز را هوشمندانه بهینه می‌کند، جریان‌کاری پیشرفته‌ی فریم‌ساخت را نصب می‌کند و بازی‌های شما را برای حداکثر عملکرد آماده می‌سازد.",
@@ -505,15 +504,13 @@ const fa: Dictionary = {
     primary: "دانلود PC MAX",
     secondary: "نحوه‌ی کار را ببینید",
     hint: "برای کاوش اسکرول کنید",
-    gpuAlt:
-      "مدل سه‌بعدی تعاملی کارت گرافیک انویدیا جی‌فورس RTX 5090 نسخه‌ی Founders Edition — کارت گرافیک دو-فنه با طراحی عبور جریان دوگانه، به‌عنوان نمونه‌ای از سخت‌افزار مدرنی که PC MAX برای آن ساخته شده است.",
   },
   pipeline: {
     eyebrow: "پی‌سی‌مکس چیست؟",
     title: "یک پلتفرم، میان بازی‌های شما و سخت‌افزارتان.",
-    desc: "پی‌سی‌مکس یک اپلیکیشن دسکتاپ ویندوز با سرور اختصاصی خودش است — تنظیمات گرافیکی هر بازی و بهینه‌سازی ویندوز از سرور ارائه می‌شوند؛ بدون نیاز به Rebuild.",
+    desc: "پی‌سی‌مکس یک اپلیکیشن دسکتاپ ویندوز با سرور اختصاصی خودش است — تنظیمات گرافیکی هر بازی و بهینه‌سازی ویندوز از سرور ارائه می‌شوند؛ بدون نیاز به ساخت مجدد اپ.",
     nodes: [
-      { label: "بازی‌ها", desc: "همگام‌شده از سرور — بازی‌های جدید بدون نیاز به Rebuild می‌رسند" },
+      { label: "بازی‌ها", desc: "همگام‌شده از سرور — بازی‌های جدید بدون نیاز به ساخت مجدد اپ می‌رسند" },
       { label: "پردازنده‌ی گرافیکی", desc: "تشخیص سخت‌افزار به‌صورت محلی، توسط موتور Rust" },
       { label: "ویندوز", desc: "رجیستری، سرویس‌ها و تسک‌های زمان‌بندی — در قالب یک تراکنش" },
       { label: "پی‌سی‌مکس", desc: "اپ دسکتاپ به‌همراه API اختصاصی‌اش — تنظیمات از سرور، نه تعبیه‌شده" },
@@ -641,7 +638,7 @@ const fa: Dictionary = {
       points: [
         "اولویت با نرخ فریم بالا برای بازی رقابتی",
         "تأخیر تحت کنترل، در حالی که فریم بالا می‌رود",
-        "بازی‌های جدید در همگام‌سازی بعدی شما فعال می‌شوند — بدون نیاز به Rebuild",
+        "بازی‌های جدید در همگام‌سازی بعدی شما فعال می‌شوند — بدون نیاز به ساخت مجدد اپ",
         "پروفایل‌های Balanced و Ultra Quality میان همین دو قرار دارند",
       ],
     },
@@ -695,7 +692,7 @@ const fa: Dictionary = {
       { name: "Baldur's Gate 3", before: 74, after: 96 },
       { name: "GTA V", before: 118, after: 144 },
     ],
-    note: "میانه‌ی ۳ اجرا · 1440p · میز آزمون RTX 4070 · فریم‌ساخت در صورت سازگاری · نتایج به سیستم شما بستگی دارد.",
+    note: "میانه‌ی 3 اجرا · 1440p · میز آزمون RTX 4070 · فریم‌ساخت در صورت سازگاری · نتایج به سیستم شما بستگی دارد.",
   },
   social: {
     eyebrow: "اعتماد",
@@ -712,7 +709,7 @@ const fa: Dictionary = {
       viewReport: "مشاهده‌ی گزارش",
       items: [
         { title: "بیلدهای کد‌ساین‌شده", desc: "هر نسخه پیش از اجرا امضا و قابل راستی‌آزمایی است.", meta: "", href: "" },
-        { title: "پاک در VirusTotal", desc: "صفر شناسایی در ۷۲ موتور.", meta: "اسکن: سپتامبر ۲۰۲۶", href: "https://www.virustotal.com/" },
+        { title: "پاک در VirusTotal", desc: "صفر شناسایی در 72 موتور.", meta: "اسکن: سپتامبر 2026", href: "https://www.virustotal.com/" },
         { title: "تله‌متری صفر", desc: "هیچ‌چیز به هیچ‌جا تماس نمی‌گیرد. بهینه‌سازی کاملاً آفلاین کار می‌کند.", meta: "", href: "" },
       ],
     },
@@ -751,7 +748,6 @@ const fa: Dictionary = {
     },
     settings: {
       language: "زبان",
-      theme: "پوسته",
       profile: "پروفایل پیش‌فرض",
       telemetry: "تله‌متری",
       off: "خاموش",
@@ -801,7 +797,7 @@ const fa: Dictionary = {
     core: [
       {
         q: "پی‌سی‌مکس واقعاً فریم را بهتر می‌کند؟",
-        a: "بله — از دو مسیر: تنظیم ویندوز (استارت‌آپ، حافظه، انرژی، سرویس‌ها) و جریان‌های کاری فریم‌ساخت به‌ازای هر بازی. میانگین ترکیبی روی میز آزمون ما +۳۴٪ است — میانه‌ی ۳ اجرای اندازه‌گیری‌شده. نتایج به سیستم شما بستگی دارد.",
+        a: "بله — از دو مسیر: تنظیم ویندوز (استارت‌آپ، حافظه، انرژی، سرویس‌ها) و جریان‌های کاری فریم‌ساخت به‌ازای هر بازی. میانگین ترکیبی روی میز آزمون ما +34٪ است — میانه‌ی 3 اجرای اندازه‌گیری‌شده. نتایج به سیستم شما بستگی دارد.",
       },
       {
         q: "می‌توانم تغییرات را برگردانم؟",
@@ -832,7 +828,7 @@ const fa: Dictionary = {
       },
       {
         q: "کدام نسخه‌های ویندوز پشتیبانی می‌شوند؟",
-        a: "ویندوز ۱۰ (۶۴بیتی) و ویندوز ۱۱. برخی بهینه‌سازی‌ها مخصوص هر نسخه هستند؛ پی‌سی‌مکس نسخه‌ی ویندوز شما را تشخیص می‌دهد و خودکار تنظیم می‌شود.",
+        a: "ویندوز 10 (64بیتی) و ویندوز 11. برخی بهینه‌سازی‌ها مخصوص هر نسخه هستند؛ پی‌سی‌مکس نسخه‌ی ویندوز شما را تشخیص می‌دهد و خودکار تنظیم می‌شود.",
       },
       {
         q: "اپتی‌اسکیلر (OptiScaler) چیست؟",
@@ -857,7 +853,7 @@ const fa: Dictionary = {
     title: "رایانه‌ی شما. در اوج.",
     sub: "پی‌سی‌مکس را دانلود کنید و ماشین خود را برای بهترین فریم‌های ممکنش آماده کنید.",
     button: "دانلود PC MAX",
-    meta: "دانلود رایگان · ویندوز ۱۰/۱۱ · ۶۴بیتی",
+    meta: "دانلود رایگان · ویندوز 10/11 · 64بیتی",
     fetching: "در حال بررسی آخرین نسخه…",
     versionLabel: "آخرین نسخه",
     sizeLabel: "حجم",
@@ -868,13 +864,13 @@ const fa: Dictionary = {
     requirements: {
       title: "نیازمندی‌های سیستم",
       os: "سیستم‌عامل",
-      osValue: "ویندوز ۱۰ / ۱۱ · ۶۴بیتی",
+      osValue: "ویندوز 10 / 11 · 64بیتی",
       arch: "معماری",
       archValue: "x64",
       ram: "حافظه",
-      ramValue: "حداقل ۴ گیگ · پیشنهادی ۸ گیگ",
+      ramValue: "حداقل 4 گیگ · پیشنهادی 8 گیگ",
       disk: "فضای دیسک",
-      diskValue: "۲۲۰ مگابایت",
+      diskValue: "220 مگابایت",
       gpu: "گرافیک",
       gpuValue: "کارت گرافیکی سازگار با DirectX 12",
     },
@@ -899,11 +895,13 @@ const fa: Dictionary = {
       title: "چه چیزی جدید است",
       tags: { feature: "جدید", improvement: "بهبود", fix: "رفع اشکال" },
       error: "تاریخچه تغییرات در حال حاضر در دسترس نیست.",
+      empty: "هنوز یادداشتی برای نسخه‌ها ثبت نشده است.",
     },
     waitlist: {
       title: "پرو را زودتر بگیرید",
       desc: "یک ایمیل هنگام عرضه‌ی Pro. همین — هیچ چیز دیگری.",
       placeholder: "you@example.com",
+      emailLabel: "نشانی ایمیل شما",
       button: "خبرم کن",
       success: "در لیست هستید.",
       successDesc: "به‌محض عرضه‌ی PC MAX Pro به شما ایمیل می‌زنیم.",
@@ -940,15 +938,13 @@ const fa: Dictionary = {
     privacyBody: "پی‌سی‌مکس آفلاین-محور کار می‌کند. هیچ داده‌ی شخصی‌ای جمع‌آوری، ذخیره یا منتقل نمی‌شود. این وب‌سایت فقط رویدادهای تجمیعی و بی‌نام (بازدید صفحه، شمار دانلود) را ثبت می‌کند؛ بدون هیچ شناسه‌ای. اپلیکیشن دسکتاپ تله‌متری صفر دارد. ایمیل‌های ثبت‌شده در لیست انتظار فقط برای اطلاع‌رسانی عرضه‌ی Pro استفاده می‌شوند و نه چیز دیگری.",
     termsBody: "پی‌سی‌مکس رایگان و «همین‌طور که هست» و بدون ضمانت ارائه می‌شود. مسئولیت نگه‌داری پشتیبان با شماست؛ اپ خودکار این کار را انجام می‌دهد اما راستی‌آزمایی عادت خوبی است. اپتی‌اسکیلر تحت مجوز متن‌باز خودش استفاده می‌شود. پی‌سی‌مکس وابسته به NVIDIA، مایکروسافت، Valve یا هیچ ناشر بازی نیست.",
     status: "همه‌ی سیستم‌ها عملیاتی هستند",
-    platformItems: ["ویندوز ۱۰ و ۱۱", "معماری x64", "آفلاین‌پذیر", "بدون تله‌متری"],
+    platformItems: ["ویندوز 10 و 11", "معماری x64", "آفلاین‌پذیر", "بدون تله‌متری"],
     rights: "© {year} پی‌سی‌مکس. تمامی حقوق محفوظ است.",
     disclaimer: "پی‌سی‌مکس محصولی مستقل است و وابسته به NVIDIA، مایکروسافت یا هیچ ناشر بازی نیست.",
-    madeFor: "ساخته‌شده برای ویندوز ۱۰ و ۱۱",
+    madeFor: "ساخته‌شده برای ویندوز 10 و 11",
   },
   common: {
     switchTo: "English",
-    themeLight: "روشن",
-    themeDark: "تاریک",
     skipToContent: "پرش به محتوای اصلی",
   },
   error404: {

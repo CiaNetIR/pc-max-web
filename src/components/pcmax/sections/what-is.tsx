@@ -14,7 +14,8 @@ const nodeIcons = [GamepadIcon, GpuIcon, WindowsIcon, LogoMark, PerformanceIcon]
  * (that spine was the "line crossing over the 01–05 items" bug source behind
  * Task 25). What remains is the Guardian card language: five numbered surface
  * cards in a 3 + 2 grid on lg, staggered whileInView reveals, and the fifth
- * card — the outcome node — closing the sequence in gold. */
+ * card — the outcome node — closing the sequence in gold. The icon chips
+ * carry a slow ambient breath (Task 28) so the band never reads as static. */
 export function WhatIsPcMax() {
   const { t } = useLanguage();
 
@@ -26,8 +27,10 @@ export function WhatIsPcMax() {
         {t.pipeline.nodes.map((node, i) => {
           const Icon = nodeIcons[i] ?? PerformanceIcon;
           /* the last node — "Optimized Experience" — is the outcome: it
-           * closes the pipeline in gold instead of violet. */
+           * closes the pipeline in gold instead of crimson. */
           const isLast = i === t.pipeline.nodes.length - 1;
+          /* ambient breath variants, staggered across the grid (Task 28) */
+          const breathe = ["gc-breathe", "gc-breathe-2", "gc-breathe-3"][i % 3];
 
           return (
             <motion.li
@@ -51,6 +54,7 @@ export function WhatIsPcMax() {
                 <span
                   className={cn(
                     "flex h-11 w-11 items-center justify-center rounded-xl ring-1 ring-inset",
+                    breathe,
                     isLast
                       ? "bg-[rgba(254,219,41,0.13)] text-[#fedb29] ring-[rgba(254,219,41,0.3)]"
                       : "bg-crimson/10 text-crimson ring-crimson/25"

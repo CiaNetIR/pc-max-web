@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, ArrowRight, Check } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { DownloadIcon } from "@/components/pcmax/icons";
-import { asset } from "@/lib/gh-pages";
+import { APP_VERSION, asset } from "@/lib/gh-pages";
 import { cn } from "@/lib/utils";
 
 /*
@@ -82,13 +82,14 @@ export function Hero() {
     >
       {/* copy stack */}
       <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-        {/* kicker */}
+        {/* kicker — version injected from APP_VERSION (Task 28-c/C1) so it
+            can never drift from the shipped installer again */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <span className="kicker">{t.hero.kicker}</span>
+          <span className="kicker">{t.hero.kicker.replace("{version}", APP_VERSION)}</span>
         </motion.div>
 
         {/* headline — word-reveal; accessible text lives on the h1 label,

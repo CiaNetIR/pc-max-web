@@ -3,6 +3,7 @@ import { createHash } from "crypto";
 import { readFile, stat } from "fs/promises";
 import path from "path";
 import { db } from "@/lib/db";
+import { INSTALLER_FILE } from "@/lib/gh-pages";
 
 export const dynamic = "force-dynamic";
 
@@ -45,17 +46,19 @@ function asciiFileName(fileName: string): string {
 }
 
 export async function GET() {
+  /* DB first (counts the download); on an empty/unreachable DB fall back
+   * to the known artifact on disk WITHOUT counting (Task 28-c/C2): the
+   * button in the CTA must never be a dead 404 link while the page still
+   * renders confident release chips above it. */
   let release: LatestRelease | null = null;
   try {
     release = await latestRelease();
   } catch {
-    return NextResponse.json({ error: "download unavailable" }, { status: 503 });
-  }
-  if (!release) {
-    return NextResponse.json({ error: "no release available" }, { status: 404 });
+    release = null;
   }
 
-  const filePath = resolveArtifact(release.fileName);
+  const fileName = release ? release.fileName : INSTALLER_FILE;
+  const filePath = resolveArtifact(fileName);
   if (!filePath) {
     return NextResponse.json({ error: "artifact not found" }, { status: 404 });
   }
@@ -66,20 +69,22 @@ export async function GET() {
   }
   const sha256 = createHash("sha256").update(buf).digest("hex");
 
-  // Atomic in-database increment (single UPDATE … downloads = downloads + 1) —
-  // never read-modify-write, so concurrent downloads cannot lose counts.
-  // Counter/logging failures must not block the actual file transfer.
-  await db.release
-    .update({ where: { id: release.id }, data: { downloads: { increment: 1 } } })
-    .catch((err) => console.error("[download] counter increment failed:", err));
-  await db.eventLog
-    .create({ data: { type: "download", meta: release.version } })
-    .catch((err) => console.error("[download] event log failed:", err));
+  if (release) {
+    // Atomic in-database increment (single UPDATE … downloads = downloads + 1) —
+    // never read-modify-write, so concurrent downloads cannot lose counts.
+    // Counter/logging failures must not block the actual file transfer.
+    await db.release
+      .update({ where: { id: release.id }, data: { downloads: { increment: 1 } } })
+      .catch((err) => console.error("[download] counter increment failed:", err));
+    await db.eventLog
+      .create({ data: { type: "download", meta: release.version } })
+      .catch((err) => console.error("[download] event log failed:", err));
+  }
 
   return new NextResponse(new Uint8Array(buf), {
     headers: {
       "Content-Type": "application/octet-stream",
-      "Content-Disposition": `attachment; filename="${asciiFileName(release.fileName)}"`,
+      "Content-Disposition": `attachment; filename="${asciiFileName(fileName)}"`,
       "Content-Length": String(buf.byteLength),
       "X-Checksum-Sha256": sha256,
       // never cached — every hit must pass through the counter
@@ -90,11 +95,9 @@ export async function GET() {
 
 export async function HEAD() {
   const release = await latestRelease().catch(() => null);
-  if (!release) {
-    return new NextResponse(null, { status: 404 });
-  }
+  const fileName = release ? release.fileName : INSTALLER_FILE;
 
-  const filePath = resolveArtifact(release.fileName);
+  const filePath = resolveArtifact(fileName);
   if (!filePath) {
     return new NextResponse(null, { status: 404 });
   }
@@ -109,7 +112,7 @@ export async function HEAD() {
   return new NextResponse(null, {
     headers: {
       "Content-Type": "application/octet-stream",
-      "Content-Disposition": `attachment; filename="${asciiFileName(release.fileName)}"`,
+      "Content-Disposition": `attachment; filename="${asciiFileName(fileName)}"`,
       "Content-Length": String(size),
       "Cache-Control": "no-store",
     },

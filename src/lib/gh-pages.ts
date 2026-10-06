@@ -56,6 +56,12 @@ export const GITHUB_REPO_URL = "https://github.com/DLSDT/pc-max-web";
  */
 export const INSTALLER_FILE = "PCMAX-Setup-2.4.1-x64.exe";
 
+/** Human version of the shipped release (hero kicker, meta copy). Sits next
+ * to INSTALLER_FILE so the marketed version can never drift from the
+ * artifact again (Task 28-c/C1: the hero said 1.2.5 for three releases).
+ * Keep in sync with INSTALLER_FILE + prisma/seed.ts. */
+export const APP_VERSION = "2.4.1";
+
 /**
  * Download href for the installer.
  *  - SSR flavor: the counting/streaming API route (unchanged).

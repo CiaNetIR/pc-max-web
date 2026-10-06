@@ -12,14 +12,14 @@ import { cn } from "@/lib/utils";
  * Features — three disciplines, told as three quiet editorial rows instead
  * of a wall of cards: Detect → Optimize → Protect. Guardian re-skin
  * (Task 26-d1): hairline-separated rows, ring-inset icon chips, display
- * numerals, and a tri-color tick rhythm — teal / gold / violet per group.
+ * numerals, and a tri-color tick rhythm — teal / gold / crimson per group.
  * Server-rendered content, whileInView animation only (opacity / small y).
  * Split layout alternates sides on lg+, stacks on mobile.
  */
 
 /* Guardian tri-color rhythm — each discipline's checklist keeps its own
- * tick accent: Detect → teal (default), Optimize → gold, Protect → violet. */
-const tickTone = ["", "tick-gold", "tick-violet"] as const;
+ * tick accent: Detect → teal (default), Optimize → gold, Protect → crimson. */
+const tickTone = ["", "tick-gold", "tick-crimson"] as const;
 
 export function Features() {
   const { t } = useLanguage();
@@ -53,7 +53,12 @@ export function Features() {
                 {/* intro side */}
                 <div className={cn(flip && "lg:order-2")}>
                   <div className="flex items-center gap-4">
-                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
+                    <span
+                      className={cn(
+                        "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25",
+                        i === 0 ? "gc-breathe" : i === 1 ? "gc-breathe-2" : "gc-breathe-3"
+                      )}
+                    >
                       <Icon className="h-6 w-6" />
                     </span>
                     <span className="font-display text-[13px] font-bold tabular-nums text-crimson">

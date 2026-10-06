@@ -54,7 +54,7 @@ export function Footer() {
               the visible wordmark is the accessible name, logo decorative. */}
           <div>
             <a href="#top" className="group flex items-center gap-2.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#ff5a50] to-[#e50914] shadow-[0_6px_20px_rgba(229,9,20,0.42)] transition-transform duration-300 group-hover:scale-105">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#ff3b30] to-[#e50914] shadow-[0_6px_20px_rgba(229,9,20,0.42)] transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src={asset("/brand/pcmax-logo-96.webp")}
                   alt=""
@@ -100,7 +100,7 @@ export function Footer() {
                   <button
                     type="button"
                     onClick={() => scrollTo(link.id)}
-                    className="press text-foreground/70 transition-colors hover:text-crimson"
+                    className="press py-1.5 text-foreground/70 transition-colors hover:text-crimson"
                   >
                     {link.label}
                   </button>
@@ -123,7 +123,7 @@ export function Footer() {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group press inline-flex items-center gap-2.5 text-foreground/70 transition-colors hover:text-crimson"
+                      className="group press inline-flex items-center gap-2.5 py-1.5 text-foreground/70 transition-colors hover:text-crimson"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card/60 text-crimson/80 transition-colors group-hover:border-crimson/40">
                         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -148,7 +148,7 @@ export function Footer() {
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="group press inline-flex items-center gap-2.5 text-foreground/70 transition-colors hover:text-crimson"
+                      className="group press inline-flex items-center gap-2.5 py-1.5 text-foreground/70 transition-colors hover:text-crimson"
                     >
                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card/60 text-crimson/80 transition-colors group-hover:border-crimson/40">
                         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -169,7 +169,7 @@ export function Footer() {
                   <button
                     type="button"
                     onClick={() => setDialog("privacy")}
-                    className="press text-foreground/70 transition-colors hover:text-crimson"
+                    className="press py-1.5 text-foreground/70 transition-colors hover:text-crimson"
                   >
                     {t.footer.privacy}
                   </button>
@@ -178,7 +178,7 @@ export function Footer() {
                   <button
                     type="button"
                     onClick={() => setDialog("terms")}
-                    className="press text-foreground/70 transition-colors hover:text-crimson"
+                    className="press py-1.5 text-foreground/70 transition-colors hover:text-crimson"
                   >
                     {t.footer.terms}
                   </button>

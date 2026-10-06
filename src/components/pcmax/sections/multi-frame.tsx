@@ -30,7 +30,7 @@ const cardEnter = [
 const CARD_IDS = ["optiscaler", "ai-optical-flow", "streamline"] as const;
 
 /* Guardian tri-color rhythm — badge pills carry their card's own accent:
- * OptiScaler violet, AI Optical Flow teal, Streamline gold. */
+ * OptiScaler crimson, AI Optical Flow teal, Streamline gold. */
 const badgeTone = [
   "bg-crimson/10 text-crimson ring-crimson/25",
   "bg-[rgba(31,191,156,0.14)] text-[#1fbf9c] ring-[rgba(31,191,156,0.32)]",
@@ -54,9 +54,9 @@ export function MultiFrame() {
 
   return (
     <Section id="multiframe" className="relative overflow-hidden">
-      {/* ambient violet aura — one quiet wash, nothing rotating */}
+      {/* ambient crimson aura — one quietly pulsing wash (Task 28) */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-[380px] w-[720px] max-w-none rounded-full bg-crimson/[0.07] blur-[120px]"
+        className="gc-glow-pulse pointer-events-none absolute inset-x-0 top-0 mx-auto h-[380px] w-[720px] max-w-none rounded-full bg-crimson/[0.07] blur-[120px]"
         aria-hidden="true"
       />
 
@@ -158,7 +158,7 @@ export function MultiFrame() {
           className="press group flex w-full items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card/60 px-5 py-4 text-start transition-colors hover:border-crimson/40"
         >
           <span className="flex items-center gap-3 text-sm font-bold text-foreground">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
+            <span className="gc-breathe flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
               <FileText className="h-4.5 w-4.5" />
             </span>
             {t.multiframe.tech.title}

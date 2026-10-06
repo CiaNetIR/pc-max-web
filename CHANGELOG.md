@@ -4,6 +4,88 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.1.1] — 2026-10-06
+
+**Multi-agent professional audit fixes** — a four-specialist review team
+(visual design director, UX expert, UI engineer, responsive/RTL expert)
+audited the live v2.1.0 site and surfaced 35+ findings; this release ships
+the critical/major/minor fixes (Task 28).
+
+### Fixed — critical
+- **Download card clipped its own prices** (`download-cta.client.tsx`): the
+  EditionPicker's bare `grid gap-2.5` implicit auto track sized rows to
+  min-content (~588px), so the Free price and the Pro waitlist CTA rendered
+  outside the card where `.shcard__in`'s `overflow:hidden` silently clipped
+  them — invisible on phones AND 1024–1279px, partially cut even at 1920px.
+  `grid-cols-1` (minmax(0,1fr)) fixes it everywhere (D1).
+- **Frosted-glass blur stripped from the header/HUD chips**: Lightning CSS
+  deduped the manual `-webkit-backdrop-filter` pair down to the prefixed
+  form alone, which Blink/Gecko drop — the signature sticky header rendered
+  as a flat black veil. Unprefixed-only declarations now survive the
+  compile (A1).
+- **`/api/download` dead-404 on an empty/unreachable DB** while the page
+  still showed confident release chips: the route now falls back to the
+  known installer artifact on disk (no counter) — the primary CTA is never
+  a dead link (C2).
+
+### Fixed — major
+- **Card hover-lift dead on 19/44 cards**: framer-motion settles an inline
+  `transform: none` that out-ranked `.gc-card:hover`'s transform. The lift
+  now rides the independent `translate` property — verified lifting under a
+  real mouse hover (A2).
+- **Ambient glows fully off-screen in RTL** (showcase + download): the
+  `start-1/2` + physical `-translate-x-1/2` combo never flips in RTL and
+  pushed the glows ~820px off-canvas in FA. Physical `left-1/2` centering
+  restores them (measured centerOffset 0px) (D2).
+- **Persian prose rhythm 1.556 where the reference runs 1.9–2.05**: Tailwind
+  size utilities' own line-heights beat the base body value. Unlayered
+  `html[lang="fa"]` rules now pin p/li/summary at 1.9, FA h2 at weight 800
+  and `.type-title` at 1.45 (A3).
+- **Hero advertised v1.2.5 for three releases** while the download card
+  ships 2.4.1: the kicker now interpolates `{version}` from a single
+  `APP_VERSION` constant that lives next to `INSTALLER_FILE` — the marketed
+  version can never drift from the artifact again (C1/B4).
+- **FAQ answers snapped open**: `interpolate-size: allow-keywords` +
+  `::details-content` height transition (0.28s) animate the disclosure where
+  supported; other engines keep the native snap (B3).
+- **"Dead feeling" (حس مرده) — mid-page had zero persistent motion across
+  8/12 sections**: distributed quiet ambient life — icon chips breathe
+  (gc-breathe ×3 phases), ambient washes pulse (gc-glow-pulse), install
+  counter circles carry a staggered ring pulse (steps-ambient, replacing
+  ~110 lines of dead `.gc-steps` choreography CSS) (A4/B2/D8).
+- **EN toggle kept the Persian `<title>`**: `setLocale` now swaps
+  `document.title` + meta description from the same locale metadata the SSR
+  document uses (A7).
+
+### Fixed — minor / polish
+- Kicker reshaped to the reference's flat **notched tag** (clip-path
+  polygon, no dot/border) — 14+ kickers now match tweakfa's signature
+  geometry (A8); card radius tightened to the reference's 16px (A9);
+  mid-section density raised (py-24/28, page 14,237→14,090px) (A10).
+- Consolidated the near-duplicate reds (#ff6b61→#ff8a80, #ff5a50→#ff3b30)
+  and renamed the lying `*-violet*` tokens/classes to `*-crimson*`; stale
+  violet-era comments rewritten (A5/A11).
+- Touch targets: showcase tabs wired to the existing 44px coarse-pointer
+  rule via the `showcase-tab` class; changelog summary + Pro ghost pill +
+  benchmarks view-all ≥44px; footer links 26→38px (D3/D4).
+- `.shcard__sheen` sweep mirrored in RTL via `inset-inline-start`; the
+  trust-card `ArrowUpRight` glyph mirrors in FA and nudges toward the
+  reading direction (D5/D6).
+- ARIA: the profiles "tablist" is now a real `radiogroup/radio`, the
+  profile card buttons carry a concise `aria-label` instead of a 60-word
+  accessible name, the waitlist field's accessible name is a real label
+  (was the placeholder), the showcase slide title is an h3 (was a second
+  h2) (B7/B8/C3/C4).
+- i18n: `«بدون نیاز به Rebuild»` translated (×3); FA digits unified to
+  Latin (Poppins-digits policy — 41 conversions) so versions/metrics/
+  OS tokens stop mixing three digit systems; changelog dates localize
+  (fa-IR); the "0 downloads" live pill hides until there is something to
+  show; changelog empty state renders a real message (B6/B11/C5/C6/C7).
+- `font-black` (900 — no such face) on the shcard title → `font-extrabold`
+  (A6); gallery alt drops the English "— key art" suffix on FA (C9);
+  removed 4 dead dictionary leaves (`hero.gpuAlt`, `showcase.settings.theme`,
+  `common.themeLight/themeDark`) (C10).
+
 ## [2.1.0] — 2026-10-06
 
 **Red Edition + the TweakFa type system** — per user request

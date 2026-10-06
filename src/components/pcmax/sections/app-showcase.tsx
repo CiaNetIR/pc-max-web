@@ -68,7 +68,7 @@ const panelDetails = {
     },
   },
   fa: {
-    sync: { label: "همگام‌سازی", status: "آنلاین · آخرین همگام‌سازی ۲ دقیقه پیش" },
+    sync: { label: "همگام‌سازی", status: "آنلاین · آخرین همگام‌سازی 2 دقیقه پیش" },
     rating: "کارایی",
     newOpt: "بهینه‌سازی جدید",
     win: {
@@ -80,7 +80,7 @@ const panelDetails = {
     },
     settings: {
       sync: "همگام‌سازی",
-      lastSync: "۲ دقیقه پیش همگام شد",
+      lastSync: "2 دقیقه پیش همگام شد",
       syncNow: "همگام‌سازی الآن",
       cache: "کش",
       clearCache: "پاک کردن کش",
@@ -91,13 +91,6 @@ const panelDetails = {
   },
 } as const;
 
-/* Persian digit shaping for the FA locale (display only). */
-const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
-function localizeNum(locale: string, value: number | string): string {
-  const s = String(value);
-  return locale === "fa" ? s.replace(/\d/g, (d) => FA_DIGITS.charAt(Number(d))) : s;
-}
-
 /* Dashboard mock data — per-game metadata for the titles the product mock
  * has full ratings for (names/genres come from the dictionary library;
  * cover art matches it via dictIndex). */
@@ -107,7 +100,7 @@ const dashboardGames = [
     year: 2020,
     rating: 78,
     tech: ["DLSS", "FG", "RT"],
-    profile: { en: "Maximum FPS · Target 165 FPS", fa: "حداکثر FPS · هدف ۱۶۵ فریم" },
+    profile: { en: "Maximum FPS · Target 165 FPS", fa: "حداکثر FPS · هدف 165 فریم" },
     isNew: false,
   },
   {
@@ -115,7 +108,7 @@ const dashboardGames = [
     year: 2024,
     rating: 85,
     tech: ["DLSS", "FG"],
-    profile: { en: "Balanced · Target 120 FPS", fa: "متعادل · هدف ۱۲۰ فریم" },
+    profile: { en: "Balanced · Target 120 FPS", fa: "متعادل · هدف 120 فریم" },
     isNew: true,
   },
 ] as const;
@@ -262,7 +255,7 @@ export function AppShowcase() {
   const optiCard = t.multiframe.cards[0];
   const badgeLabel = "badges" in optiCard ? (optiCard.badges ?? []).join(" · ") : "";
 
-  /* Frame + surface shared by every media panel: violet gradient frame,
+  /* Frame + surface shared by every media panel: crimson gradient frame,
    * diagonal sheen sweep, dark app surface, gentle hover scale. */
   const frameClass = "gc-frame media-sheen transition-transform duration-500 ease-out hover:scale-[1.012]";
   const surfaceClass =
@@ -270,9 +263,12 @@ export function AppShowcase() {
 
   return (
     <Section id="showcase" className="overflow-hidden">
-      {/* ambient violet glow behind the slider */}
+      {/* ambient crimson glow behind the slider — physical centering
+          (left + -translate-x-1/2): `start-1/2` resolves to right:50% in RTL
+          and the physical translate never flips, which pushed the glow
+          ~820px off-screen in FA (D2/Task 28-d). */}
       <div
-        className="pointer-events-none absolute start-1/2 top-24 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.07] blur-[130px]"
+        className="pointer-events-none absolute left-1/2 top-24 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.07] blur-[130px]"
         aria-hidden="true"
       />
 
@@ -312,7 +308,7 @@ export function AppShowcase() {
               ref={tab === key ? activeTabRef : undefined}
               onClick={() => setTab(key)}
               className={cn(
-                "press h-10 flex-none snap-center rounded-full px-4 text-[13.5px] font-bold transition-colors",
+                "press showcase-tab h-10 flex-none snap-center rounded-full px-4 text-[13.5px] font-bold transition-colors",
                 tab === key
                   ? "bg-[#e50914] text-white shadow-[0_8px_24px_rgba(229,9,20,0.35)]"
                   : "bg-[#1b1b21] text-muted-foreground ring-1 ring-inset ring-border hover:text-foreground"
@@ -359,7 +355,7 @@ export function AppShowcase() {
                             src={gameFiles[gameIdx].src}
                             srcSet={gameFiles[gameIdx].srcSet}
                             sizes="(max-width: 640px) calc(100vw - 2.5rem), (max-width: 1024px) calc(100vw - 3.5rem), 592px"
-                            alt={`${gameInfo.name} — key art`}
+                            alt={gameInfo.name}
                             loading="lazy"
                             decoding="async"
                             className="absolute inset-0 h-full w-full object-cover"
@@ -384,7 +380,7 @@ export function AppShowcase() {
                             <HudChip className="hud-drift-3 end-3 top-[4.25rem] sm:end-4 sm:top-[4.5rem]">
                               <GpuIcon className="h-3.5 w-3.5 text-crimson" />
                               <b className="font-display tabular-nums text-foreground">
-                                {localizeNum(locale, `${gameMeta.rating}/100`)}
+                                {gameMeta.rating}/100
                               </b>
                               <span className="font-medium text-muted-foreground">{copy.rating}</span>
                             </HudChip>
@@ -403,7 +399,7 @@ export function AppShowcase() {
                             </div>
                             <p className="mt-0.5 text-[11px] font-medium text-white/70">
                               {gameInfo.genre}
-                              {gameMeta ? ` · ${localizeNum(locale, gameMeta.year)}` : ""}
+                              {gameMeta ? ` · ${gameMeta.year}` : ""}
                             </p>
                             {gameMeta && (
                               <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -420,7 +416,7 @@ export function AppShowcase() {
                             )}
                           </div>
                         </div>
-                        {/* thumbnail strip — 92px thumbs, active gets the violet ring */}
+                        {/* thumbnail strip — 92px thumbs, active gets the crimson ring */}
                         <div className="flex snap-x gap-2 overflow-x-auto border-t border-white/[0.07] p-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                           {gameFiles.map((g, i) => (
                             <button
@@ -528,7 +524,7 @@ export function AppShowcase() {
                           <span className="text-[#fedb29]">{copy.win.rollbackChip}</span>
                         </HudChip>
                         <HudChip className="hud-drift-2 end-4 top-4">
-                          <span className="font-display tabular-nums text-[#1fbf9c]">{localizeNum(locale, "6/8")}</span>
+                          <span className="font-display tabular-nums text-[#1fbf9c]">6/8</span>
                           <span className="font-medium text-muted-foreground">{t.showcase.win.modules}</span>
                         </HudChip>
                         <div className="space-y-4">
@@ -536,8 +532,8 @@ export function AppShowcase() {
                             <div className="mb-2.5 flex items-center justify-between text-xs font-semibold text-muted-foreground">
                               <span>{t.showcase.win.applied}</span>
                               <span className="text-foreground">
-                                {localizeNum(locale, 6)} <span className="text-muted-foreground">{t.showcase.win.of}</span>{" "}
-                                {localizeNum(locale, 8)} {t.showcase.win.modules}
+                                {6} <span className="text-muted-foreground">{t.showcase.win.of}</span>{" "}
+                                {8} {t.showcase.win.modules}
                               </span>
                             </div>
                             <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
@@ -657,12 +653,13 @@ export function AppShowcase() {
                   )}
                 </div>
 
-                {/* TEXT */}
+                {/* TEXT — h3 (Task 28-b/B7): the slide title sits under the
+                    section's own h2; a second h2 broke the outline. */}
                 <div className="min-w-0 lg:order-1">
                   <span className="kicker">{t.showcase.tabs[tab]}</span>
-                  <h2 className="type-title font-display mt-4 text-2xl font-bold text-foreground sm:text-3xl">
+                  <h3 className="type-title font-display mt-4 text-2xl font-bold text-foreground sm:text-3xl">
                     {slide.title}
-                  </h2>
+                  </h3>
                   <ul className="mt-6 grid gap-3.5">
                     {slide.bullets.map((b) => (
                       <li key={b} className="flex items-start gap-3 text-[14.5px] leading-relaxed text-muted-foreground">

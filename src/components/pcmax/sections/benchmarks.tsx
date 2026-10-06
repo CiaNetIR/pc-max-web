@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
 /*  Benchmarks — the headline numbers as Guardian stat tiles, then    */
-/*  the per-game chart with violet gradient bars on elevated tracks.  */
+/*  the per-game chart with crimson gradient bars on elevated tracks. */
 /*  Section 37: +34% → few samples → view-all.                        */
 /* ------------------------------------------------------------------ */
 
 const VISIBLE = 3;
 
-/* bar tracks sit on the elevated surface, fills are violet ramp / dim */
+/* bar tracks sit on the elevated surface, fills are crimson ramp / dim */
 const BAR_TRACK =
   "h-2.5 min-w-0 flex-1 rounded-full bg-[#1b1b21] ring-1 ring-inset ring-white/[0.06] sm:h-3";
 const BEFORE_FILL = "h-full rounded-full bg-foreground/20";
@@ -168,10 +168,11 @@ export function Benchmarks() {
 
       {/* Chart canvas */}
       <div className="relative mt-10 sm:mt-12">
-        {/* ambient — a very soft violet halo behind the card */}
+        {/* ambient — a very soft crimson halo behind the card, slowly
+            pulsing (Task 28) */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -inset-4 rounded-[3rem] bg-crimson/[0.04] blur-[100px] sm:-inset-6"
+          className="gc-glow-pulse pointer-events-none absolute -inset-4 rounded-[3rem] bg-crimson/[0.04] blur-[100px] sm:-inset-6"
         />
 
         <Reveal y={32}>
@@ -186,7 +187,7 @@ export function Benchmarks() {
                 {t.bench.beforeLabel}
               </span>
               <span className={CHIP}>
-                <span className="h-2 w-2 rounded-full bg-crimson" aria-hidden="true" />
+                <span className="gc-breathe h-2 w-2 rounded-full bg-crimson" aria-hidden="true" />
                 {t.bench.afterLabel}
               </span>
             </div>
@@ -243,7 +244,7 @@ export function Benchmarks() {
                 onClick={() => setShowAll((v) => !v)}
                 aria-expanded={showAll}
                 aria-controls="bench-extra"
-                className="gc-btn-ghost mx-auto mt-7 flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold"
+                className="gc-btn-ghost mx-auto mt-7 flex min-h-11 items-center gap-2 rounded-full px-5 text-xs font-bold"
               >
                 {showAll ? t.bench.viewLess : t.bench.viewAll}
                 <ChevronDown

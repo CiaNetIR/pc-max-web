@@ -5,6 +5,7 @@ import { ArrowUpRight, FileCheck2, ShieldCheck, WifiOff } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { AnimatedCounter, Reveal, Section, SectionHeading } from "@/components/pcmax/ui/primitives";
 import { springFluid } from "@/components/pcmax/ui/motion";
+import { cn } from "@/lib/utils";
 
 /* Prop payload — serialized server → client. The server wrapper
  * (social-proof.tsx) runs the same aggregates /api/stats runs and seeds
@@ -29,12 +30,16 @@ const TRUST_ICONS = [FileCheck2, ShieldCheck, WifiOff];
  * initial document), the gc-stat tiles keep their SSR-final-value counters,
  * and the trust claims read as reference-style voices cards. */
 export function SocialProofClient({ stats }: SocialProofClientProps) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const reduce = useReducedMotion();
 
   /* Live-downloads pill — seeded from the server aggregate; hidden when the
-   * aggregate was unavailable (stats === null). */
-  const liveDownloads = stats !== null && typeof stats.downloads === "number" ? stats.downloads : null;
+   * aggregate was unavailable OR nothing has been served yet (a "0" pill
+   * directly contradicts the 290K+ marketing stat next to it — B6/Task 28-b). */
+  const liveDownloads =
+    stats !== null && typeof stats.downloads === "number" && stats.downloads > 0
+      ? stats.downloads
+      : null;
 
   /* Reduced motion → jump, don't glide, to the anchored section. */
   const scrollTo = (id: string) => {
@@ -141,7 +146,14 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
                     )}
                     {hasEvidence && (
                       <ArrowUpRight
-                        className="h-3.5 w-3.5 text-crimson/70 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        className={cn(
+                          "h-3.5 w-3.5 text-crimson/70 transition-transform duration-300",
+                          /* D6/Task 28-d: mirror the external-link glyph in RTL
+                           * and nudge it toward the reading direction. */
+                          isRTL
+                            ? "-scale-x-100 group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
+                            : "group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        )}
                         aria-hidden="true"
                       />
                     )}
