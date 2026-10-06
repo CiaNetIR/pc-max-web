@@ -129,6 +129,37 @@ const en = {
       { title: "Pick a Game", desc: "Browse or search, open a title, choose a profile" },
       { title: "Apply", desc: "A full snapshot is taken first — then it applies. Play." },
     ],
+    /* Task 39 — the pinned scroll journey (scrollytelling) over these same
+     * seven steps. Labels are UI chrome only; the step content itself stays
+     * the steps array above (single source of truth, EN+FA). */
+    journey: {
+      menuLabel: "Installation steps",
+      scrollHint: "Scroll to run the sequence",
+      skip: "Skip the sequence",
+      counter: "Step {n} of {total}",
+      disclaimer: "Illustrative interface — this preview is driven by your scroll.",
+    },
+  },
+  /* Task 39 — the sector HUD: the fixed mini menu box that tracks scroll
+   * position through the page's sections (sector names only, in page
+   * order — the ids live in the component, translations here). */
+  hud: {
+    label: "Sector",
+    menuLabel: "Jump to section",
+    close: "Close",
+    sectors: [
+      "Top",
+      "Console",
+      "Platform",
+      "Frame Gen",
+      "Profiles",
+      "Safety",
+      "Benchmarks",
+      "Community",
+      "Install",
+      "FAQ",
+      "Download",
+    ],
   },
   library: {
     eyebrow: "Game Library",
@@ -634,6 +665,31 @@ const fa: Dictionary = {
       { title: "همگام‌سازی", desc: "کاتالوگ بازی‌ها و پروفایل‌ها از سرور همگام می‌شوند" },
       { title: "انتخاب بازی", desc: "مرور یا جست‌وجو کنید؛ بازی را باز و پروفایل را انتخاب کنید" },
       { title: "اعمال", desc: "اول اسنپ‌شات کامل، بعد اعمال پروفایل. بازی کنید." },
+    ],
+    journey: {
+      menuLabel: "مراحل نصب",
+      scrollHint: "برای اجرای توالی اسکرول کنید",
+      skip: "رد کردن توالی",
+      counter: "مرحله {n} از {total}",
+      disclaimer: "رابط نمایشی — این پیش‌نمایش با اسکرول شما هدایت می‌شود.",
+    },
+  },
+  hud: {
+    label: "بخش",
+    menuLabel: "پرش به بخش",
+    close: "بستن",
+    sectors: [
+      "آغاز",
+      "کنسول",
+      "پلتفرم",
+      "فریم‌ساخت",
+      "پروفایل‌ها",
+      "ایمنی",
+      "بنچمارک",
+      "جامعه",
+      "نصب",
+      "سوالات",
+      "دانلود",
     ],
   },
   library: {

@@ -4,6 +4,71 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.6.0] — 2026-10-07
+
+**The Scroll Odyssey** — owner request: "review everything and give the
+scroll a gorgeous UI — when you scroll there's a menu box and the page
+stays fixed until it completes; add the best and the most, with the
+highest performance, using the ui-ux-pro-max skill." Designed against the
+skill's pinned-scrollytelling rules (motion row 6: deterministic height,
+scrub-smoothed progress, max 1–2 pinned sections, reduced-motion = the
+readable static state) and its pre-delivery checklist (Lucide icons,
+visible focus, contrast, 375–1440 responsive, reflow without clipping).
+
+### Added — the pinned Install Journey (scrollytelling)
+- The seven real installation steps become a scroll-driven sequence:
+  the section pins for the length of a deterministic CSS runway
+  (`calc(100svh + 7 × --gc-jstep)` — no JS measurement, no
+  image/font-dependent sizing), the page "stays fixed" while the menu box
+  completes, then releases exactly when the sequence does.
+- **The menu box**: a glass step rail (vertical on desktop, snap strip on
+  phones) with numbered chips, `aria-current="step"` on the active item,
+  a scroll-scrubbed crimson fill per step, and click-to-jump that lands
+  precisely on the step's slice of the runway (verified E2E: 0.573 vs
+  the 4/7 = 0.571 target).
+- **The console**: a glass panel with HUD corner brackets hosting seven
+  decorative mock scenes (download with a scroll-driven progress bar,
+  setup wizard, app launch, sign-in, server sync with a scrubbed SVG
+  arc, the six real library titles + the real Maximum FPS profile, and
+  the snapshot→apply end state). All aria-hidden; the REAL step copy
+  lives in the caption below (tab pattern — every step in the DOM,
+  inactive ones `hidden`), with a "driven by your scroll" disclaimer.
+- **Affordances**: a "Scroll to run the sequence" pill that fades after
+  the first step, a "Skip the sequence" escape hatch, and a
+  "Step N of 7" counter (RTL-safe `dir="ltr"` numerals).
+- **Performance contract**: one rAF `useScroll` + one scrub spring for
+  the whole section; React commits only when the integer step changes
+  (≤7 per pass); every animated property is transform/opacity; the
+  download bar and sync arc read MotionValues directly (zero re-renders);
+  native scrolling via `position: sticky` — zero wheel hijacking.
+- **Accessibility contract**: motion-sensitive visitors (and SSR/no-JS)
+  keep the calm static seven-step grid — the journey never mounts for
+  them (hydration-safe `useSyncExternalStore` gate, verified by
+  emulating `prefers-reduced-motion`).
+
+### Added — the sector HUD (the scroll menu box)
+- A fixed gaming HUD chip (lg+, bottom inline-start, RTL-aware) that
+  tracks the current sector of the page — "SECTOR 09/11 · INSTALL" —
+  through one IntersectionObserver on the eleven real sections, using
+  the same focus band as the navbar's scroll-spy.
+- Clicking it opens a quick-jump panel of eleven REAL `#section`
+  anchors (crawlable, middle-click friendly, CSS smooth-scroll +
+  scroll-mt offsets), with the active sector highlighted; Escape closes
+  and restores focus; `inert` while hidden at the hero.
+- E2E-found-and-fixed: the chip's counter was 0-based while the menu
+  items were 1-based (06 vs 07 at the same section) — now both 1-based.
+
+### Fixed
+- Mobile (≤767px): tightened the pinned stage's paddings, panel
+  min-height, caption type scale and mock-scene spacing so the whole
+  caption stack + disclaimer fit above the phones-only CTA bar at
+  320×568 (VLM-found clipping; verified with per-line Range-rect
+  measurements — both disclaimer lines fully inside the viewport).
+- Removed `scroll-snap` from the phone step strip: snap points fought
+  the keep-in-view programmatic `scrollLeft` (E2E-verified: a manual
+  240px set snapped back to 191px; after removal the active chip is
+  fully revealed, `activeFullyVisible: true`).
+
 ## [2.5.0] — 2026-10-07
 
 **The Motion Pass** — owner request: "maximum animation, cutting-edge UI,

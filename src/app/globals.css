@@ -653,6 +653,542 @@ html[lang="fa"] h2 {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Task 39 — the Install Journey: a pinned scrollytelling stage       */
+/*  (ui-ux-pro-max skill, motion row 6 "pin/scrub/scrollytelling").    */
+/*  The runway (.gc-journey) owns a DETERMINISTIC CSS height (skill    */
+/*  rule: pinning needs deterministic height — no JS measurement, no   */
+/*  image/font-dependent sizing inside). The stage is position:sticky  */
+/*  — native scrolling, zero wheel hijacking. Progress comes from      */
+/*  framer's rAF useScroll + a scrub spring; every animated property   */
+/*  is transform/opacity. Motion-sensitive visitors never see this     */
+/*  markup at all — they keep the calm static grid above.              */
+/* ------------------------------------------------------------------ */
+
+.gc-journey {
+  --gc-jstep: 60vh;
+  --gc-jcount: 7;
+  position: relative;
+  height: calc(100vh + var(--gc-jcount) * var(--gc-jstep));
+}
+@supports (height: 100svh) {
+  .gc-journey {
+    height: calc(100svh + var(--gc-jcount) * var(--gc-jstep));
+  }
+}
+@media (max-width: 820px) {
+  .gc-journey {
+    --gc-jstep: 46vh;
+  }
+}
+
+/* The pinned stage — one viewport tall, rides the runway while it lasts. */
+.gc-jstage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: clamp(84px, 11vh, 108px);
+  padding-bottom: 28px;
+}
+@supports (height: 100svh) {
+  .gc-jstage {
+    height: 100svh;
+  }
+}
+@media (max-width: 767px) {
+  /* leave room for the phones-only fixed conversion bar + safe area;
+     tighter top padding keeps the whole caption stack on screen at 568px
+     (VLM-found clipping fix, Task 39) */
+  .gc-jstage {
+    padding-top: 76px;
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Stage content: rail (menu box) + visual column. */
+.gc-jgrid {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  gap: 10px;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+@media (min-width: 992px) {
+  .gc-jgrid {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(258px, 316px) minmax(0, 1fr);
+    gap: clamp(24px, 3vw, 44px);
+  }
+  /* the rail centers itself; the visual column stretches so the glass
+     console panel fills the stage height */
+  .gc-jrail {
+    align-self: center;
+    max-height: 100%;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .gc-jrail::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* The menu box — vertical rail on desktop, snap strip on phones. */
+.gc-jrail {
+  display: flex;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(18, 18, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* no scroll-snap here on purpose: the keep-in-view effect sets exact
+     scrollLeft values for the active chip, and snap points fight those
+     programmatic scrolls (verified E2E — snap pulled 240 back to 191) */
+}
+.gc-jrail::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 992px) {
+  .gc-jrail {
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px;
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+}
+.gc-jrail-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex: none;
+  width: auto;
+  padding: 7px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.62);
+  transition: color 0.25s ease, background-color 0.25s ease;
+  cursor: pointer;
+  text-align: start;
+  white-space: nowrap;
+}
+@media (min-width: 992px) {
+  .gc-jrail-btn {
+    width: 100%;
+    white-space: normal;
+  }
+}
+.gc-jrail-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+.gc-jrail-btn[aria-current="step"] {
+  color: #fff;
+  background: rgba(229, 9, 20, 0.1);
+}
+.gc-jnum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #1b1b21;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.56);
+  transition: color 0.25s ease, border-color 0.25s ease,
+    background-color 0.25s ease, box-shadow 0.25s ease;
+  flex: none;
+}
+.gc-jrail-btn[aria-current="step"] .gc-jnum {
+  color: #ff8a80;
+  border-color: rgba(229, 9, 20, 0.45);
+  background: rgba(229, 9, 20, 0.12);
+  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.14);
+}
+/* Per-step scroll fill — scaleX is driven by the scrub spring. */
+.gc-jfill {
+  position: absolute;
+  inset-inline: 12px;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #e50914, #ff8a80);
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+[dir="rtl"] .gc-jfill {
+  transform-origin: right center;
+}
+
+/* Visual column — the glass console panel + the caption stack. */
+.gc-jvisual {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+.gc-jpanel {
+  position: relative;
+  flex: 1;
+  min-height: 150px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(229, 9, 20, 0.08), transparent 55%),
+    linear-gradient(180deg, rgba(24, 24, 29, 0.92), rgba(15, 15, 18, 0.95));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* corner brackets — HUD framing, pure CSS */
+.gc-jpanel::before,
+.gc-jpanel::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(229, 9, 20, 0.35);
+  pointer-events: none;
+}
+.gc-jpanel::before {
+  top: 10px;
+  inset-inline-start: 10px;
+  border-width: 2px 0 0 2px;
+  border-radius: 4px 0 0 0;
+}
+[dir="rtl"] .gc-jpanel::before {
+  border-width: 2px 2px 0 0;
+  border-radius: 0 4px 0 0;
+}
+.gc-jpanel::after {
+  bottom: 10px;
+  inset-inline-end: 10px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 4px 0;
+}
+[dir="rtl"] .gc-jpanel::after {
+  border-width: 0 0 2px 2px;
+  border-radius: 0 0 0 4px;
+}
+
+/* Scene primitives — decorative mock UI (aria-hidden in markup). */
+.gc-jwin {
+  width: min(82%, 400px);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(21, 21, 26, 0.94);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .gc-jwin {
+    width: min(94%, 360px);
+  }
+}
+.gc-jwin-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+}
+.gc-jdot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  flex: none;
+}
+.gc-jbar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+.gc-jbar i {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #e50914, #ff6b5e);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+[dir="rtl"] .gc-jbar i {
+  transform-origin: right center;
+}
+.gc-jtile {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+.gc-jtile.on {
+  border-color: rgba(229, 9, 20, 0.5);
+  background: rgba(229, 9, 20, 0.1);
+  color: #fff;
+}
+
+/* Caption stack — the active step's title+desc (tab pattern: all steps
+   live in the DOM, inactive ones carry the `hidden` attribute). */
+.gc-jcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+}
+.gc-jcount {
+  font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+[dir="rtl"] .gc-jcount {
+  letter-spacing: 0;
+}
+.gc-jcap-title {
+  font-family: var(--font-display), var(--font-sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-foreground, #fff);
+}
+.gc-jcap-desc {
+  flex-basis: 100%;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 64ch;
+}
+@media (min-width: 992px) {
+  .gc-jcap-desc {
+    font-size: 13.5px;
+    line-height: 1.65;
+  }
+}
+.gc-jnote {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.34);
+}
+
+/* Floating stage affordances. */
+.gc-jhint {
+  position: absolute;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(18, 18, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.gc-jhint svg {
+  animation: jhintBob 1.7s ease-in-out infinite;
+}
+@keyframes jhintBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+.gc-jskip {
+  position: absolute;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: clamp(16px, 4vw, 34px);
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(18, 18, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: color 0.25s ease, border-color 0.25s ease;
+}
+.gc-jskip:hover {
+  color: #fff;
+  border-color: rgba(229, 9, 20, 0.4);
+}
+@media (max-width: 767px) {
+  .gc-jhint,
+  .gc-jskip {
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-jhint svg {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Task 39 — the sector HUD: the fixed scroll menu box (lg+ only)     */
+/* ------------------------------------------------------------------ */
+
+.gc-sector-hud {
+  position: fixed;
+  bottom: 22px;
+  inset-inline-start: 22px;
+  z-index: 45;
+}
+@media (max-width: 1023px) {
+  .gc-sector-hud {
+    display: none;
+  }
+}
+.gc-sector-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 13px;
+  border-radius: 14px;
+  background: rgba(18, 18, 22, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  cursor: pointer;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.gc-sector-chip:hover {
+  border-color: rgba(229, 9, 20, 0.4);
+  box-shadow: 0 14px 44px rgba(229, 9, 20, 0.16);
+}
+.gc-sector-kicker {
+  font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+[dir="rtl"] .gc-sector-kicker {
+  letter-spacing: 0;
+}
+.gc-sector-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.gc-sector-name i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e50914;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.8);
+  flex: none;
+}
+.gc-sector-menu {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  inset-inline-start: 0;
+  width: 248px;
+  max-height: min(56vh, 500px);
+  overflow-y: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(18, 18, 22, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  padding: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+}
+.gc-sector-menu::-webkit-scrollbar {
+  width: 8px;
+}
+.gc-sector-menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+}
+.gc-sector-item {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  text-align: start;
+}
+.gc-sector-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.gc-sector-item[aria-current="true"] {
+  color: #ff8a80;
+  background: rgba(229, 9, 20, 0.1);
+}
+.gc-sector-n {
+  font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.42);
+}
+.gc-sector-item .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(229, 9, 20, 0.35);
+}
+.gc-sector-item[aria-current="true"] .dot {
+  background: #e50914;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.7);
+}
+
+/* ------------------------------------------------------------------ */
 /*  shcard — premium plan/download card (reference .shcard)            */
 /*  Usage: <div class="shcard in"> <div class="shcard__in"> …          */
 /* ------------------------------------------------------------------ */

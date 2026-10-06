@@ -19,6 +19,7 @@ import { GamingCursor } from "@/components/pcmax/gaming-cursor";
 import { ScrollProgress } from "@/components/pcmax/scroll-progress";
 import { SpotlightCards } from "@/components/pcmax/spotlight-cards";
 import { GameTicker } from "@/components/pcmax/game-ticker";
+import { SectorHud } from "@/components/pcmax/sector-hud";
 
 /*
  * The optional catch-all root segment `[[...lang]]` (audit 29-a — the /fa
@@ -72,6 +73,9 @@ export default async function Home({
         <ScrollProgress />
         <GamingCursor />
         <SpotlightCards />
+        {/* Task 39 — the sector HUD: the fixed scroll menu box (lg+) that
+            tracks the current section and quick-jumps via real anchors. */}
+        <SectorHud />
         {/* Fixed background fx — 64px grid (radial-masked) + crimson glow */}
         <div className="bgfx" aria-hidden="true" />
         <Navbar />
