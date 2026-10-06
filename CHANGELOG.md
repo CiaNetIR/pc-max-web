@@ -4,6 +4,90 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.8.0] — 2026-10-07
+
+**Atelier** — owner request: "the UI/UX is very bad, the worst
+performance — it totally feels AI-made. I want it to be undetectable
+that AI built this." v2.7's "Neon Ops" maximalism (film grain, scanlines,
+CRT bloom, gaming reticle cursor, spotlight cards, tri-color accents,
+gradient text, a dozen infinite animations) was itself the loudest
+machine-generated tell — and its fixed full-viewport overlay layers,
+backdrop-filters and global pointermove listeners were the scroll-jank.
+v2.8 strips every one of them and rebuilds on the fundamentals real
+design teams ship: flat confident surfaces, hairline rules, numbered
+sections, one accent, typography discipline. Content, IA, the pinned
+Install Journey and the sector HUD are untouched — this is a visual
+reset, not a restructure.
+
+### Removed — the machine-generated tells (and their perf cost)
+- **Fixed atmosphere stack deleted**: `.bgfx` (grid + scanlines + the
+  `blur(30px)` crimson aurora), `body::before` vignette and `body::after`
+  film-grain + horizon glow — three full-viewport composite layers gone;
+  the page paints on one flat `#0a0a0c` canvas.
+- **Gaming reticle cursor deleted** (component + CSS): global
+  `mousemove`/`mousedown`/`mouseup` listeners and two chasing springs
+  gone; the native cursor returns.
+- **Cursor-following card spotlights deleted** (component + CSS): the
+  delegated `pointermove` listener and per-card `::after` gradients gone.
+- **Every `backdrop-filter` retired** (header, HUD chips, journey rail,
+  sector chip/menu, hints — ~10 elements): the header is now a solid
+  seamless bar; everything else is a flat panel.
+- **Ambient blur blobs deleted** in showcase/multiframe/profiles/
+  benchmarks/safety (720–820px `blur-[100–130px]` crimson washes).
+- **Twelve infinite animations retired**: step rings, icon breathes,
+  glow pulses, HUD drift, media sheen sweeps, jhint bob, the premium
+  card's conic orbit + drifting glows + sheen, the breathing mark.
+  Remaining motion budget: the ticker marquee, scroll-linked progress
+  bar, one-shot reveals, and the journey scrub — all direct-manipulation
+  or one-shot.
+- **Gradient-as-decoration retired**: the 4-stop gradient headline bloom
+  is now SOLID crimson `#ff3b30` (5.7:1); the benchmark "after" bars,
+  journey progress fills and meter fills are single solid fills; the
+  premium card's tri-color conic border became one flat card with a 2px
+  crimson top rule; the tri-color "PC MAX" gradient wordmark is solid
+  crimson.
+- **Neon glows gone** from every surface: no more crimson box-shadow
+  blooms on cards, buttons, brackets, dots, kickers or the scrollbar
+  (hover is now a neutral lighter gray).
+
+### Added — the hand-crafted fundamentals
+- **Space Grotesk** (variable, latin 300–700, one 22KB woff2) is the EN
+  display face; the EN body rides the **platform system stack** — zero
+  font bytes, and the Poppins/Inter cliché is gone entirely (Chakra
+  Petch and the EN Poppins latin cuts deleted; EN font payload drops
+  from ~65KB across 4 files to one 22KB file). Persian typography is
+  untouched: IRANYekanX + Poppins digits (TweakFa contract), not even
+  downloaded in EN.
+- **Numbered sections** — pure-CSS counters stamp every section kicker
+  as a mono `01 / BENCHMARKS` readout (crimson two-digit index + muted
+  uppercase label, EN mono; Persian keeps the sans face and never
+  letterspaces). Works in SSR, static export and no-JS.
+- **Hairline section separators**: the glowing "data conduit" + diamond
+  node became a calm full-width 1px rule between sections.
+- **Editorial kickers**: the notched chassis pill with the glowing
+  status dot became a bare mono label — no background, no notch.
+- **Flat material system**: cards are `#101013` + 1px hairline borders,
+  hovers brighten the border (never lift, never bloom); buttons are
+  solid crimson (primary), solid white with near-black label (the old
+  gold premium CTA), and 1px hairline ghosts; the media frame is a thin
+  dark bezel with one soft black ambient shadow.
+- **Semantic color discipline**: crimson is the only accent; the
+  success/metric teal and tier amber survive as muted semantic tokens
+  (`#45d4ab` / `#ffd54a` / `#e8a33d`) on metrics, status dots, warnings
+  and the two real profile tiers; gold is gone from generic UI.
+- **The premium download card**: flat card, 2px crimson top edge, the
+  three-bar mark rendered static, staggered perk reveal kept.
+
+### Changed
+- Journey console restyled from CRT (scanlines + glowing corner
+  brackets) to a clean flat product window; all pinning/scrub layout
+  rules byte-identical to the E2E-proven v2.7 values.
+- Hero: targeting rings, drifting fact chips and the sheen sweep
+  removed; fact-chip values render white (one calm readout); the
+  headline accent word is solid crimson; h1 weight 800→700 (the real
+  Space Grotesk top).
+- Service-worker cache bumped to `v2.8.0`.
+
 ## [2.7.0] — 2026-10-07
 
 **Neon Ops** — owner request: "do a complete review, I don't like the UI."

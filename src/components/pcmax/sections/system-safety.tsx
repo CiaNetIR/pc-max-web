@@ -35,13 +35,6 @@ export function SystemSafety() {
 
   return (
     <Section id="safety" className="relative overflow-hidden">
-      {/* the single soft ambient wash behind the two panes — slowly pulsing
-          (Task 28) so the safety band keeps a quiet heartbeat */}
-      <div
-        className="gc-glow-pulse pointer-events-none absolute inset-x-0 top-56 mx-auto h-72 w-[640px] max-w-none rounded-full bg-crimson/[0.04] blur-[110px] sm:top-64"
-        aria-hidden="true"
-      />
-
       <SectionHeading
         align="start"
         eyebrow={t.safety.eyebrow}
@@ -59,7 +52,7 @@ export function SystemSafety() {
           className="gc-card p-6 sm:p-8 lg:p-10"
         >
           <div className="flex items-start gap-4 sm:gap-5">
-            <span className="gc-breathe flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
               <Gauge className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -102,7 +95,7 @@ export function SystemSafety() {
           className="gc-card p-6 sm:p-8 lg:p-10"
         >
           <div className="flex items-start gap-4 sm:gap-5">
-            <span className="gc-breathe-2 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
               <BackupIcon className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0">

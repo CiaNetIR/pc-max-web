@@ -144,7 +144,7 @@ const en = {
    * position through the page's sections (sector names only, in page
    * order — the ids live in the component, translations here). */
   hud: {
-    label: "Sector",
+    label: "Section",
     menuLabel: "Jump to section",
     close: "Close",
     sectors: [

@@ -28,9 +28,6 @@ export const springBounce: Transition = {
 /** Press feedback for motion elements (pairs with the `.press` CSS class). */
 export const whileTapPress = { scale: 0.96 } as const;
 
-/** Hover lift for interactive cards. */
-export const whileHoverLift = { scale: 1.02, y: -3 } as const;
-
 /** Global MotionConfig — honors the OS reduced-motion setting by
  *  collapsing transform/layout animations to opacity changes. */
 export function MotionProvider({ children }: { children: ReactNode }) {

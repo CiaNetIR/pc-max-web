@@ -29,12 +29,12 @@ const cardEnter = [
  * cards/tech entries: OptiScaler, AI Optical Flow, Streamline. */
 const CARD_IDS = ["optiscaler", "ai-optical-flow", "streamline"] as const;
 
-/* Guardian tri-color rhythm — badge pills carry their card's own accent:
- * OptiScaler crimson, AI Optical Flow teal, Streamline gold. */
+/* Card badge accents (v2.8 softened): OptiScaler crimson, AI Optical
+ * Flow teal, Streamline amber — semantic tones on the muted token ramp. */
 const badgeTone = [
   "bg-crimson/10 text-crimson ring-crimson/25",
-  "bg-[rgba(31,191,156,0.14)] text-[#1fbf9c] ring-[rgba(31,191,156,0.32)]",
-  "bg-[rgba(254,219,41,0.13)] text-[#fedb29] ring-[rgba(254,219,41,0.3)]",
+  "bg-success-gc/10 text-success-gc ring-success-gc/25",
+  "bg-gold-gc/10 text-gold-gc ring-gold-gc/25",
 ] as const;
 
 export function MultiFrame() {
@@ -54,12 +54,6 @@ export function MultiFrame() {
 
   return (
     <Section id="multiframe" className="relative overflow-hidden">
-      {/* ambient crimson aura — one quietly pulsing wash (Task 28) */}
-      <div
-        className="gc-glow-pulse pointer-events-none absolute inset-x-0 top-0 mx-auto h-[380px] w-[720px] max-w-none rounded-full bg-crimson/[0.07] blur-[120px]"
-        aria-hidden="true"
-      />
-
       <SectionHeading
         eyebrow={t.multiframe.eyebrow}
         title={t.multiframe.title}
@@ -142,7 +136,7 @@ export function MultiFrame() {
             key={item}
             className="inline-flex items-center gap-2 text-[13.5px] text-muted-foreground"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#1fbf9c]" aria-hidden="true" />
+            <span className="h-1.5 w-1.5 rounded-full bg-success-gc" aria-hidden="true" />
             {item}
           </span>
         ))}
@@ -158,7 +152,7 @@ export function MultiFrame() {
           className="press group flex w-full items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card/60 px-5 py-4 text-start transition-colors hover:border-crimson/40"
         >
           <span className="flex items-center gap-3 text-sm font-bold text-foreground">
-            <span className="gc-breathe flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
               <FileText className="h-4.5 w-4.5" />
             </span>
             {t.multiframe.tech.title}

@@ -15,9 +15,7 @@ import { MobileCtaBar } from "@/components/pcmax/sections/mobile-cta-bar";
 import { Footer } from "@/components/pcmax/footer";
 import { AnalyticsBeacon } from "@/components/pcmax/ui/analytics-beacon";
 import { MotionProvider } from "@/components/pcmax/ui/motion";
-import { GamingCursor } from "@/components/pcmax/gaming-cursor";
 import { ScrollProgress } from "@/components/pcmax/scroll-progress";
-import { SpotlightCards } from "@/components/pcmax/spotlight-cards";
 import { GameTicker } from "@/components/pcmax/game-ticker";
 import { SectorHud } from "@/components/pcmax/sector-hud";
 
@@ -50,9 +48,11 @@ export function generateStaticParams() {
  *   → FAQ
  *   → the premium download card
  *
- * `.bgfx` mounts the fixed grid + crimson top-glow background ONCE (z-0,
- * pointer-events-none); every section sits above it (z-1 via .gc-sect's
- * stacking in globals.css — sections are position:relative).
+ * v2.8 "Atelier": the fixed .bgfx atmosphere layer (grid + scanlines +
+ * crimson aurora), the gaming reticle cursor and the cursor-following
+ * card spotlights are retired — the page paints on one flat
+ * near-black canvas; sections separate via hairline rules and carry
+ * pure-CSS numbered kickers (see globals.css).
  */
 export default async function Home({
   params,
@@ -67,17 +67,12 @@ export default async function Home({
     <MotionProvider>
       <div className="relative min-h-screen overflow-x-clip">
         <AnalyticsBeacon />
-        {/* Motion pass (Task 38): scroll progress bar, gaming reticle
-            cursor and card spotlight — all pointer-driven, reduced-motion
-            and touch safe (each component self-gates). */}
+        {/* Scroll progress — 2px solid crimson, scroll-linked (moves only
+            as the visitor scrolls — direct-manipulation feedback). */}
         <ScrollProgress />
-        <GamingCursor />
-        <SpotlightCards />
         {/* Task 39 — the sector HUD: the fixed scroll menu box (lg+) that
             tracks the current section and quick-jumps via real anchors. */}
         <SectorHud />
-        {/* Fixed background fx — 64px grid (radial-masked) + crimson glow */}
-        <div className="bgfx" aria-hidden="true" />
         <Navbar />
         {/* id="main-content" — target of the layout's skip-to-content link (a11y / SXO) */}
         <main id="main-content" className="relative z-[1]">

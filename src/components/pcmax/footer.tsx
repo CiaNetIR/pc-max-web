@@ -41,8 +41,8 @@ export function Footer() {
   ];
 
   return (
-    /* Guardian footer (reference .ftr): transparent over the fixed .bgfx
-     * grid, single hairline top edge, quiet 13.5px muted text. */
+    /* Footer (reference .ftr): transparent over the flat page canvas,
+     * single hairline top edge, quiet 13.5px muted text. */
     <footer className="relative mt-auto border-t border-border bg-transparent text-[13.5px] text-muted-foreground">
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
@@ -62,7 +62,7 @@ export function Footer() {
               />
               <span
                 dir="ltr"
-                className="font-display text-[17px] font-extrabold tracking-wide text-foreground"
+                className="font-display text-[17px] font-bold tracking-wide text-foreground"
               >
                 PC&nbsp;<span className="text-crimson">MAX</span>
               </span>

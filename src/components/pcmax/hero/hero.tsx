@@ -11,11 +11,10 @@ import { cn } from "@/lib/utils";
 
 /*
  * Guardian hero (reference word-reveal landing): a centered copy stack —
- * kicker pill, masked word-reveal headline, lead, tick bullets, CTAs —
- * over a violet-gradient framed "app window" stage with drifting HUD
- * stat chips and a sheen sweep. The 3D GPU scene and constellation field
- * are retired for this design (files stay on disk, simply unimported);
- * the background grid + violet top glow come from the page-level .bgfx.
+ * kicker, masked word-reveal headline, lead, tick bullets, CTAs — over
+ * a framed "app window" stage with static HUD fact chips. v2.8
+ * "Atelier": the targeting rings, drifting chips, media sheen sweep and
+ * neon accents are retired — flat surfaces, one crimson accent word.
  *
  * Progressive enhancement: the whole copy block is server-rendered;
  * entrance motion is opacity/transform-only (covered by the
@@ -132,7 +131,7 @@ export function Hero() {
     <section
       ref={heroRef}
       id="top"
-      className="gc-hero-rings relative overflow-hidden pt-[clamp(96px,12vw,140px)] pb-16 sm:pb-24"
+      className="relative overflow-hidden pt-[clamp(96px,12vw,140px)] pb-16 sm:pb-24"
     >
       {/* copy stack */}
       <motion.div style={parallax}>
@@ -151,7 +150,7 @@ export function Hero() {
          * the split spans are hidden from the a11y tree */}
         <h1
           aria-label={`${t.hero.title1} ${t.hero.title2}`}
-          className="type-display font-display font-extrabold leading-tight text-[clamp(30px,4.4vw,54px)] sm:text-[clamp(34px,5vw,58px)]"
+          className="type-display font-display font-bold leading-tight text-[clamp(30px,4.4vw,54px)] sm:text-[clamp(34px,5vw,58px)]"
         >
           <WordLine text={t.hero.title1} landed={landed} />
           <WordLine text={t.hero.title2} landed={landed} wordClassName="text-glow-crimson" />
@@ -162,13 +161,13 @@ export function Hero() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
-          className="mx-auto mt-5 max-w-2xl text-balance text-[15.5px] text-muted-foreground sm:text-lg"
+          className="mx-auto mt-5 max-w-2xl text-balance text-[15.5px] leading-[1.6] text-muted-foreground sm:text-lg sm:leading-[1.6]"
         >
           {t.hero.sub}
         </motion.p>
 
-        {/* bullets — v2.7: the checks ride inside a glass console strip
-            (gc-check-strip) instead of floating on the background */}
+        {/* bullets — a bare centered feature row (v2.8: no box chrome —
+            the checks sit directly on the canvas like an editorial deck) */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -244,14 +243,14 @@ export function Hero() {
        * instantly recognizable characters in gaming (Task 33) — served
        * with a hand-rolled srcSet like the gallery (unoptimized static
        * export). */}
-      <motion.div style={stageParallax} className="mt-14 px-4 sm:px-6">
+      <motion.div style={stageParallax} className="mt-12 px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.7, ease: "easeOut" }}
       >
-        <div className="gc-frame media-sheen mx-auto max-w-4xl">
+        <div className="gc-frame mx-auto max-w-4xl">
           <div className="overflow-hidden bg-[#121216]">
             {/* app-window chrome */}
             <div className="flex items-center gap-2 px-4 py-3">
@@ -292,21 +291,23 @@ export function Hero() {
                 className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#08080a]/80 to-transparent"
               />
 
-              {/* fact chips — VER / WIN / GITHUB — static, verifiable */}
+              {/* fact chips — VER / WIN / GITHUB — static, verifiable; v2.8:
+                 all values render white (labels stay muted) — the data
+                 reads as one calm readout, no tri-color soup */}
               <div
                 aria-hidden="true"
-                className="gc-hud-chip hud-drift pointer-events-none absolute top-[6%] start-[4%] flex items-baseline gap-2 px-3.5 py-2"
+                className="gc-hud-chip pointer-events-none absolute top-[6%] start-[4%] flex items-baseline gap-2 px-3.5 py-2"
               >
                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
                   VER
                 </span>
-                <b className="font-display text-xl font-bold tabular-nums text-[#1fbf9c]">
+                <b className="font-display text-xl font-bold tabular-nums text-white">
                   {release.version}
                 </b>
               </div>
               <div
                 aria-hidden="true"
-                className="gc-hud-chip hud-drift-2 pointer-events-none absolute top-[6%] end-[4%] flex items-baseline gap-2 px-3.5 py-2"
+                className="gc-hud-chip pointer-events-none absolute top-[6%] end-[4%] flex items-baseline gap-2 px-3.5 py-2"
               >
                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
                   WIN
@@ -315,12 +316,12 @@ export function Hero() {
               </div>
               <div
                 aria-hidden="true"
-                className="gc-hud-chip hud-drift-3 pointer-events-none absolute bottom-[6%] end-[4%] flex items-baseline gap-2 px-3.5 py-2"
+                className="gc-hud-chip pointer-events-none absolute bottom-[6%] end-[4%] flex items-baseline gap-2 px-3.5 py-2"
               >
                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
                   GITHUB
                 </span>
-                <b className="font-display text-xl font-bold tabular-nums text-[#fedb29]">
+                <b className="font-display text-xl font-bold tabular-nums text-white">
                   ✓
                 </b>
               </div>

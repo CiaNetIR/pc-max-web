@@ -17,8 +17,9 @@ import { cn } from "@/lib/utils";
 
 const nodeIcons = [GamepadIcon, GpuIcon, WindowsIcon, LogoMark, PerformanceIcon];
 
-/* Guardian tri-color rhythm — each discipline's checklist keeps its own
- * tick accent: Detect → teal (default), Optimize → gold, Protect → crimson. */
+/* Discipline tick rhythm — each discipline's checklist keeps its own
+ * muted tick accent: Detect → teal (default), Optimize → amber, Protect →
+ * crimson (v2.8: softened — semantic color that whispers). */
 const tickTone = ["", "tick-gold", "tick-crimson"] as const;
 
 /*
@@ -26,9 +27,9 @@ const tickTone = ["", "tick-gold", "tick-crimson"] as const;
  * taught the same concept twice, ~2,100px apart with heavy copy reuse).
  *
  * Part 1 — the pipeline (what the platform is): five numbered surface cards
- * in a 3 + 2 grid on lg, staggered whileInView reveals, the fifth — the
- * outcome node — closing the sequence in gold. The icon chips carry a slow
- * ambient breath so the band never reads as static. The connector-spine
+ * in a 3 + 2 grid on lg, staggered whileInView reveals, every numeral in
+ * the single crimson accent (v2.8: the gold "outcome node" special-case
+ * is retired — one accent, stated once per card). The connector-spine
  * timeline is long gone (that spine was the "line crossing the 01–05 items"
  * bug source behind Task 25).
  *
@@ -51,12 +52,6 @@ export function WhatIsPcMax() {
       <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {t.pipeline.nodes.map((node, i) => {
           const Icon = nodeIcons[i] ?? PerformanceIcon;
-          /* the last node — "Optimized Experience" — is the outcome: it
-           * closes the pipeline in gold instead of crimson. */
-          const isLast = i === t.pipeline.nodes.length - 1;
-          /* ambient breath variants, staggered across the grid */
-          const breathe = ["gc-breathe", "gc-breathe-2", "gc-breathe-3"][i % 3];
-
           return (
             <motion.li
               key={`pipeline-node-${i}`}
@@ -68,23 +63,10 @@ export function WhatIsPcMax() {
             >
               {/* HUD row — display numeral (start) + icon chip (end) */}
               <div className="flex items-center justify-between gap-3">
-                <span
-                  className={cn(
-                    "font-display text-[13px] font-bold tabular-nums",
-                    isLast ? "text-[#fedb29]" : "text-crimson"
-                  )}
-                >
+                <span className="font-display text-[13px] font-bold tabular-nums text-crimson">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <span
-                  className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-xl ring-1 ring-inset",
-                    breathe,
-                    isLast
-                      ? "bg-[rgba(254,219,41,0.13)] text-[#fedb29] ring-[rgba(254,219,41,0.3)]"
-                      : "bg-crimson/10 text-crimson ring-crimson/25"
-                  )}
-                >
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
                   <Icon className="h-5 w-5" />
                 </span>
               </div>
@@ -102,7 +84,7 @@ export function WhatIsPcMax() {
        * (not a second full SectionHeading) keeps one visual owner per band
        * while the editorial rows below carry the depth. */}
       <div className="mt-20 border-t border-border/60 pt-16 text-center sm:mt-24 sm:pt-20">
-        <h3 className="type-display font-display text-[clamp(22px,2.6vw,30px)] font-extrabold text-foreground">
+        <h3 className="type-display font-display text-[clamp(22px,2.6vw,30px)] font-bold text-foreground">
           {t.features.title}
         </h3>
         <p className="type-lead mx-auto mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
@@ -130,12 +112,7 @@ export function WhatIsPcMax() {
                 {/* intro side */}
                 <div className={cn(flip && "lg:order-2")}>
                   <div className="flex items-center gap-4">
-                    <span
-                      className={cn(
-                        "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25",
-                        i === 0 ? "gc-breathe" : i === 1 ? "gc-breathe-2" : "gc-breathe-3"
-                      )}
-                    >
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
                       <Icon className="h-6 w-6" />
                     </span>
                     <span className="font-display text-[13px] font-bold tabular-nums text-crimson">

@@ -292,7 +292,7 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
             <p className="mt-0.5 truncate text-xs text-muted-foreground">{t.cta.editions.free.tagline}</p>
           </div>
         </div>
-        <span className="shrink-0 font-display text-lg font-extrabold text-crimson">{t.cta.editions.free.price}</span>
+        <span className="shrink-0 font-display text-lg font-bold text-crimson">{t.cta.editions.free.price}</span>
       </div>
       {/* Pro — coming */}
       <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-[#121216] px-4 py-3.5">
@@ -311,7 +311,7 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
           </div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <span className="font-display text-lg font-extrabold text-muted-foreground">{t.cta.editions.pro.price}</span>
+          <span className="font-display text-lg font-bold text-muted-foreground">{t.cta.editions.pro.price}</span>
           <button
             type="button"
             onClick={onPro}
@@ -520,7 +520,7 @@ export function DownloadCtaClient() {
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={springFluid}
-          className="type-display font-display text-[clamp(24px,2.9vw,34px)] font-extrabold text-foreground"
+          className="type-display font-display text-[clamp(24px,2.9vw,34px)] font-bold text-foreground"
         >
           {t.cta.title.split(".").map((part, i, arr) =>
             part.trim() ? (
@@ -543,14 +543,10 @@ export function DownloadCtaClient() {
         </motion.p>
       </div>
 
-      {/* premium card — animated conic orbit border, drifting glows, sheen
-          sweep and the breathing three-bar mark (all pure CSS in globals) */}
+      {/* premium card — v2.8 "Atelier": one flat card with a 2px crimson
+          top rule and the static three-bar mark (the conic orbit border,
+          drifting glows and sheen sweep are retired; see globals.css) */}
       <div ref={cardRef} className={cn("shcard", cardInView && "in")}>
-        <span className="shcard__edge" aria-hidden="true" />
-        <span className="shcard__gA" aria-hidden="true" />
-        <span className="shcard__gB" aria-hidden="true" />
-        <span className="shcard__sheen" aria-hidden="true" />
-
         <div className="shcard__in">
           {/* top grid — brand lock + perks ⇄ editions + download */}
           <div className="grid items-center gap-8 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-12">
@@ -565,11 +561,11 @@ export function DownloadCtaClient() {
                 <div className="min-w-0">
                   <span
                     dir="ltr"
-                    className="block bg-gradient-to-r from-[#fedb29] via-[#ff3b30] to-[#1fbf9c] bg-clip-text text-[11px] font-bold tracking-[0.22em] text-transparent"
+                    className="block text-[11px] font-bold tracking-[0.22em] text-crimson"
                   >
                     PC MAX
                   </span>
-                  <h3 className="type-title font-display mt-1 text-[clamp(21px,2.2vw,26px)] font-extrabold leading-snug text-foreground">
+                  <h3 className="type-title font-display mt-1 text-[clamp(21px,2.2vw,26px)] font-bold leading-snug text-foreground">
                     {t.footer.tagline}
                   </h3>
                 </div>
@@ -599,7 +595,7 @@ export function DownloadCtaClient() {
                 onClick={onDownload}
                 aria-label={busy ? t.cta.buttonBusy : t.cta.button}
                 aria-busy={busy}
-                className="gc-btn-gold press mt-6 flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl text-[15px] font-extrabold"
+                className="gc-btn-gold press mt-6 flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl text-[15px] font-bold"
               >
                 {busy ? (
                   <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
@@ -624,7 +620,7 @@ export function DownloadCtaClient() {
             <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[13px] text-muted-foreground">
               {requirements.map(({ label, value }) => (
                 <span key={label} className="flex items-center gap-2">
-                  <i className="h-1.5 w-1.5 flex-none rounded-full bg-[#1fbf9c]" aria-hidden="true" />
+                  <i className="h-1.5 w-1.5 flex-none rounded-full bg-success-gc" aria-hidden="true" />
                   <span className="flex flex-wrap items-baseline gap-1.5">
                     <span>{label}</span>
                     <b className="font-semibold text-foreground">{value}</b>

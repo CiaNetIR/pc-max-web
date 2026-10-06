@@ -16,12 +16,12 @@ import { cn } from "@/lib/utils";
 
 const VISIBLE = 3;
 
-/* bar tracks sit on the elevated surface, fills are crimson ramp / dim */
+/* bar tracks sit on the elevated surface; the after fill is one solid
+   crimson statement (v2.8: the three-stop gradient ramp is retired) */
 const BAR_TRACK =
   "h-2.5 min-w-0 flex-1 rounded-full bg-[#1b1b21] ring-1 ring-inset ring-white/[0.06] sm:h-3";
-const BEFORE_FILL = "h-full rounded-full bg-foreground/20";
-const AFTER_FILL =
-  "h-full rounded-full bg-gradient-to-r from-crimson-deep via-crimson to-crimson-bright rtl:bg-gradient-to-l";
+const BEFORE_FILL = "h-full rounded-full bg-foreground/30";
+const AFTER_FILL = "h-full rounded-full bg-crimson";
 const CHIP =
   "inline-flex items-center gap-2 rounded-full bg-[#1b1b21] px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-inset ring-white/[0.09]";
 const VALUE =
@@ -169,13 +169,6 @@ export function Benchmarks() {
 
       {/* Chart canvas */}
       <div className="relative mt-10 sm:mt-12">
-        {/* ambient — a very soft crimson halo behind the card, slowly
-            pulsing (Task 28) */}
-        <div
-          aria-hidden="true"
-          className="gc-glow-pulse pointer-events-none absolute -inset-4 rounded-[3rem] bg-crimson/[0.04] blur-[100px] sm:-inset-6"
-        />
-
         <Reveal y={32}>
           <div className="gc-card relative p-6 sm:p-10">
             {/* Legend */}
@@ -188,7 +181,7 @@ export function Benchmarks() {
                 {t.bench.beforeLabel}
               </span>
               <span className={CHIP}>
-                <span className="gc-breathe h-2 w-2 rounded-full bg-crimson" aria-hidden="true" />
+                <span className="h-2 w-2 rounded-full bg-crimson" aria-hidden="true" />
                 {t.bench.afterLabel}
               </span>
             </div>

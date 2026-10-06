@@ -230,7 +230,7 @@ function StepScene({
             <div className="flex items-center gap-3 px-5 py-4">
               <LogoMark className="h-8 w-8 shrink-0" />
               <div className="flex flex-col">
-                <span className="font-display text-[15px] font-extrabold text-white">
+                <span className="font-display text-[15px] font-bold text-white">
                   PC&nbsp;<span className="text-crimson">MAX</span>
                 </span>
                 <span className="text-[11px] text-white/50">{copy.native}</span>
@@ -323,7 +323,7 @@ function StepScene({
         <div className="flex flex-col items-center gap-4">
           <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-crimson/12 text-crimson ring-1 ring-inset ring-crimson/35">
             <Check className="h-7 w-7" strokeWidth={3} />
-            <ShieldIcon className="absolute -bottom-1 -end-1 h-6 w-6 rounded-full bg-[#121216] p-1 text-[#1fbf9c] ring-1 ring-inset ring-white/12" />
+            <ShieldIcon className="absolute -bottom-1 -end-1 h-6 w-6 rounded-full bg-[#121216] p-1 text-success-gc ring-1 ring-inset ring-white/12" />
           </span>
           <div className="flex flex-col items-center gap-1.5 text-center">
             <span className="text-[13px] font-bold text-white">{copy.snapshot}</span>
@@ -347,6 +347,7 @@ function RailItem({
   active,
   scrub,
   label,
+  current,
   onSelect,
 }: {
   i: number;
@@ -354,6 +355,7 @@ function RailItem({
   active: boolean;
   scrub: MotionValue<number>;
   label: string;
+  current: number;
   onSelect: (i: number) => void;
 }) {
   const fill = useTransform(scrub, [i / total, (i + 1) / total], [0, 1], {
@@ -385,6 +387,10 @@ function RailItem({
       type="button"
       onClick={() => onSelect(i)}
       aria-current={active ? "step" : undefined}
+      /* the visual path (v2.8): past steps settle at full legibility,
+         the active step lights, future steps recede — a readable
+         progress trail instead of seven identical chips */
+      data-jstate={active ? "active" : i < current ? "past" : "future"}
       className="gc-jrail-btn press"
     >
       <span className="gc-jnum" aria-hidden="true">
@@ -492,6 +498,7 @@ function Journey({
                 i={i}
                 total={total}
                 active={i === step}
+                current={step}
                 scrub={scrub}
                 label={s.title}
                 onSelect={jumpTo}

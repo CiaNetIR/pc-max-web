@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading } from "@/components/pcmax/ui/primitives";
-import { springFluid, whileHoverLift, whileTapPress } from "@/components/pcmax/ui/motion";
+import { springFluid, whileTapPress } from "@/components/pcmax/ui/motion";
 import { cn } from "@/lib/utils";
 
 type ProfileKey = "yellow" | "green";
@@ -27,31 +27,28 @@ const accents: Record<
     chip: string;
     /** status / switch dot */
     dot: string;
-    /** raw hex for the meter fill + card glow (inline styles) */
+    /** raw hex for the meter fill (inline styles) */
     hex: string;
     borderTint: string;
-    glow: string;
   }
 > = {
   yellow: {
     kicker: "kicker-gold",
-    text: "text-[#fedb29]",
-    thumb: "border-[rgba(254,219,41,0.35)]",
-    chip: "bg-[rgba(254,219,41,0.13)] ring-[rgba(254,219,41,0.3)]",
-    dot: "bg-[#fedb29]",
-    hex: "#fedb29",
-    borderTint: "rgba(254,219,41,0.32)",
-    glow: "rgba(254,219,41,0.22)",
+    text: "text-gold-gc",
+    thumb: "border-[rgba(255,213,74,0.3)]",
+    chip: "bg-[rgba(255,213,74,0.1)] ring-[rgba(255,213,74,0.26)]",
+    dot: "bg-gold-gc",
+    hex: "#ffd54a",
+    borderTint: "rgba(255,213,74,0.3)",
   },
   green: {
     kicker: "kicker-teal",
-    text: "text-[#1fbf9c]",
-    thumb: "border-[rgba(31,191,156,0.35)]",
-    chip: "bg-[rgba(31,191,156,0.14)] ring-[rgba(31,191,156,0.32)]",
-    dot: "bg-[#1fbf9c]",
-    hex: "#1fbf9c",
-    borderTint: "rgba(31,191,156,0.34)",
-    glow: "rgba(31,191,156,0.2)",
+    text: "text-success-gc",
+    thumb: "border-[rgba(69,212,171,0.3)]",
+    chip: "bg-[rgba(69,212,171,0.12)] ring-[rgba(69,212,171,0.28)]",
+    dot: "bg-success-gc",
+    hex: "#45d4ab",
+    borderTint: "rgba(69,212,171,0.3)",
   },
 };
 
@@ -70,11 +67,6 @@ export function Profiles() {
 
   return (
     <Section id="profiles" className="relative overflow-hidden">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-24 mx-auto h-64 w-[560px] max-w-none rounded-full bg-crimson/[0.06] blur-[110px]"
-        aria-hidden="true"
-      />
-
       <SectionHeading
         eyebrow={t.profiles.eyebrow}
         title={t.profiles.title}
@@ -157,7 +149,6 @@ export function Profiles() {
                * skin (border/glow/pills) — every string stays at full WCAG
                * contrast, no opacity dimming. */
               animate={{ scale: isActive ? 1 : 0.965 }}
-              whileHover={whileHoverLift}
               whileTap={whileTapPress}
               transition={springFluid}
               className="gc-card press group relative flex flex-col p-6 text-start sm:p-8"
@@ -165,7 +156,7 @@ export function Profiles() {
                 isActive
                   ? {
                       borderColor: a.borderTint,
-                      boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 14px 36px -18px rgba(0, 0, 0, 0.4), 0 0 44px -14px ${a.glow}`,
+                      boxShadow: "0 14px 36px -18px rgba(0, 0, 0, 0.4)",
                     }
                   : undefined
               }
@@ -222,7 +213,7 @@ export function Profiles() {
                   className="h-full rounded-full"
                   style={{
                     width: key === "yellow" ? "38%" : "86%",
-                    background: `linear-gradient(90deg, ${a.hex}55, ${a.hex})`,
+                    background: a.hex,
                   }}
                 />
               </div>

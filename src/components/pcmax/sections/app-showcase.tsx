@@ -340,23 +340,15 @@ export function AppShowcase() {
   const optiCard = t.multiframe.cards[0];
   const badgeLabel = "badges" in optiCard ? (optiCard.badges ?? []).join(" · ") : "";
 
-  /* Frame + surface shared by every media panel: crimson gradient frame,
-   * diagonal sheen sweep, dark app surface, gentle hover scale. */
-  const frameClass = "gc-frame media-sheen transition-transform duration-500 ease-out hover:scale-[1.012]";
+  /* Frame + surface shared by every media panel: flat bezel frame,
+   * dark app surface, gentle hover scale (v2.8: the sheen sweep is
+   * retired — the panel reads as product UI, not as a promo card). */
+  const frameClass = "gc-frame transition-transform duration-500 ease-out hover:scale-[1.012]";
   const surfaceClass =
     "relative overflow-hidden rounded-[calc(var(--radius)-4px)] bg-[#0d0d11] p-5 pt-16 sm:p-6 sm:pt-16";
 
   return (
     <Section id="showcase" className="overflow-hidden">
-      {/* ambient crimson glow behind the slider — physical centering
-          (left + -translate-x-1/2): `start-1/2` resolves to right:50% in RTL
-          and the physical translate never flips, which pushed the glow
-          ~820px off-screen in FA (D2/Task 28-d). */}
-      <div
-        className="pointer-events-none absolute left-1/2 top-24 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.07] blur-[130px]"
-        aria-hidden="true"
-      />
-
       <SectionHeading
         eyebrow={t.showcase.eyebrow}
         title={t.showcase.title}
@@ -483,19 +475,19 @@ export function AppShowcase() {
                             aria-hidden="true"
                           />
                           {/* floating HUD stats */}
-                          <HudChip className="hud-drift start-3 top-3 sm:start-4 sm:top-4">
+                          <HudChip className="start-3 top-3 sm:start-4 sm:top-4">
                             <Cloud className="h-3.5 w-3.5 text-crimson" />
                             <span className="text-foreground">{copy.sync.label}</span>
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#1fbf9c]" aria-hidden="true" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-success-gc" aria-hidden="true" />
                             <span className="font-medium text-muted-foreground">{copy.sync.status}</span>
                           </HudChip>
-                          <HudChip className="hud-drift-2 end-3 top-3 sm:end-4 sm:top-4">
+                          <HudChip className="end-3 top-3 sm:end-4 sm:top-4">
                             <PerformanceIcon className="h-3.5 w-3.5 text-crimson" />
-                            <b className="font-display tabular-nums text-[#1fbf9c]">{t.bench.avg}</b>
+                            <b className="font-display tabular-nums text-success-gc">{t.bench.avg}</b>
                             <span className="font-medium text-muted-foreground">{t.bench.unit}</span>
                           </HudChip>
                           {gameMeta && (
-                            <HudChip className="hud-drift-3 end-3 top-[4.25rem] sm:end-4 sm:top-[4.5rem]">
+                            <HudChip className="end-3 top-[4.25rem] sm:end-4 sm:top-[4.5rem]">
                               <GpuIcon className="h-3.5 w-3.5 text-crimson" />
                               <b className="font-display tabular-nums text-foreground">
                                 {gameMeta.rating}/100
@@ -521,7 +513,7 @@ export function AppShowcase() {
                             </p>
                             {gameMeta && (
                               <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <span className="text-[11px] font-bold text-[#fedb29]">{gameMeta.profile[locale]}</span>
+                                <span className="text-[11px] font-bold text-crimson">{gameMeta.profile[locale]}</span>
                                 {gameMeta.tech.map((tech) => (
                                   <span
                                     key={tech}
@@ -575,14 +567,14 @@ export function AppShowcase() {
                     <div className={frameClass}>
                       <div className={surfaceClass}>
                         {badgeLabel && (
-                          <HudChip className="hud-drift start-4 top-4">
+                          <HudChip className="start-4 top-4">
                             <AiIcon className="h-3.5 w-3.5 text-crimson" />
                             <span className="text-foreground">{badgeLabel}</span>
                           </HudChip>
                         )}
                         {"warning" in streamlineCard && (
-                          <HudChip className="hud-drift-2 end-4 top-4">
-                            <Lock className="h-3.5 w-3.5 text-[#fedb29]" />
+                          <HudChip className="end-4 top-4">
+                            <Lock className="h-3.5 w-3.5 text-warning-gc" />
                             <span className="font-medium text-muted-foreground">{streamlineCard.warning}</span>
                           </HudChip>
                         )}
@@ -641,12 +633,12 @@ export function AppShowcase() {
                   {tab === "windows" && (
                     <div className={frameClass}>
                       <div className={surfaceClass}>
-                        <HudChip className="hud-drift start-4 top-4">
-                          <BackupIcon className="h-3.5 w-3.5 text-[#fedb29]" />
-                          <span className="text-[#fedb29]">{copy.win.rollbackChip}</span>
+                        <HudChip className="start-4 top-4">
+                          <BackupIcon className="h-3.5 w-3.5 text-crimson" />
+                          <span className="text-crimson">{copy.win.rollbackChip}</span>
                         </HudChip>
-                        <HudChip className="hud-drift-2 end-4 top-4">
-                          <span className="font-display tabular-nums text-[#1fbf9c]">6/8</span>
+                        <HudChip className="end-4 top-4">
+                          <span className="font-display tabular-nums text-success-gc">6/8</span>
                           <span className="font-medium text-muted-foreground">{t.showcase.win.modules}</span>
                         </HudChip>
                         <div className="space-y-4">
@@ -660,7 +652,7 @@ export function AppShowcase() {
                             </div>
                             <div className="h-2 overflow-hidden rounded-full bg-white/[0.08]">
                               <motion.div
-                                className="h-full rounded-full bg-gradient-to-r from-crimson to-crimson-bright"
+                                className="h-full rounded-full bg-crimson"
                                 initial={{ width: 0 }}
                                 animate={{ width: "75%" }}
                                 transition={{ ...springFluid, delay: 0.2 }}
@@ -709,13 +701,13 @@ export function AppShowcase() {
                   {tab === "settings" && (
                     <div className={frameClass}>
                       <div className={surfaceClass}>
-                        <HudChip className="hud-drift start-4 top-4">
-                          <Cloud className="h-3.5 w-3.5 text-[#1fbf9c]" />
+                        <HudChip className="start-4 top-4">
+                          <Cloud className="h-3.5 w-3.5 text-success-gc" />
                           <span className="font-medium text-muted-foreground">{copy.settings.offlineValue}</span>
                         </HudChip>
-                        <HudChip className="hud-drift-2 end-4 top-4">
-                          <ShieldIcon className="h-3.5 w-3.5 text-[#1fbf9c]" />
-                          <span className="text-[#1fbf9c]">{t.footer.platformItems[3]}</span>
+                        <HudChip className="end-4 top-4">
+                          <ShieldIcon className="h-3.5 w-3.5 text-success-gc" />
+                          <span className="text-success-gc">{t.footer.platformItems[3]}</span>
                         </HudChip>
                         <div className="space-y-2.5">
                           {[

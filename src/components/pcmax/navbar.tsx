@@ -211,7 +211,7 @@ export function Navbar() {
             priority
             className="h-9 w-9 shrink-0 object-contain"
           />
-          <span className="font-display text-[17px] font-extrabold text-foreground">
+          <span className="font-display text-[17px] font-bold text-foreground">
             PC&nbsp;<span className="text-crimson">MAX</span>
           </span>
         </a>
@@ -231,7 +231,7 @@ export function Navbar() {
                     "press rounded-full px-1 py-2 text-sm/[14.5px] font-medium transition-colors",
                     isActive
                       ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-foreground/75 hover:text-foreground"
                   )}
                 >
                   {link.label}

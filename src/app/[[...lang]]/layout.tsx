@@ -12,22 +12,22 @@ import { Toaster } from "@/components/ui/toaster";
 import "../globals.css";
 
 /* ---------------------------------------------------------------------
- * The TweakFa font pair, self-hosted (downloaded from tweakfa.com
- * phoenix-landing/fonts, woff2 only):
- *   IRANYekanX — Persian face, 5 weights (400/500/600/700/800)
- *   Poppins    — Latin face (400/600/700) + digit subsets
- *
- * The signature TweakFa move: Poppins DIGITS (U+0030-0039) are declared
- * UNDER the 'IRANYekanX' family with a unicode-range, so Latin digits
- * inside Persian text render in Poppins while every other glyph renders
- * in IRANYekanX — byte-identical to the reference site's typography.
+ * Self-hosted fonts (v2.8 "Atelier"):
+ *   IRANYekanX      — Persian face, 5 weights (400/500/600/700/800)
+ *   Poppins digits  — U+0030-0039 declared UNDER 'IRANYekanX' with a
+ *                     unicode-range, so Latin digits inside Persian text
+ *                     render in Poppins (the signature TweakFa move)
+ *   Space Grotesk   — the EN display face: ONE variable latin cut
+ *                     (~22KB, weights 300–700). The EN body rides the
+ *                     platform system stack — zero font bytes, the honest
+ *                     utility-tool choice (and no Poppins/Inter cliché).
  *
  * @font-face lives in an injected <style> (not globals.css) because CSS
  * url() refs to /public are NOT basePath-prefixed in the static export —
  * the injected tag interpolates BASE_PATH explicitly (the proven pattern
  * from the old Ariobarzan contract). font-display:swap throughout.
  * ------------------------------------------------------------------- */
-type LocalFace = { family: string; file: string; weight: number; range?: string };
+type LocalFace = { family: string; file: string; weight: number | string; range?: string };
 
 /* Latin subset range (Google Fonts' own latin block) — scopes the EN
  * display face so it can never try to render Persian glyphs. */
@@ -46,14 +46,11 @@ const LOCAL_FACES: LocalFace[] = [
   { family: "IRANYekanX", file: "Poppins-SemiBold.digits.woff2", weight: 600, range: "U+0030-0039" },
   { family: "IRANYekanX", file: "Poppins-Bold.digits.woff2", weight: 700, range: "U+0030-0039" },
   { family: "IRANYekanX", file: "Poppins-Bold.digits.woff2", weight: 800, range: "U+0030-0039" },
-  { family: "Poppins", file: "Poppins-Regular.latin.woff2", weight: 400 },
-  { family: "Poppins", file: "Poppins-SemiBold.latin.woff2", weight: 600 },
-  { family: "Poppins", file: "Poppins-Bold.latin.woff2", weight: 700 },
-  /* v2.7 — the EN display face (Neon Ops): Chakra Petch, the ui-ux-pro-max
-   * skill's gaming pick. Latin-only (~10KB cuts); the Persian document keeps
-   * IRANYekanX via html[dir=rtl]'s --font-display override in globals.css. */
-  { family: "Chakra Petch", file: "ChakraPetch-SemiBold.latin.woff2", weight: 600, range: LATIN_RANGE },
-  { family: "Chakra Petch", file: "ChakraPetch-Bold.latin.woff2", weight: 700, range: LATIN_RANGE },
+  /* v2.8 — the EN display face: Space Grotesk variable (latin subset,
+   * weights 300–700 in one 22KB file). The Persian document keeps
+   * IRANYekanX via html[dir=rtl]'s --font-display override in globals.css
+   * and never downloads this file. */
+  { family: "Space Grotesk", file: "SpaceGrotesk-Var.latin.woff2", weight: "300 700", range: LATIN_RANGE },
 ];
 
 const localFontFace = LOCAL_FACES.map((f) => {
@@ -61,18 +58,12 @@ const localFontFace = LOCAL_FACES.map((f) => {
   return `@font-face{font-family:'${f.family}';font-weight:${f.weight};src:url('${BASE_PATH}/fonts/${f.file}') format('woff2');${range}font-display:swap;}`;
 }).join("");
 
-/* Above-the-fold preloads per locale (tiny subsets): EN paints Poppins
- * (canonical document), FA paints IRANYekanX (a real prerendered /fa
- * document since the [[...lang]] route — both flavors). */
+/* Above-the-fold preloads per locale (tiny subsets): EN paints the
+ * single Space Grotesk variable cut (canonical document — the body is
+ * the system stack, so this one file is the entire EN font payload);
+ * FA paints IRANYekanX (a real prerendered /fa document). */
 const FONT_PRELOADS: Record<Locale, string[]> = {
-  en: [
-    "Poppins-Regular.latin.woff2",
-    "Poppins-SemiBold.latin.woff2",
-    "Poppins-Bold.latin.woff2",
-    /* the v2.7 display face paints the above-fold h1 — preload kills the
-     * swap flash (Poppins → Chakra Petch) on first paint */
-    "ChakraPetch-Bold.latin.woff2",
-  ],
+  en: ["SpaceGrotesk-Var.latin.woff2"],
   fa: ["IRANYekanX-Regular.woff2", "IRANYekanX-Bold.woff2", "IRANYekanX-ExtraBold.woff2"],
 };
 
@@ -202,7 +193,7 @@ export async function generateMetadata({
 export const viewport: Viewport = {
   /* Dark-only since the Guardian redesign (Task 26) — the light theme no
    * longer exists; a single dark theme-color keeps the UA chrome matched. */
-  themeColor: "#08080a",
+  themeColor: "#0a0a0c",
   width: "device-width",
   initialScale: 1,
   /* Emits <meta name="color-scheme" content="dark"> — native scrollbars,
@@ -223,9 +214,10 @@ export default async function RootLayout({
   const dir = locale === "fa" ? "rtl" : "ltr";
 
   return (
-    /* Fonts are self-hosted and resolved by family name ('Poppins' LTR /
-     * 'IRANYekanX' RTL — see globals.css @theme + html[dir="rtl"] stacks);
-     * no next/font variables are needed on <html> anymore. */
+    /* Fonts are self-hosted and resolved by family name ('Space Grotesk'
+     * + the system stack in LTR / 'IRANYekanX' RTL — see globals.css
+     * @theme + html[dir="rtl"] stacks); no next/font variables are needed
+     * on <html> anymore. */
     <html
       lang={locale}
       dir={dir}

@@ -28,12 +28,12 @@ export default async function NotFound() {
       <div className="relative">
         <p
           aria-hidden="true"
-          className="font-display text-[clamp(7rem,22vw,16rem)] font-extrabold leading-none tracking-tighter text-transparent [-webkit-text-stroke:2px_var(--border)]"
+          className="font-display text-[clamp(7rem,22vw,16rem)] font-bold leading-none tracking-tighter text-transparent [-webkit-text-stroke:2px_var(--border)]"
         >
           404
         </p>
 
-        <h1 className="font-display -mt-4 text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+        <h1 className="font-display -mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
           {t.title}
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted-foreground">{t.sub}</p>

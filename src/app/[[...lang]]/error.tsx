@@ -25,7 +25,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
       <div className="absolute left-1/2 top-1/2 h-[360px] w-[720px] max-w-none -translate-x-1/2 -translate-y-1/2 rounded-full bg-crimson/[0.1] blur-[130px]" aria-hidden="true" />
 
       <div className="relative">
-        <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
           {t.title}
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted-foreground">{t.sub}</p>

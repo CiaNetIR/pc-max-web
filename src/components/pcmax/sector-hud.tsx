@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronUp, Joystick } from "lucide-react";
+import { ChevronUp } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { springFluid } from "@/components/pcmax/ui/motion";
 import { cn } from "@/lib/utils";
@@ -105,10 +105,13 @@ export function SectorHud() {
         aria-label={t.hud.menuLabel}
         className="gc-sector-chip press"
       >
-        <Joystick className="h-[18px] w-[18px] text-crimson" aria-hidden="true" />
         <span className="flex flex-col items-start gap-0.5 leading-none">
+          {/* v2.8: the counter matches the section kickers exactly — the
+              hero ("Top") is index 0 and unnumbered, content sections are
+              01–10, so the chip and the on-page kicker always agree. The
+              chip is only visible from the first content section down. */}
           <span className="gc-sector-kicker">
-            {t.hud.label} <span dir="ltr">{pad((active ?? 0) + 1)}/{pad(total)}</span>
+            <span dir="ltr">{pad(active ?? 0)}/{pad(total - 1)}</span>
           </span>
           <span className="gc-sector-name">
             <i aria-hidden="true" />
@@ -142,7 +145,7 @@ export function SectorHud() {
                     className="gc-sector-item press"
                   >
                     <span className="gc-sector-n" dir="ltr">
-                      {pad(i + 1)}
+                      {i === 0 ? "" : pad(i)}
                     </span>
                     <span>{names[i]}</span>
                     <span className="dot" aria-hidden="true" />
