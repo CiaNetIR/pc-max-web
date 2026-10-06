@@ -1,7 +1,7 @@
 "use client";
 
-import { Fragment, useEffect, useState, type CSSProperties } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowDown, ArrowRight, Check } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { DownloadIcon } from "@/components/pcmax/icons";
@@ -55,9 +55,63 @@ function WordLine({
   );
 }
 
+/* Magnetic — the CTA drifts toward the pointer while it hovers (spring
+ * physics, ±~10px max), settling back dead-center on leave. Reduced-motion
+ * and touch visitors get the plain inline wrapper (no motion values).
+ * The drift is pure transform — it composes with the button's own hover
+ * lift and never moves the layout. */
+function Magnetic({ children }: { children: ReactNode }) {
+  const reduce = useReducedMotion() ?? false;
+  const ref = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const x = useSpring(mx, { stiffness: 300, damping: 20, mass: 0.5 });
+  const y = useSpring(my, { stiffness: 300, damping: 20, mass: 0.5 });
+
+  if (reduce) return <div className="inline-flex">{children}</div>;
+
+  return (
+    <motion.div
+      ref={ref}
+      style={{ x, y }}
+      className="inline-flex"
+      onMouseMove={(e) => {
+        const el = ref.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        mx.set((e.clientX - (r.left + r.width / 2)) * 0.28);
+        my.set((e.clientY - (r.top + r.height / 2)) * 0.28);
+      }}
+      onMouseLeave={() => {
+        mx.set(0);
+        my.set(0);
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export function Hero() {
   const { t, isRTL } = useLanguage();
   const reduce = useReducedMotion();
+  /* Scroll parallax (Task 38 motion pass): as the hero scrolls out, the
+   * copy drifts up slowly and the stage slower still + fades — depth
+   * without autonomous motion (scroll-linked = direct manipulation, so
+   * it stays for reduced-motion users too... except framer collapses
+   * transforms for them via MotionConfig, so gate explicitly to keep
+   * the exit clean). Transform/opacity only — zero layout work. */
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, 44]);
+  const stageY = useTransform(scrollYProgress, [0, 1], [0, 96]);
+  const stageO = useTransform(scrollYProgress, [0, 0.85], [1, 0.35]);
+  const parallax = reduce ? undefined : { y: copyY };
+  const stageParallax = reduce ? undefined : { y: stageY, opacity: stageO };
+
   /* Real app version — KNOWN_LATEST baseline paints with the SSR HTML and
    * upgrades live from the app repo's GitHub releases after hydration
    * (Task 32: one shared request per page view, never a stale number). */
@@ -76,10 +130,12 @@ export function Hero() {
 
   return (
     <section
+      ref={heroRef}
       id="top"
       className="relative overflow-hidden pt-[clamp(96px,12vw,140px)] pb-16 sm:pb-24"
     >
       {/* copy stack */}
+      <motion.div style={parallax}>
       <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
         {/* kicker — version injected from the live release store so it can
             never drift from the installer the download button fetches */}
@@ -131,13 +187,15 @@ export function Hero() {
         {/* CTAs — real anchors (#download / #install): the browser's native
          * in-page navigation does the scrolling — CSS scroll-behavior + its
          * prefers-reduced-motion override + the sections' scroll-mt-24 — so
-         * no JS handler is needed (audit 29-a D7). */}
+         * no JS handler is needed (audit 29-a D7). Magnetic wrapper drifts
+         * them toward the pointer (Task 38 motion pass). */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.54, ease: "easeOut" }}
           className="mt-10 flex flex-wrap items-center justify-center gap-4"
         >
+          <Magnetic>
           <a
             href="#download"
             className="gc-btn-primary press group inline-flex h-[52px] items-center gap-2.5 rounded-xl px-7 text-[15px] font-bold text-white"
@@ -145,6 +203,8 @@ export function Hero() {
             <DownloadIcon className="h-5 w-5" aria-hidden="true" />
             {t.hero.primary}
           </a>
+          </Magnetic>
+          <Magnetic>
           <a
             href="#install"
             className="gc-btn-ghost press group inline-flex h-[52px] items-center gap-2 rounded-xl px-7 text-[15px] font-bold"
@@ -158,6 +218,7 @@ export function Hero() {
               )}
             />
           </a>
+          </Magnetic>
         </motion.div>
 
         {/* trust line — the verifiable platform facts under the CTA pair
@@ -171,6 +232,7 @@ export function Hero() {
           {t.hero.trustLine}
         </motion.p>
       </div>
+      </motion.div>
 
       {/* THE STAGE — framed app-window over artwork. An interface PREVIEW,
        * never a live feed: the badge says so, the chips carry static,
@@ -181,12 +243,12 @@ export function Hero() {
        * instantly recognizable characters in gaming (Task 33) — served
        * with a hand-rolled srcSet like the gallery (unoptimized static
        * export). */}
+      <motion.div style={stageParallax} className="mt-14 px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-60px" }}
         transition={{ duration: 0.7, ease: "easeOut" }}
-        className="mt-14 px-4 sm:px-6"
       >
         <div className="gc-frame media-sheen mx-auto max-w-4xl">
           <div className="overflow-hidden bg-[#121216]">
@@ -267,6 +329,7 @@ export function Hero() {
         <p className="mx-auto mt-3 max-w-4xl text-center text-xs text-muted-foreground/80">
           {t.hero.stage.caption}
         </p>
+      </motion.div>
       </motion.div>
 
       {/* scroll hint — content-flow below the stage (hero is no longer

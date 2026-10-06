@@ -291,10 +291,34 @@ html:root {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: border-color 0.2s ease, translate 0.2s ease;
+  /* SpotlightCards (Task 38): containing block for the cursor-following
+     ::after glow; also keeps any abs-positioned children card-scoped. */
+  position: relative;
 }
 .gc-card:hover {
   border-color: rgba(255, 255, 255, 0.16);
   translate: 0 -3px;
+}
+/* Cursor-following spotlight — --mx/--my are stamped by the delegated
+   listener in spotlight-cards.tsx (pointer:fine only); no transition on
+   the gradient position = instant direct-manipulation feedback, never
+   autonomous motion. */
+.gc-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(229, 9, 20, 0.1),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.gc-card.gc-spot::after {
+  opacity: 1;
 }
 
 /* Crimson gradient media frame (reference .frame) */
@@ -1043,4 +1067,246 @@ html:not(.hydrated) [style$="opacity:0"] {
 }
 html:not(.hydrated) .wi {
   transform: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   MOTION PASS (Task 38) — gaming reticle cursor, scroll progress bar,
+   recognized-titles ticker, primary-button sheen. Every rule here has a
+   prefers-reduced-motion story (see the block at the bottom).
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Gaming reticle cursor ──────────────────────────────────────────────
+   Armed by gaming-cursor.tsx (pointer:fine, no reduced motion): the
+   html.gc-cursor-on class swaps the native cursor out. The reticle
+   itself is fixed-position, pointer-events-none, transform/opacity only. */
+html.gc-cursor-on,
+html.gc-cursor-on * {
+  cursor: none !important;
+}
+.gc-cursor {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  pointer-events: none;
+}
+.gc-cursor-ring,
+.gc-cursor-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  transition: opacity 0.18s ease;
+}
+.gc-cursor-hidden .gc-cursor-ring,
+.gc-cursor-hidden .gc-cursor-trail {
+  opacity: 0;
+}
+.gc-cursor-reticle {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1.5px solid rgba(229, 9, 20, 0.85);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 0 18px rgba(229, 9, 20, 0.35),
+    inset 0 0 10px rgba(229, 9, 20, 0.18);
+}
+.gc-cursor-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff4d42;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.9);
+}
+.gc-dot-hot {
+  background: #fff;
+}
+/* crosshair ticks — children of the reticle, so the hover rotation
+   (45°) spins them with it */
+.gc-cursor-tick {
+  position: absolute;
+  background: rgba(229, 9, 20, 0.95);
+  box-shadow: 0 0 6px rgba(229, 9, 20, 0.55);
+}
+.gc-tick-n {
+  top: -8px;
+  left: 50%;
+  width: 1.5px;
+  height: 6px;
+  transform: translateX(-50%);
+}
+.gc-tick-s {
+  bottom: -8px;
+  left: 50%;
+  width: 1.5px;
+  height: 6px;
+  transform: translateX(-50%);
+}
+.gc-tick-e {
+  right: -8px;
+  top: 50%;
+  width: 6px;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+.gc-tick-w {
+  left: -8px;
+  top: 50%;
+  width: 6px;
+  height: 1.5px;
+  transform: translateY(-50%);
+}
+/* trailing dot — the loose-spring lag (pure glow, sits under the ring) */
+.gc-cursor-trail {
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: rgba(229, 9, 20, 0.4);
+  box-shadow: 0 0 20px 5px rgba(229, 9, 20, 0.22);
+}
+
+/* ── Scroll progress bar ────────────────────────────────────────────────
+   Scroll-LINKED (moves only as the visitor scrolls) — safe for everyone.
+   Origin flips to the right on the RTL document so the bar grows with
+   the reading direction. */
+.gc-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 125;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, #e50914, #ff4d42, #fedb29);
+  pointer-events: none;
+}
+html[dir="rtl"] .gc-scroll-progress {
+  transform-origin: 100% 50%;
+}
+
+/* ── Recognized-titles ticker ───────────────────────────────────────────
+   Infinite marquee of the REAL library names. Each item carries its own
+   trailing margin (margin-inline-end) so the track is exactly 2× one
+   copy — translateX(-50%) lands on the pixel twin (a flex gap would
+   drift half a gap per loop). RTL reverses the direction. */
+.gc-ticker {
+  overflow: hidden;
+  padding-block: 16px;
+  border-block: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12%,
+    black 88%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12%,
+    black 88%,
+    transparent
+  );
+}
+.gc-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: gcTicker 38s linear infinite;
+}
+.gc-ticker:hover .gc-ticker-track {
+  animation-play-state: paused;
+}
+@keyframes gcTicker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+html[dir="rtl"] .gc-ticker-track {
+  animation-direction: reverse;
+}
+.gc-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-inline-end: 56px;
+}
+.gc-ticker-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e50914;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.7);
+  flex: none;
+}
+.gc-ticker-name {
+  font-family: var(--font-mono, ui-monospace, "SF Mono", monospace);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+}
+
+/* ── Primary-button sheen sweep (hover) ───────────────────────────────── */
+.gc-btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+.gc-btn-primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 60%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.3, 1);
+}
+.gc-btn-primary:hover::after {
+  transform: translateX(130%);
+}
+html[dir="rtl"] .gc-btn-primary::after {
+  transform: translateX(130%);
+}
+html[dir="rtl"] .gc-btn-primary:hover::after {
+  transform: translateX(-130%);
+}
+
+/* ── Motion pass — reduced motion ───────────────────────────────────────
+   Cursor: hidden (JS never arms it either — belt and braces).
+   Ticker: no animation — items wrap into a static centered row, no mask.
+   Sheen: disabled (hover feedback stays via the existing lift/glow). */
+@media (prefers-reduced-motion: reduce) {
+  .gc-cursor {
+    display: none !important;
+  }
+  html.gc-cursor-on,
+  html.gc-cursor-on * {
+    cursor: auto !important;
+  }
+  .gc-ticker {
+    -webkit-mask-image: none;
+    mask-image: none;
+    overflow: visible;
+  }
+  .gc-ticker-track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 10px;
+    padding-inline: 1rem;
+  }
+  .gc-btn-primary::after {
+    display: none;
+  }
 }

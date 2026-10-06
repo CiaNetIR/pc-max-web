@@ -4,6 +4,53 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.5.0] — 2026-10-07
+
+**The Motion Pass** — owner request: "maximum animation, cutting-edge UI,
+even the mouse icon should be gaming." Six new motion layers on top of the
+existing 12 CSS keyframe families + ~110 framer-motion usages, every one
+pointer-driven, reduced-motion-safe and touch-safe.
+
+### Added — the gaming reticle cursor
+- **GamingCursor**: a crimson reticle (ring + 4 crosshair ticks + center
+  dot) that chases the pointer on springs, with a deliberately loose
+  trailing dot for the FPS-HUD "lag". Hovering interactive targets
+  expands it and rotates the ticks 45°; pressing contracts it; leaving
+  the document hides it. Arms only on `(pointer: fine)` devices without
+  `prefers-reduced-motion` — touch/no-JS/reduced visitors keep the native
+  cursor (`cursor:none` is a JS-added class, never baked into HTML).
+  E2E-found-and-fixed: the reticle DOM stays always-mounted (visually
+  inert until armed) because framer v12's `useSpring` only follows its
+  source once the consumer is attached — unmounting until "armed"
+  silently dropped the first pointer position and parked the ring
+  off-screen.
+
+### Added — scroll-driven & pointer-driven polish
+- **ScrollProgress**: the thin crimson→gold reading bar pinned to the top
+  of the viewport, spring-smoothed off scrollYProgress; origin flips to
+  the right on the RTL document. Scroll-linked (moves only when the
+  visitor scrolls), so it stays for reduced-motion users.
+- **Hero scroll parallax**: as the hero scrolls out, the copy drifts up
+  44px and the stage 96px + fades to 0.35 — depth with zero layout work
+  (transform/opacity only; gated off for reduced motion).
+- **Magnetic CTAs**: the two hero CTAs drift toward the pointer (±~10px,
+  spring physics with visible overshoot) and settle back dead-center on
+  leave — verified end-to-end including the spring reset.
+- **GameTicker**: the REAL library names (Cyberpunk 2077 · GTA V ·
+  Black Myth: Wukong · God of War · The Witcher 3 · RDR2) on an infinite
+  marquee strip under the hero — hairline borders, edge-fade masks,
+  crimson separator dots, per-item trailing margin for a mathematically
+  seamless loop (flex gap drifts half a gap per loop), direction
+  reversed on RTL, paused on hover, static wrapped row under
+  reduced motion, aria-hidden (the same titles live in the Dashboard DOM).
+- **SpotlightCards**: the cursor-following crimson glow across every
+  `.gc-card` — ONE delegated rAF-throttled pointermove listener stamps
+  `--mx/--my` CSS vars; the paint is a pure-CSS `::after` radial
+  gradient. No React re-renders, no per-card listeners, instant
+  direct-manipulation feedback (no autonomous motion).
+- **Primary-button sheen**: a diagonal light sweep crosses the download
+  CTA on hover (direction-aware for RTL; disabled under reduced motion).
+
 ## [2.4.3] — 2026-10-07
 
 **The showcase tabs now auto-rotate** — owner request: the four panels

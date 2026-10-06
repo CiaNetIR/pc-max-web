@@ -15,6 +15,10 @@ import { MobileCtaBar } from "@/components/pcmax/sections/mobile-cta-bar";
 import { Footer } from "@/components/pcmax/footer";
 import { AnalyticsBeacon } from "@/components/pcmax/ui/analytics-beacon";
 import { MotionProvider } from "@/components/pcmax/ui/motion";
+import { GamingCursor } from "@/components/pcmax/gaming-cursor";
+import { ScrollProgress } from "@/components/pcmax/scroll-progress";
+import { SpotlightCards } from "@/components/pcmax/spotlight-cards";
+import { GameTicker } from "@/components/pcmax/game-ticker";
 
 /*
  * The optional catch-all root segment `[[...lang]]` (audit 29-a — the /fa
@@ -62,12 +66,21 @@ export default async function Home({
     <MotionProvider>
       <div className="relative min-h-screen overflow-x-clip">
         <AnalyticsBeacon />
+        {/* Motion pass (Task 38): scroll progress bar, gaming reticle
+            cursor and card spotlight — all pointer-driven, reduced-motion
+            and touch safe (each component self-gates). */}
+        <ScrollProgress />
+        <GamingCursor />
+        <SpotlightCards />
         {/* Fixed background fx — 64px grid (radial-masked) + crimson glow */}
         <div className="bgfx" aria-hidden="true" />
         <Navbar />
         {/* id="main-content" — target of the layout's skip-to-content link (a11y / SXO) */}
         <main id="main-content" className="relative z-[1]">
           <Hero />
+          {/* recognized-titles ticker — the real library names on an
+              infinite (reduced-motion: static) marquee strip */}
+          <GameTicker />
           <AppShowcase />
           <WhatIsPcMax />
           <MultiFrame />
