@@ -51,15 +51,15 @@ export function Footer() {
               the visible wordmark is the accessible name, logo decorative. */}
           <div>
             <a href="#top" className="group flex items-center gap-2.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#ff3b30] to-[#e50914] shadow-[0_6px_20px_rgba(229,9,20,0.42)] transition-transform duration-300 group-hover:scale-105">
-                <Image
-                  src={asset("/brand/pcmax-logo-96.webp")}
-                  alt=""
-                  width={36}
-                  height={36}
-                  className="h-full w-full object-contain p-1"
-                />
-              </span>
+              {/* Circular transparent WebP emblem (Task 34) — no tile, no glow;
+                  the hover-scale now lives on the image itself. */}
+              <Image
+                src={asset("/brand/pcmax-logo-96.webp")}
+                alt=""
+                width={36}
+                height={36}
+                className="h-9 w-9 shrink-0 object-contain transition-transform duration-300 group-hover:scale-105"
+              />
               <span
                 dir="ltr"
                 className="font-display text-[17px] font-extrabold tracking-wide text-foreground"

@@ -10,8 +10,8 @@ const en = {
     menu: "Menu",
   },
   hero: {
-    /* {version} is replaced with APP_VERSION at render (hero.tsx) — keep in
-       sync with INSTALLER_FILE via lib/gh-pages.ts, never hardcode it here. */
+    /* {version} is replaced with the live app release at render (hero.tsx) —
+       sourced from lib/app-release.ts (GitHub resolver), never hardcoded. */
     kicker: "PC optimization for Windows · v{version}",
     title1: "More FPS.",
     title2: "Better frames. Full control.",

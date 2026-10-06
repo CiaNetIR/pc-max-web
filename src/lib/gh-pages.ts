@@ -53,21 +53,3 @@ export const GITHUB_REPO_URL = "https://github.com/CiaNetIR/pc-max-web";
  * Releases live at github.com/CiaNetIR/pc-max/releases; the download
  * buttons resolve the newest tag live via lib/app-release.ts. */
 export const APP_REPO_URL = "https://github.com/CiaNetIR/pc-max";
-
-/**
- * Filename of the local demo artifact — kept ONLY as the /api/download
- * route's fallback (SSR-flavor legacy compat; external consumers may still
- * hit the route). The user-facing download flow points at the REAL app
- * releases on github.com/CiaNetIR/pc-max — see lib/app-release.ts.
- */
-export const INSTALLER_FILE = "PCMAX-Setup-2.4.1-x64.exe";
-
-/**
- * Download href LEGACY — the old local-artifact flow. Kept for the SSR
- * flavor's /api/download counting route only; every user-facing download
- * button now resolves the newest GitHub release via lib/app-release.ts
- * (no-JS href fallback: APP_RELEASES_URL from that module).
- */
-export function installerHref(fileName: string = INSTALLER_FILE): string {
-  return IS_STATIC_EXPORT ? `${BASE_PATH}/releases/${fileName}` : "/api/download";
-}

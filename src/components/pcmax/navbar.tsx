@@ -201,16 +201,16 @@ export function Navbar() {
             scrolling + its own reduced-motion override); the visible
             "PC MAX" wordmark is the accessible name, the logo is decorative */}
         <a href="#top" className="flex shrink-0 items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[10px] bg-gradient-to-br from-[#ff3b30] to-[#e50914] shadow-[0_6px_20px_rgba(229,9,20,0.42)]">
-            <Image
-              src={asset("/brand/pcmax-logo-96.webp")}
-              alt=""
-              width={36}
-              height={36}
-              priority
-              className="h-full w-full object-contain p-1"
-            />
-          </span>
+          {/* Circular transparent WebP emblem (Task 34): no tile, no glow —
+              the ring art floats directly on the bar, nothing frames it. */}
+          <Image
+            src={asset("/brand/pcmax-logo-96.webp")}
+            alt=""
+            width={36}
+            height={36}
+            priority
+            className="h-9 w-9 shrink-0 object-contain"
+          />
           <span className="font-display text-[17px] font-extrabold text-foreground">
             PC&nbsp;<span className="text-crimson">MAX</span>
           </span>

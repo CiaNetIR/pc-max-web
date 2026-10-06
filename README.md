@@ -39,7 +39,7 @@
 - **Real-time 3D GPU hero** — a React-Three-Fiber graphics card with inertia/damping physics, contact shadows, theme-aware lighting, and a "PC MAX" LED backplate. Runs on a demand-driven render loop (`frameloop="never"` + one manual rAF) and **self-heals after WebGL context loss**.
 - **Mobile never ships the 3D** — dynamic import + `ssr:false` + a ≥1024px guard mean phones download zero WebGL code and get the full content instantly.
 - **Interactive product dashboard** — Home / Multi-Frame / Optimized Windows / Settings tabs that mirror the actual app, including the Windows tuning surface (Registry · Services · Scheduled tasks · Game files) with snapshot/rollback rows.
-- **Live release pipeline** — the download button is a *real* download: `/api/download` streams the actual installer (`public/releases/PCMAX-Setup-2.4.1-x64.exe`), returns its SHA-256, and atomically increments the counter (HEAD probes never count).
+- **Live release pipeline** — the download buttons resolve the newest real release of the [app repository](https://github.com/CiaNetIR/pc-max) live from GitHub Releases (REST resolver + hand-verified baseline + honest `releases/latest` fallback); legacy `/api/download` hits permanently redirect there.
 - **Dark & light themes**, calibrated motion (every animation neutralized under `prefers-reduced-motion`), and an a11y-hardened shell (focus traps, aria pairing, 44px touch targets, isolated digits in RTL).
 - **SEO-complete** — SSR-everything, JSON-LD, OpenGraph, sitemap/robots/manifest, and `llms.txt` / `llms-full.txt` for LLM crawlers.
 
@@ -66,7 +66,7 @@ bun prisma/seed.ts   # seed releases + changelog history
 bun run dev          # http://localhost:3000
 ```
 
-> The seeded installer artifact ships in `public/releases/`, so `/api/download` works out of the box.
+> `/api/download` redirects to the app repository's GitHub Releases — no local artifact needed.
 
 ## 📜 Scripts
 
@@ -83,9 +83,8 @@ bun run dev          # http://localhost:3000
 
 ```
 ├─ public/                     # static assets
-│  ├─ releases/                #   PCMAX-Setup-*.exe served by /api/download
-│  ├─ brand/ · games/          #   brand icons, game cover art
-│  ├─ fonts/                   #   self-hosted: Sora, Vazirmatn, Ariobarzan, Estedad
+│  ├─ brand/ · games/          #   brand icons, game cover art (WebP)
+│  ├─ fonts/                   #   self-hosted woff2 faces
 │  └─ llms.txt · llms-full.txt #   machine-readable site facts
 ├─ prisma/
 │  ├─ schema.prisma            # Release · ChangelogEntry · WaitlistSubscriber · EventLog

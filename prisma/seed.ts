@@ -3,13 +3,12 @@
  *
  * Task 32: the website UI now reads release facts from the app repo's real
  * GitHub Releases (src/lib/app-release.ts); this seed only feeds the
- * legacy /api/release + /api/changelog routes and the /api/download
- * fallback — kept for external consumers, not the marketing surface. */
+ * legacy /api/release + /api/changelog routes — kept for external
+ * consumers, not the marketing surface. (Task 34: /api/download now
+ * redirects to GitHub — the local demo .exe no longer ships.) */
 import { PrismaClient } from "@prisma/client";
-import { INSTALLER_FILE } from "../src/lib/gh-pages";
 
-/* Version of the local demo artifact tracked by INSTALLER_FILE (the file
- * the /api/download route streams). */
+/* Version of the legacy demo-release rows below (historical seed data). */
 const APP_VERSION = "2.4.1";
 
 const db = new PrismaClient();
@@ -26,7 +25,7 @@ async function main() {
       {
         version: APP_VERSION,
         channel: "stable",
-        fileName: INSTALLER_FILE,
+        fileName: "PCMAX-Setup-2.4.1-x64.exe",
         notes: "Streamline guardrails for Blackwell, faster Epic detection",
         releasedAt: new Date("2025-11-18T10:00:00Z"),
         downloads: 128450,

@@ -4,6 +4,46 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.4.1] — 2026-10-06
+
+**The red box around the logo is gone and every browser-rendered image is
+WebP** — Task 34 (user feedback: "all images should be WebP for fast
+loading, and there's still a red box around the top-left logo").
+
+### Fixed — no more red frame around the brand logo
+- Root cause: the navbar/footer logo sat inside a **red gradient tile +
+  red glow shadow** (`from-[#ff3b30] to-[#e50914]` + crimson box-shadow) —
+  read as a red box framing the logo. Both tiles are removed.
+- `pcmax-logo-96.webp` regenerated as a **circular transparent emblem**
+  (alpha-channel WebP cropped to the ring artwork, VLM-verified clean) —
+  the logo now floats directly on the bar like a badge; the footer keeps
+  its hover-scale on the image itself. Nothing frames it anywhere.
+- New `pcmax-logo-256.webp` (13.5 KB) replaces the PNG in the branded
+  404 page template — that page's only image is WebP now too.
+
+### Changed — WebP everywhere the browser actually renders
+- Audit: hero (Ghost) + all six gallery key arts were already WebP
+  (Task 33); the logo is WebP with alpha now; the 404 logo is WebP.
+  **Every `<img>` rendered on the page is WebP** — verified in the network
+  log on EN, FA, mobile and the static Pages flavor (0 non-WebP).
+- Flat-color brand PNGs palette-optimized losslessly: logo-256
+  62.7→31.8 KB, logo-96 11.8→6.4 KB, maskable 121.8→60.6 KB.
+- `favicon.ico` / `icon.png` / `apple-icon.png` / `og.png` / manifest
+  icons stay PNG/ICO on purpose — platform requirements (favicon + Apple
+  touch icon compatibility, og:image crawler support, PWA install);
+  none of them render inside the page.
+
+### Removed — 2.2 MB of dead deploy weight
+- `public/releases/PCMAX-Setup-2.4.1-x64.exe` deleted: a fabricated-version
+  artifact superseded by the real GitHub-Releases resolver (Task 32).
+  Deploy size drops 5.4 MB → **3.2 MB** (−40%).
+- Dead plumbing cleaned: `INSTALLER_FILE` + `installerHref()` (zero call
+  sites) removed from `lib/gh-pages.ts`; `/api/download` now permanently
+  **redirects to the app repo's `releases/latest`** (legacy links still
+  land on a real download; GET counts an anonymous event, HEAD does not);
+  `prisma/seed.ts` decoupled; build-script installer sed + SW
+  `/releases` never-cache rule dropped; README download story corrected.
+
 ## [2.4.0] — 2026-10-06
 
 **Every image on the site now carries a character gamers instantly

@@ -12,12 +12,11 @@
  *   documents (navigations — / and the /fa route) → network-first
  *       fresh HTML discovers new asset hashes on every deploy; the cached
  *       copy is the offline fallback after the first successful visit
- *   /releases/** (the 2.2 MB installer) → never cached, network only
  *
  * Registered ONLY in the GitHub Pages static export (see
  * src/components/pcmax/sw-register.tsx — the SSR/dev flavor never mounts
  * it). Bump VERSION whenever public/ assets change so old caches drop. */
-const VERSION = "v2.4.0";
+const VERSION = "v2.4.1";
 const CACHE = `pcmax-${VERSION}`;
 const BASE = "/pc-max-web";
 /* Content-hashed build output. Next's default layout is /_next/static/;
@@ -97,9 +96,6 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  /* The installer artifact must always hit the network (2.2 MB, versioned
-   * by filename — the HTTP cache + server range support handle it). */
-  if (url.pathname.startsWith(`${BASE}/releases/`)) return;
 
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(request));

@@ -30,10 +30,6 @@ IN_PLACE=0
 
 PAGES_URL="https://cianetir.github.io/pc-max-web"
 REPO_URL="https://github.com/CiaNetIR/pc-max-web"
-# Single source of truth (audit 29-c): read the installer filename straight
-# from src/lib/gh-pages.ts so the script can never drift from the code.
-INSTALLER="$(bun -e 'const m = await import("./src/lib/gh-pages.ts"); console.log(m.INSTALLER_FILE);' 2>/dev/null)"
-[[ -n "$INSTALLER" ]] || INSTALLER="PCMAX-Setup-2.4.1-x64.exe"
 
 if [[ $IN_PLACE -eq 1 ]]; then
   if [[ "$SRC_ROOT" == "/home/z/my-project" && "${CI:-}" != "true" ]]; then
@@ -86,7 +82,6 @@ echo "▸ rewriting public text-file URLs to the Pages deployment"
 for f in public/llms.txt public/llms-full.txt public/.well-known/security.txt; do
   [[ -f "$f" ]] || continue
   sed -i \
-    -e "s#https://pcmax\.app/api/download#${PAGES_URL}/releases/${INSTALLER}#g" \
     -e "s#https://pcmax\.app/api/release#${REPO_URL}/releases#g" \
     -e "s#https://pcmax\.app/api/changelog#${REPO_URL}/releases#g" \
     -e "s#https://pcmax\.app#${PAGES_URL}#g" \
@@ -152,7 +147,7 @@ cat > "$WORK/out/404.html" <<'HTML404'
 </head>
 <body>
   <main class="wrap">
-    <img src="/pc-max-web/brand/pcmax-logo-256.png" alt="PC MAX logo" width="56" height="56">
+    <img src="/pc-max-web/brand/pcmax-logo-256.webp" alt="PC MAX logo" width="56" height="56">
     <div class="code">404</div>
     <h1>Lost in optimization.</h1>
     <p>The page you&rsquo;re looking for doesn&rsquo;t exist.<br>صفحه‌ای که دنبالش بودید وجود ندارد.</p>
