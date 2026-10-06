@@ -4,6 +4,36 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.4.3] — 2026-10-07
+
+**The showcase tabs now auto-rotate** — owner request: the four panels
+(Dashboard / Multi-Frame / Optimized Windows / Settings) under
+«The console for your PC.» swap every **1.5 s**, turning the static
+preview into the "live tabs" the copy promises.
+
+### Added — auto-rotation with a full accessibility contract
+- **1.5 s heartbeat** (`AUTOPLAY_MS`): the active tab advances
+  dashboard → multiframe → windows → settings → … with the existing
+  fade+rise slide swap; on phones the pill strip auto-scrolls to keep
+  the active tab revealed.
+- **Pause conditions (WCAG 2.2.2 + APG carousel pattern)**: rotation
+  pauses while the region is *hovered* or *focused* (reading time),
+  while the section is *off-screen* (one IntersectionObserver on the
+  stable tabpanel anchor) and while the document tab is hidden.
+- **Manual control wins**: any tab click, roving-tabindex arrow/Home/End
+  key, thumbnail pick or mock-button interaction hands control to the
+  visitor for good — an explicit **pause/play toggle** (lucid Pause/Play,
+  EN+FA labels, 44 px effective hit area) sits by the interface-preview
+  caption and re-arms rotation on demand.
+- **prefers-reduced-motion never starts it** — implemented via
+  `useSyncExternalStore` (SSR snapshot `false`, hydration-safe, reacts
+  to live OS-setting changes); the toggle hides for those visitors
+  instead of shipping a dead control. (framer's `useReducedMotion`
+  reads the media query synchronously on first client render — safe for
+  animation props, unsafe for structure — so it was not used here.)
+- New dictionary keys `showcase.pauseAuto` / `showcase.resumeAuto`
+  (EN + FA); `sw.js` VERSION → v2.4.3.
+
 ## [2.4.2] — 2026-10-06
 
 **The download card now shows the REAL SHA-256 of the real installer** —

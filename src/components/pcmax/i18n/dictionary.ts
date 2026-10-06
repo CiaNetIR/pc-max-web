@@ -260,6 +260,9 @@ const en = {
     title: "The console for your PC.",
     desc: "The PC MAX desktop app — glass surfaces, soft reflections and live tabs.",
     disclaimer: "Interface preview — values are illustrative.",
+    /* Auto-rotation control (the 1.5s panel swap) — WCAG 2.2.2 pause */
+    pauseAuto: "Pause auto-rotate",
+    resumeAuto: "Resume auto-rotate",
     tabs: {
       dashboard: "Dashboard",
       multiframe: "Multi-Frame",
@@ -758,6 +761,9 @@ const fa: Dictionary = {
     title: "کنسولِ رایانه‌ی شما.",
     desc: "اپلیکیشن دسکتاپ PC MAX — سطوح شیشه‌ای، بازتاب‌های ملایم و تب‌های زنده.",
     disclaimer: "پیش‌نمایش رابط کاربری — مقادیر نمایشی هستند.",
+    /* کنترل چرخش خودکار (تعویض پنل هر ۱.۵ ثانیه) — توقف WCAG 2.2.2 */
+    pauseAuto: "توقف چرخش خودکار",
+    resumeAuto: "ادامه چرخش خودکار",
     tabs: {
       dashboard: "داشبورد",
       multiframe: "مولتی‌فریم",

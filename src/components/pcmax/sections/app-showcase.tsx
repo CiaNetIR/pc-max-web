@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type ComponentProps } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Cloud, Lock } from "lucide-react";
+import { Check, Cloud, Lock, Pause, Play } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading, AnimatedCounter } from "@/components/pcmax/ui/primitives";
 import { asset } from "@/lib/gh-pages";
@@ -14,6 +14,26 @@ import { cn } from "@/lib/utils";
 type TabKey = "dashboard" | "multiframe" | "windows" | "settings";
 
 const tabOrder: TabKey[] = ["dashboard", "multiframe", "windows", "settings"];
+
+/* Auto-rotation heartbeat (owner request): the showcase panels swap on
+ * this cadence while the region is on screen, un-hovered and un-focused;
+ * the full a11y contract lives with the autoplay state block below. */
+const AUTOPLAY_MS = 1500;
+
+/* prefers-reduced-motion via useSyncExternalStore: the SSR snapshot is
+ * false AND the hydration pass reuses it, so markup can never mismatch;
+ * the real client value (and any live toggle of it) lands one commit
+ * later. (framer's useReducedMotion reads the media query synchronously
+ * on the first client render — fine for animation props, unsafe for
+ * structure.) */
+const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
+const subscribeReduce = (cb: () => void) => {
+  const mq = window.matchMedia(REDUCE_QUERY);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+const getReduceSnapshot = () => window.matchMedia(REDUCE_QUERY).matches;
+const getReduceServerSnapshot = () => false;
 
 /* Responsive WebP key-arts (Task 24, Lighthouse "Improve image delivery":
  * −123 KiB mobile; Task 33: famous-character swap). The Pages export runs
@@ -140,6 +160,64 @@ export function AppShowcase() {
    * swap the key art — the Guardian media panel keeps the old gallery's
    * informational content in a single focused surface). */
   const [gameIdx, setGameIdx] = useState(0);
+  /* --- Auto-rotation (owner request): panels swap every AUTOPLAY_MS ---
+   * A11y contract (WCAG 2.2.2 + the APG carousel pattern): rotation
+   * pauses on hover/focus (reading time) and while off-screen; any manual
+   * activation (tab click/keys, thumbnail, mock button) hands control to
+   * the visitor for good — the toggle by the disclaimer re-arms it — and
+   * prefers-reduced-motion never starts it. */
+  const reduce = useSyncExternalStore(subscribeReduce, getReduceSnapshot, getReduceServerSnapshot);
+  const [autoOn, setAutoOn] = useState(true);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [inView, setInView] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  /* Off-screen → no wasted ticks (and nothing moving under a viewport the
+   * visitor is not looking at). The stable tabpanel div is the anchor. */
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => setInView(entries[0]?.isIntersecting ?? false),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const playing = autoOn && !reduce && !hovered && !focused && inView;
+
+  /* The heartbeat — one tab per tick. The functional setTab reads the live
+   * tab (no stale closure); hidden-document ticks are skipped so returning
+   * to the page never shows a mid-sequence jump. */
+  useEffect(() => {
+    if (!playing) return;
+    const id = window.setInterval(() => {
+      if (document.hidden) return;
+      setTab((cur) => tabOrder[(tabOrder.indexOf(cur) + 1) % tabOrder.length]);
+    }, AUTOPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [playing]);
+
+  /* Hover/focus reading-time pauses — shared by the tab strip and the
+   * slider (two sibling regions, no wrapper div: the tuned strip layout
+   * stays byte-identical). Focus merely MOVING between the two never
+   * resumes rotation spuriously — only focus landing outside both does. */
+  const hoverIn = () => setHovered(true);
+  const hoverOut = () => setHovered(false);
+  const focusIn = () => setFocused(true);
+  const focusOut = (e: React.FocusEvent<HTMLDivElement>) => {
+    const next = e.relatedTarget;
+    if (!(next instanceof Node) || !e.currentTarget.contains(next)) setFocused(false);
+  };
+  const regionProps = {
+    onPointerEnter: hoverIn,
+    onPointerLeave: hoverOut,
+    onFocusCapture: focusIn,
+    onBlurCapture: focusOut,
+  } as const;
+
   /* Unique panel id — stays unique even if this section ever mounts twice. */
   const panelId = useId();
   /* Local mock-data copy for the current locale. */
@@ -191,6 +269,8 @@ export function AppShowcase() {
     else if (e.key === "End") next = last;
     if (next === null) return;
     e.preventDefault();
+    /* roving-tabindex navigation is manual control too */
+    setAutoOn(false);
     const id = tabOrder[next];
     setTab(id);
     requestAnimationFrame(() => {
@@ -201,6 +281,8 @@ export function AppShowcase() {
   }
 
   const mockToast = () => {
+    /* engaging with the mock = stop rotating away from it */
+    setAutoOn(false);
     toast({ title: "PC MAX", description: t.showcase.disclaimer });
   };
 
@@ -284,10 +366,30 @@ export function AppShowcase() {
 
       {/* Interface-preview label — hoisted to the tab strip (audit 29-b D9:
           visitors see the mock panels first; the label must not live only in
-          a 12px footnote 700px below). */}
-      <p className="mt-3 text-center text-xs text-muted-foreground/90">
-        {t.showcase.disclaimer}
-      </p>
+          a 12px footnote 700px below) — plus the auto-rotation control:
+          WCAG 2.2.2 asks for an explicit pause for auto-updating content,
+          so a small icon toggle sits by the preview label (hidden when
+          reduced motion keeps rotation off entirely). */}
+      <div className="mt-3 flex items-center justify-center gap-2.5">
+        <p className="text-center text-xs text-muted-foreground/90">
+          {t.showcase.disclaimer}
+        </p>
+        {!reduce && (
+          <button
+            type="button"
+            onClick={() => setAutoOn((v) => !v)}
+            aria-label={autoOn ? t.showcase.pauseAuto : t.showcase.resumeAuto}
+            title={autoOn ? t.showcase.pauseAuto : t.showcase.resumeAuto}
+            className="press relative flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:text-foreground after:absolute after:-inset-2"
+          >
+            {autoOn ? (
+              <Pause className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <Play className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
+          </button>
+        )}
+      </div>
 
       {/* Tab strip — Guardian .ftabs language: pill tabs on a hairline-
           scrollable strip, hidden scrollbar, centered when it fits. The
@@ -297,6 +399,7 @@ export function AppShowcase() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "0px 0px -60px 0px" }}
         transition={springFluid}
+        {...regionProps}
       >
         <div
           ref={tablistRef}
@@ -316,7 +419,11 @@ export function AppShowcase() {
               aria-selected={tab === key}
               aria-controls={panelId}
               ref={tab === key ? activeTabRef : undefined}
-              onClick={() => setTab(key)}
+              onClick={() => {
+                /* manual selection takes the wheel — auto-rotation stops */
+                setAutoOn(false);
+                setTab(key);
+              }}
               className={cn(
                 "press showcase-tab h-10 flex-none snap-center rounded-full px-4 text-[13.5px] font-bold transition-colors",
                 tab === key
@@ -337,8 +444,9 @@ export function AppShowcase() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "0px 0px -60px 0px" }}
         transition={springFluid}
+        {...regionProps}
       >
-        <div id={panelId} role="tabpanel" aria-labelledby={`${panelId}-${tab}`}>
+        <div id={panelId} ref={panelRef} role="tabpanel" aria-labelledby={`${panelId}-${tab}`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={tab}
@@ -432,7 +540,11 @@ export function AppShowcase() {
                             <button
                               key={g.src}
                               type="button"
-                              onClick={() => setGameIdx(i)}
+                              onClick={() => {
+                /* picking art is manual control — rotation stops */
+                setAutoOn(false);
+                setGameIdx(i);
+              }}
                               aria-label={t.library.games[i].name}
                               aria-pressed={i === gameIdx}
                               className={cn(
