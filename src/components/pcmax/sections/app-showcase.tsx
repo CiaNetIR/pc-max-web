@@ -371,7 +371,7 @@ export function AppShowcase() {
           so a small icon toggle sits by the preview label (hidden when
           reduced motion keeps rotation off entirely). */}
       <div className="mt-3 flex items-center justify-center gap-2.5">
-        <p className="text-center text-xs text-muted-foreground/90">
+        <p className="gc-logline text-center text-xs">
           {t.showcase.disclaimer}
         </p>
         {!reduce && (

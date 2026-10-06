@@ -258,7 +258,7 @@ export function Benchmarks() {
             {/* Methodology + illustrative-data disclosure — the per-game rows
              * are examples; only the headline average is a measured figure
              * (audit 29-b D6: unsourced pairs must be labeled as such). */}
-            <p className="mt-8 max-w-2xl rounded-xl bg-[#1b1b21]/70 p-4 text-xs leading-relaxed text-muted-foreground ring-1 ring-inset ring-white/[0.08] sm:p-5">
+            <p className="gc-logline mt-8 max-w-2xl rounded-xl bg-[#1b1b21]/70 p-4 text-xs leading-relaxed ring-1 ring-inset ring-white/[0.08] sm:p-5">
               {t.bench.gamesNote}{" "}
               {t.bench.note}
             </p>

@@ -29,6 +29,11 @@ import "../globals.css";
  * ------------------------------------------------------------------- */
 type LocalFace = { family: string; file: string; weight: number; range?: string };
 
+/* Latin subset range (Google Fonts' own latin block) — scopes the EN
+ * display face so it can never try to render Persian glyphs. */
+const LATIN_RANGE =
+  "U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD";
+
 const LOCAL_FACES: LocalFace[] = [
   { family: "IRANYekanX", file: "IRANYekanX-Regular.woff2", weight: 400 },
   { family: "IRANYekanX", file: "IRANYekanX-Medium.woff2", weight: 500 },
@@ -44,6 +49,11 @@ const LOCAL_FACES: LocalFace[] = [
   { family: "Poppins", file: "Poppins-Regular.latin.woff2", weight: 400 },
   { family: "Poppins", file: "Poppins-SemiBold.latin.woff2", weight: 600 },
   { family: "Poppins", file: "Poppins-Bold.latin.woff2", weight: 700 },
+  /* v2.7 — the EN display face (Neon Ops): Chakra Petch, the ui-ux-pro-max
+   * skill's gaming pick. Latin-only (~10KB cuts); the Persian document keeps
+   * IRANYekanX via html[dir=rtl]'s --font-display override in globals.css. */
+  { family: "Chakra Petch", file: "ChakraPetch-SemiBold.latin.woff2", weight: 600, range: LATIN_RANGE },
+  { family: "Chakra Petch", file: "ChakraPetch-Bold.latin.woff2", weight: 700, range: LATIN_RANGE },
 ];
 
 const localFontFace = LOCAL_FACES.map((f) => {
@@ -55,7 +65,14 @@ const localFontFace = LOCAL_FACES.map((f) => {
  * (canonical document), FA paints IRANYekanX (a real prerendered /fa
  * document since the [[...lang]] route — both flavors). */
 const FONT_PRELOADS: Record<Locale, string[]> = {
-  en: ["Poppins-Regular.latin.woff2", "Poppins-SemiBold.latin.woff2", "Poppins-Bold.latin.woff2"],
+  en: [
+    "Poppins-Regular.latin.woff2",
+    "Poppins-SemiBold.latin.woff2",
+    "Poppins-Bold.latin.woff2",
+    /* the v2.7 display face paints the above-fold h1 — preload kills the
+     * swap flash (Poppins → Chakra Petch) on first paint */
+    "ChakraPetch-Bold.latin.woff2",
+  ],
   fa: ["IRANYekanX-Regular.woff2", "IRANYekanX-Bold.woff2", "IRANYekanX-ExtraBold.woff2"],
 };
 

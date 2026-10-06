@@ -132,7 +132,7 @@ export function Hero() {
     <section
       ref={heroRef}
       id="top"
-      className="relative overflow-hidden pt-[clamp(96px,12vw,140px)] pb-16 sm:pb-24"
+      className="gc-hero-rings relative overflow-hidden pt-[clamp(96px,12vw,140px)] pb-16 sm:pb-24"
     >
       {/* copy stack */}
       <motion.div style={parallax}>
@@ -167,12 +167,13 @@ export function Hero() {
           {t.hero.sub}
         </motion.p>
 
-        {/* bullets */}
+        {/* bullets — v2.7: the checks ride inside a glass console strip
+            (gc-check-strip) instead of floating on the background */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.42, ease: "easeOut" }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-muted-foreground"
+          className="gc-check-strip mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-muted-foreground"
         >
           {t.hero.bullets.map((bullet) => (
             <span key={bullet} className="flex items-center gap-2.5">
@@ -326,7 +327,7 @@ export function Hero() {
             </div>
           </div>
         </div>
-        <p className="mx-auto mt-3 max-w-4xl text-center text-xs text-muted-foreground/80">
+        <p className="gc-logline mx-auto mt-3 max-w-4xl text-center">
           {t.hero.stage.caption}
         </p>
       </motion.div>

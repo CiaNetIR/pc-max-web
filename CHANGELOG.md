@@ -4,6 +4,82 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.7.0] — 2026-10-07
+
+**Neon Ops** — owner request: "do a complete review, I don't like the UI."
+A full visual-identity audit (VLM screenshots at hero/mid/journey, EN+FA,
+1440/1280/320) scored the shipped v2.6 look "template-grade 4/10 — flat
+void background, no depth, safe typography, cheap gradient text." This
+release rebuilds the visual language on the ui-ux-pro-max skill's gaming
+guidance (its Chakra Petch gaming pick, its pre-delivery checklist) while
+preserving every word of content, the IA, the crimson brand and the
+TweakFa Persian typographic contract. CSS-first: **zero new JS, zero new
+dependencies, zero new components** — every layer is static paint (no new
+autonomous motion), so the reduced-motion contract is untouched.
+
+### Added — atmosphere ("the expensive dark-mode stack")
+- **Film grain**: a 180px SVG `feTurbulence` tile at 3% opacity, fixed
+  full-viewport (`body::after`, z-60 — under the progress bar/cursor,
+  over content), composited once, never repainting on scroll.
+- **Scanlines**: a 3px repeating gradient riding the masked grid layer
+  (`.bgfx::before`) — top-weighted like a CRT under the aurora.
+- **Edge vignette** (`body::before`): radial falloff toward the viewport
+  edges — the screen-emission feel.
+- **Crimson horizon**: a live 1px edge line + soft glow pinned to the
+  viewport bottom — the "mission control" floor.
+
+### Added — typography with a voice
+- **Chakra Petch** (the skill's gaming pick) is the new EN display face:
+  self-hosted ~10KB latin cuts (600/700) with the Google latin
+  `unicode-range` so it can never touch Persian glyphs, preloaded in EN
+  to kill the swap flash. Every `font-display` consumer (h1, game
+  names, HUD numbers, journey captions) gains the angular techno voice.
+  The Persian document keeps IRANYekanX untouched (not even downloaded).
+- **Terminal kickers**: the section eyebrows become mono status chips
+  (EN only — Persian never letterspaces): glowing status dot, notched
+  chassis, crimson edge light, `0.12em` tracking, uppercase.
+- **Terminal log lines** (`.gc-logline`): honest-disclosure footnotes
+  (showcase disclaimer, benchmarks methodology, hero stage caption) now
+  read as dim mono console logs with a `//` crimson comment marker —
+  readable at ~5.4:1, styled instead of apologetic.
+- **Headline treatment**: deeper premium gradient stops
+  (#ffb4ac→#ff6b5e→#e50914→#c1121f) + a soft neon bloom
+  (`drop-shadow` on the clipped glyph alpha).
+
+### Added — depth & materials
+- **Layered cards** (`.gc-card`): top-light wash over the base, inner
+  top highlight, deep ambient shadow; hover lifts and blooms a crimson
+  edge glow (transform-free `translate` lift preserved — Task 28-a/A2).
+- **Gradient CTAs**: the primary button gets a 180° crimson ramp with an
+  inner top-light (the "pressable hardware" cue); the ghost becomes dark
+  glass (`backdrop-blur(8px)`); gold mirrors the treatment.
+- **Targeting rings**: three concentric hairline rings (outermost
+  crimson-tinted) + a dashed radar dial behind the hero copy band —
+  architectural depth, static, clipped by the hero.
+- **Glass check strip**: the hero feature bullets ride in a console
+  panel with a crimson inline-start block edge (the "terminal readout"
+  cue) instead of floating on the void.
+- **Data-conduit separators**: the section hairlines are energized
+  crimson conduits with a glowing diamond node at center.
+- **CRT console**: the journey panel gains a scanline texture + stronger
+  crimson bloom + hotter corner brackets; the download bar glows.
+- **Global scrollbar**: slim dark track, crimson thumb on hover
+  (webkit + Firefox `scrollbar-color`).
+- HUD chips / header / sector HUD / journey rail: inner top highlights,
+  richer borders, stronger hover blooms throughout.
+
+### Accessibility & performance (unchanged contract, new materials)
+- No new autonomous motion: every new layer is static paint; the
+  reduced-motion, reduced-transparency (all new glass materials degrade)
+  and high-contrast guards were extended to cover them.
+- EN-only mono/letterspacing rules are gated on `html:not([dir="rtl"])`;
+  FA keeps sans faces and `letter-spacing: 0` (cursive-script rule).
+- tsc 0 · eslint clean · E2E: EN+FA hero/mid/journey verified, overflowX
+  0 at 320px both languages, journey pin + step progression on mobile,
+  reduced-motion = static grid + no ticker + textures retained, zero
+  console errors. VLM re-audit: hero 4/10 → **9.2/10**, mid C+ →
+  **7.8/10**, FA **9.5/10 with zero RTL defects**.
+
 ## [2.6.0] — 2026-10-07
 
 **The Scroll Odyssey** — owner request: "review everything and give the

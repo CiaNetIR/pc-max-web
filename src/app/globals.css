@@ -9,11 +9,13 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ------------------------------------------------------------------ */
-/*  PC MAX DESIGN SYSTEM v2.1 — "GUARDIAN, RED EDITION"                */
-/*  Structure modeled on the TweakFa Phoenix-Guardian landing; the      */
-/*  palette is the classic PC-Max crimson/black brand. Typography is    */
-/*  the exact TweakFa pair: IRANYekanX (fa) + Poppins (latin) + the      */
-/*  Poppins-digits unicode-range trick (see layout.tsx @font-face).     */
+/*  PC MAX DESIGN SYSTEM v2.7 — "NEON OPS" (Guardian, Red Edition)    */
+/*  v2.7 adds the atmosphere + depth system on top of the v2.1 base:  */
+/*  film-grain noise, scanlines, vignette, crimson horizon (the       */
+/*  "expensive dark mode" stack), terminal kickers, layered cards    */
+/*  with inner highlights + hover bloom, gradient CTA fills with      */
+/*  glass ghosts, data-conduit section separators, CRT console        */
+/*  texture. Palette/typography unchanged (TweakFa pair, crimson).    */
 /* ------------------------------------------------------------------ */
 
 @theme {
@@ -121,6 +123,15 @@ html[dir="rtl"] {
   --font-display: "IRANYekanX", "Segoe UI", Tahoma, sans-serif;
 }
 
+/* v2.7 — the EN display face: Chakra Petch (the ui-ux-pro-max skill's
+   gaming/tech pick, ~10KB self-hosted latin cuts, preloaded in EN).
+   Every `font-display` consumer (h1, game names, HUD numbers, journey
+   captions) gains the angular techno voice; the Persian document is
+   untouched above. */
+html:not([dir="rtl"]) {
+  --font-display: "Chakra Petch", "Poppins", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Base                                                               */
 /* ------------------------------------------------------------------ */
@@ -159,8 +170,83 @@ html:root {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Background fx — the fixed grid + crimson glow layer (mount ONCE)   */
-/*  .bgfx  → <div class="bgfx" aria-hidden /> at page root, z-0         */
+/*  Hero targeting rings (v2.7) — architectural depth behind the copy: */
+/*  three concentric hairline rings (outermost crimson-tinted) + a     */
+/*  dashed radar dial, centered on the headline band. Static (no      */
+/*  autonomous motion), decorative, clipped by the hero's            */
+/*  overflow-hidden.                                                   */
+/* ------------------------------------------------------------------ */
+
+.gc-hero-rings::before {
+  content: "";
+  position: absolute;
+  top: 38vh;
+  left: 50%;
+  width: 980px;
+  height: 980px;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    transparent 0 289px,
+    rgba(255, 255, 255, 0.05) 289px 290px,
+    transparent 290px 429px,
+    rgba(255, 255, 255, 0.042) 429px 430px,
+    transparent 430px 488px,
+    rgba(229, 9, 20, 0.13) 488px 490px,
+    transparent 490px
+  );
+  pointer-events: none;
+}
+.gc-hero-rings::after {
+  content: "";
+  position: absolute;
+  top: 38vh;
+  left: 50%;
+  width: 1130px;
+  height: 1130px;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.055);
+  pointer-events: none;
+}
+@media (max-width: 640px) {
+  .gc-hero-rings::before,
+  .gc-hero-rings::after {
+    transform: translate(-50%, -50%) scale(0.52);
+  }
+}
+
+/* Hero check strip (v2.7) — the feature bullets ride in a glass      */
+/* console panel: tighter terminal padding, a crimson inline-start    */
+/* block edge (the "terminal readout" cue), brighter copy.           */
+.gc-check-strip {
+  position: relative;
+  padding: 10px 26px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-inline-start: 2px solid rgba(229, 9, 20, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.76);
+  /* unprefixed only — Lightning CSS dedupe note (Task 28-a/A1) */
+  backdrop-filter: blur(6px);
+}
+@media (max-width: 480px) {
+  .gc-check-strip {
+    padding: 9px 16px;
+    border-radius: 14px;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Background fx — the fixed atmosphere stack (mount ONCE)            */
+/*  .bgfx  → <div class="bgfx" aria-hidden /> at page root, z-0        */
+/*  v2.7: grid + scanlines (masked, top-weighted) on ::before; the    */
+/*  crimson aurora + a horizon line at the viewport bottom on ::after. */
+/*  body::before = edge vignette · body::after = film grain (z-60).   */
 /* ------------------------------------------------------------------ */
 
 .bgfx {
@@ -174,9 +260,10 @@ html:root {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
-  background-size: 64px 64px;
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.013) 0 1px, transparent 1px 3px),
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px);
+  background-size: auto, 64px 64px, 64px 64px;
   -webkit-mask-image: radial-gradient(120% 85% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 78%);
   mask-image: radial-gradient(120% 85% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, transparent 78%);
 }
@@ -188,13 +275,56 @@ html:root {
   transform: translateX(-50%);
   width: 1100px;
   height: 760px;
-  background: radial-gradient(closest-side, rgba(229, 9, 20, 0.3), rgba(229, 9, 20, 0.1) 55%, transparent 78%);
+  background: radial-gradient(closest-side, rgba(229, 9, 20, 0.34), rgba(229, 9, 20, 0.11) 55%, transparent 78%);
   filter: blur(30px);
+}
+/* Edge vignette — screen-emission falloff toward the viewport edges. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(125% 105% at 50% 42%, transparent 58%, rgba(0, 0, 0, 0.5) 100%);
+}
+/* Film grain — a 180px turbulence tile at 3% opacity over everything */
+/* (z-60: above sections/HUD, under progress bar 125 / cursor 130).   */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.03;
+}
+/* Crimson horizon — a live edge line pinned to the viewport bottom.  */
+body::after {
+  box-shadow: inset 0 -1px 0 rgba(229, 9, 20, 0.32), inset 0 -14px 34px -22px rgba(229, 9, 20, 0.4);
+}
+
+/* Terminal log line (v2.7) — honest-disclosure footnotes styled as a  */
+/* dim mono console log with a crimson comment marker (EN docs; FA      */
+/* keeps the sans face). Readability holds: ~5.4:1 on the void.        */
+.gc-logline {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.gc-logline::before {
+  content: "//";
+  margin-inline-end: 7px;
+  color: rgba(229, 9, 20, 0.65);
+  font-weight: 600;
+}
+html:not([dir="rtl"]) .gc-logline {
+  font-family: var(--font-mono);
 }
 
 /* ------------------------------------------------------------------ */
-/*  Section chrome — separators between .gc-sect sections              */
-/*  (reference: .sect + .sect::before centered gradient hairline)      */
+/*  Section chrome — "data conduit" separators between .gc-sect        */
+/*  v2.7: the hairline becomes an energized conduit with a glowing    */
+/*  crimson node at its center.                                       */
 /* ------------------------------------------------------------------ */
 
 .gc-sect {
@@ -206,73 +336,143 @@ html:root {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: min(720px, 80%);
+  width: min(680px, 84%);
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(229, 9, 20, 0.55) 30%,
+    rgba(255, 138, 128, 0.85) 50%,
+    rgba(229, 9, 20, 0.55) 70%,
+    transparent
+  );
+  box-shadow: 0 0 14px rgba(229, 9, 20, 0.3);
+  pointer-events: none;
+}
+/* the node — a small glowing diamond riding the conduit's center */
+.gc-sect + .gc-sect::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  transform: translateX(-50%) rotate(45deg);
+  background: #ff3b30;
+  box-shadow: 0 0 12px rgba(255, 59, 48, 0.95), 0 0 30px rgba(229, 9, 20, 0.55);
   pointer-events: none;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Kicker — section eyebrow (reference .kicker: flat notched tag —     */
-/*  8px clip-path notches, no dot, no border; crimson tint + text)     */
+/*  Kicker — section eyebrow (v2.7: terminal status chip — mono       */
+/*  readout in EN, notched chassis, status dot, crimson edge light).  */
 /* ------------------------------------------------------------------ */
 
 .kicker {
   display: inline-flex;
   align-items: center;
-  font-size: 12.5px;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 700;
   line-height: 1.6;
-  padding: 5px 14px;
+  padding: 5px 14px 5px 12px;
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-  background: rgba(229, 9, 20, 0.16);
-  color: #ff8a80;
+  background: linear-gradient(180deg, rgba(229, 9, 20, 0.2), rgba(229, 9, 20, 0.1));
+  color: #ff9d94;
+  box-shadow: inset 0 0 0 1px rgba(229, 9, 20, 0.26);
+}
+.kicker::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ff3b30;
+  box-shadow: 0 0 9px rgba(255, 59, 48, 0.9);
+  flex: none;
+}
+/* EN only: mono uppercase readout; Persian keeps the sans face and   */
+/* NEVER letterspaces (cursive-script rule).                         */
+html:not([dir="rtl"]) .kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+[dir="rtl"] .kicker {
+  letter-spacing: 0;
 }
 .kicker-gold {
-  background: rgba(254, 219, 41, 0.13);
+  background: linear-gradient(180deg, rgba(254, 219, 41, 0.16), rgba(254, 219, 41, 0.08));
   color: #fedb29;
+  box-shadow: inset 0 0 0 1px rgba(254, 219, 41, 0.24);
+}
+.kicker-gold::before {
+  background: #fedb29;
+  box-shadow: 0 0 9px rgba(254, 219, 41, 0.8);
 }
 .kicker-teal {
-  background: rgba(31, 191, 156, 0.14);
+  background: linear-gradient(180deg, rgba(31, 191, 156, 0.17), rgba(31, 191, 156, 0.09));
   color: #1fbf9c;
+  box-shadow: inset 0 0 0 1px rgba(31, 191, 156, 0.24);
+}
+.kicker-teal::before {
+  background: #1fbf9c;
+  box-shadow: 0 0 9px rgba(31, 191, 156, 0.8);
 }
 
 /* ------------------------------------------------------------------ */
-/*  Buttons — Guardian pair: crimson solid / hairline ghost            */
+/*  Buttons — Guardian pair (v2.7: gradient fills + inner top-light,  */
+/*  glass ghost with backdrop blur)                                   */
 /* ------------------------------------------------------------------ */
 
 .gc-btn-primary {
-  background: #e50914;
+  background: linear-gradient(180deg, #ff2d24 0%, #e50914 55%, #c1121f 100%);
   color: #fff;
-  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 12px 34px rgba(229, 9, 20, 0.42);
   transition: transform 0.16s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .gc-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(229, 9, 20, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 18px 48px rgba(229, 9, 20, 0.56);
 }
 .gc-btn-primary:active {
   transform: translateY(0) scale(0.97);
 }
 .gc-btn-gold {
-  background: #fedb29;
+  background: linear-gradient(180deg, #ffe873 0%, #fedb29 55%, #e6b91d 100%);
   color: #1a1500;
-  box-shadow: 0 10px 30px rgba(254, 219, 41, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 10px 30px rgba(254, 219, 41, 0.26);
   transition: transform 0.16s ease, box-shadow 0.2s ease;
 }
 .gc-btn-gold:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(254, 219, 41, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 16px 40px rgba(254, 219, 41, 0.38);
 }
 .gc-btn-ghost {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--foreground);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
-  transition: background 0.2s ease, transform 0.16s ease;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  /* unprefixed only — Lightning CSS dedupe note (Task 28-a/A1) */
+  backdrop-filter: blur(8px);
+  transition: background 0.2s ease, transform 0.16s ease, box-shadow 0.2s ease;
 }
 .gc-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 10px 30px -12px rgba(0, 0, 0, 0.55);
 }
 .gc-btn-ghost:active {
   transform: translateY(0) scale(0.97);
@@ -282,22 +482,34 @@ html:root {
 /*  Surfaces — Guardian cards / frames / glass                         */
 /* ------------------------------------------------------------------ */
 
-/* Surface card (reference .card): hover lift + hairline strengthening.
-   The lift rides the independent `translate` property — framer-motion
-   elements settle with an inline `transform: none` that would out-rank a
-   transform-based hover lift on ~19 of 44 cards (Task 28-a/A2). */
+/* Surface card (v2.7): layered depth — a top-light wash over the   */
+/* base, an inner top highlight, a deep ambient shadow; hover lifts  */
+/* and blooms a crimson edge glow. The lift rides the independent    */
+/* `translate` property — framer-motion elements settle with an      */
+/* inline `transform: none` that would out-rank a transform-based    */
+/* hover lift on ~19 of 44 cards (Task 28-a/A2).                     */
 .gc-card {
-  background: var(--card);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0) 128px),
+    var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  transition: border-color 0.2s ease, translate 0.2s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 18px 44px -24px rgba(0, 0, 0, 0.55);
+  transition: border-color 0.2s ease, translate 0.2s ease, box-shadow 0.25s ease;
   /* SpotlightCards (Task 38): containing block for the cursor-following
      ::after glow; also keeps any abs-positioned children card-scoped. */
   position: relative;
 }
 .gc-card:hover {
-  border-color: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.18);
   translate: 0 -3px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 26px 54px -24px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(229, 9, 20, 0.14),
+    0 10px 34px -16px rgba(229, 9, 20, 0.24);
 }
 /* Cursor-following spotlight — --mx/--my are stamped by the delegated
    listener in spotlight-cards.tsx (pointer:fine only); no transition on
@@ -321,27 +533,34 @@ html:root {
   opacity: 1;
 }
 
-/* Crimson gradient media frame (reference .frame) */
+/* Crimson gradient media frame (v2.7: hotter edge ramp + crimson   */
+/* floor bloom under the frame)                                       */
 .gc-frame {
   --fpad: clamp(4px, 0.55vw, 7px);
   border-radius: var(--radius);
   padding: var(--fpad);
-  background: linear-gradient(160deg, rgba(229, 9, 20, 0.3), rgba(229, 9, 20, 0.05));
-  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(160deg, rgba(255, 77, 66, 0.52), rgba(229, 9, 20, 0.3) 45%, rgba(193, 18, 31, 0.14));
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.6),
+    0 26px 70px -18px rgba(229, 9, 20, 0.36);
 }
 .gc-frame > * {
   border-radius: calc(var(--radius) - var(--fpad));
 }
 
-/* Glassy HUD chip for media overlays (reference .ovpanel vibe) */
+/* Glassy HUD chip for media overlays (v2.7: inner top light +      */
+/* faint crimson rim)                                                 */
 .gc-hud-chip {
   background: rgba(10, 10, 14, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 12px;
   /* unprefixed only — Lightning CSS dedupes a manual -webkit- pair down to
      the prefixed form alone, which Blink/Gecko then drop (Task 28-a/A1) */
   backdrop-filter: blur(14px);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 12px 34px rgba(0, 0, 0, 0.5),
+    0 0 26px -8px rgba(229, 9, 20, 0.16);
 }
 
 /* Legacy glass utilities — now dark surfaces (kept for un-rebuilt bits) */
@@ -356,12 +575,14 @@ html:root {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Sticky blurred header material (reference .hdr) */
+/* Sticky blurred header material (reference .hdr) — v2.7: a long  */
+/* soft drop + a hair of crimson edge light along the bottom border.  */
 .gc-hdr {
   background: rgba(8, 8, 10, 0.72);
   /* unprefixed only — see the .gc-hud-chip note (Task 28-a/A1) */
   backdrop-filter: blur(18px) saturate(160%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 12px 34px -18px rgba(0, 0, 0, 0.65);
 }
 
 /* Press feedback */
@@ -378,7 +599,14 @@ html:root {
 @media (prefers-reduced-transparency: reduce) {
   .glass,
   .gc-hud-chip,
-  .gc-hdr {
+  .gc-hdr,
+  .gc-btn-ghost,
+  .gc-jrail,
+  .gc-sector-chip,
+  .gc-sector-menu,
+  .gc-jhint,
+  .gc-jskip,
+  .gc-check-strip {
     background: var(--card);
     backdrop-filter: none;
   }
@@ -386,7 +614,8 @@ html:root {
 @media (prefers-contrast: more) {
   .glass,
   .gc-card,
-  .gc-frame {
+  .gc-frame,
+  .gc-btn-ghost {
     border-color: rgba(255, 255, 255, 0.45);
   }
 }
@@ -408,6 +637,12 @@ html:root {
 .type-eyebrow {
   letter-spacing: 0.18em;
   line-height: 1.5;
+}
+/* EN eyebrows read as mono terminal labels; Persian keeps the sans
+   face (mono stacks carry no Arabic glyphs — per-script fallback
+   would render mixed faces inside one label). */
+html:not([dir="rtl"]) .type-eyebrow {
+  font-family: var(--font-mono);
 }
 .type-lead {
   line-height: 1.6;
@@ -446,12 +681,14 @@ html[lang="fa"] h2 {
   font-weight: 800;
 }
 
-/* Brand gradient text — crimson ramp (headline accent word) */
+/* Brand gradient text — crimson ramp (v2.7: deep premium stops + a   */
+/* soft neon bloom via drop-shadow on the clipped glyph alpha)         */
 .text-glow-crimson {
-  background: linear-gradient(120deg, #ff8a80 0%, #ff3b30 45%, #e50914 100%);
+  background: linear-gradient(120deg, #ffb4ac 0%, #ff6b5e 34%, #e50914 68%, #c1121f 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 0 26px rgba(229, 9, 20, 0.35));
 }
 
 /* Crimson glow for the accent headline */
@@ -535,23 +772,28 @@ html[lang="fa"] h2 {
   place-items: center;
   background: rgba(31, 191, 156, 0.14);
   color: #1fbf9c;
+  box-shadow: 0 0 14px -2px rgba(31, 191, 156, 0.35);
 }
 .tick-gold {
   background: rgba(254, 219, 41, 0.13);
   color: #fedb29;
+  box-shadow: 0 0 14px -2px rgba(254, 219, 41, 0.3);
 }
 .tick-crimson {
   background: rgba(229, 9, 20, 0.16);
   color: #ff8a80;
+  box-shadow: 0 0 14px -2px rgba(229, 9, 20, 0.4);
 }
 
-/* Stat tile numbers — Poppins (TweakFa latin face), teal */
+/* Stat tile numbers — Poppins (TweakFa latin face), teal, with a
+   soft luminous bloom (v2.7) */
 .gc-stat b,
 .gc-stat .stat-num {
   font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
   font-weight: 700;
   color: #1fbf9c;
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 20px rgba(31, 191, 156, 0.35);
 }
 
 /* ------------------------------------------------------------------ */
@@ -812,10 +1054,12 @@ html[lang="fa"] h2 {
   flex: none;
 }
 .gc-jrail-btn[aria-current="step"] .gc-jnum {
-  color: #ff8a80;
-  border-color: rgba(229, 9, 20, 0.45);
-  background: rgba(229, 9, 20, 0.12);
-  box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.14);
+  color: #ff9d94;
+  border-color: rgba(229, 9, 20, 0.55);
+  background: rgba(229, 9, 20, 0.14);
+  box-shadow:
+    0 0 0 3px rgba(229, 9, 20, 0.16),
+    0 0 18px rgba(229, 9, 20, 0.4);
 }
 /* Per-step scroll fill — scaleX is driven by the scrub spring. */
 .gc-jfill {
@@ -840,30 +1084,38 @@ html[lang="fa"] h2 {
   gap: 8px;
   min-height: 0;
 }
+/* v2.7: the console gains a CRT scanline texture (a 3px repeating
+   gradient layered into the background) + a crimson ambient bloom —
+   it reads as powered-on hardware, not a grey box. Both corner
+   brackets keep their glow. */
 .gc-jpanel {
   position: relative;
   flex: 1;
   min-height: 150px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.11);
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(229, 9, 20, 0.08), transparent 55%),
-    linear-gradient(180deg, rgba(24, 24, 29, 0.92), rgba(15, 15, 18, 0.95));
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.026) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 50% 0%, rgba(229, 9, 20, 0.14), transparent 55%),
+    linear-gradient(180deg, rgba(24, 24, 29, 0.94), rgba(15, 15, 18, 0.97));
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    0 0 70px -18px rgba(229, 9, 20, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-/* corner brackets — HUD framing, pure CSS */
+/* corner brackets — HUD framing, pure CSS (v2.7: hotter + glowing) */
 .gc-jpanel::before,
 .gc-jpanel::after {
   content: "";
   position: absolute;
   width: 22px;
   height: 22px;
-  border: 2px solid rgba(229, 9, 20, 0.35);
+  border: 2px solid rgba(255, 77, 66, 0.55);
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.35);
   pointer-events: none;
 }
 .gc-jpanel::before {
@@ -891,9 +1143,11 @@ html[lang="fa"] h2 {
 .gc-jwin {
   width: min(82%, 400px);
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(21, 21, 26, 0.94);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
   overflow: hidden;
 }
 @media (max-width: 600px) {
@@ -927,7 +1181,8 @@ html[lang="fa"] h2 {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, #e50914, #ff6b5e);
+  background: linear-gradient(90deg, #e50914, #ff8a80);
+  box-shadow: 0 0 12px rgba(255, 59, 48, 0.5);
   transform: scaleX(0);
   transform-origin: left center;
 }
@@ -983,7 +1238,7 @@ html[lang="fa"] h2 {
   flex-basis: 100%;
   font-size: 12.5px;
   line-height: 1.55;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.68);
   max-width: 64ch;
 }
 @media (min-width: 992px) {
@@ -1084,17 +1339,22 @@ html[lang="fa"] h2 {
   padding: 9px 13px;
   border-radius: 14px;
   background: rgba(18, 18, 22, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 14px 40px rgba(0, 0, 0, 0.45);
   color: #fff;
   cursor: pointer;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .gc-sector-chip:hover {
-  border-color: rgba(229, 9, 20, 0.4);
-  box-shadow: 0 14px 44px rgba(229, 9, 20, 0.16);
+  border-color: rgba(229, 9, 20, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 44px rgba(0, 0, 0, 0.5),
+    0 0 24px -4px rgba(229, 9, 20, 0.35);
 }
 .gc-sector-kicker {
   font-family: "Poppins", var(--font-sans), ui-monospace, monospace;
@@ -1485,8 +1745,28 @@ details[open] > summary .gc-chevron {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Scrollbar — slim crimson                                           */
+/*  Scrollbar — global slim dark w/ crimson thumb (v2.7) + the        */
+/*  .scrollbar-slim inner-element variant                             */
 /* ------------------------------------------------------------------ */
+
+html {
+  scrollbar-color: #2a2a31 #0a0a0d;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #26262d;
+  border: 2px solid #0a0a0d;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e50914;
+}
 
 .scrollbar-slim {
   scrollbar-width: thin;
