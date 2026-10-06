@@ -3,6 +3,7 @@ import { cookies, headers } from "next/headers";
 import { LanguageProvider } from "@/components/pcmax/language-context";
 import { HydrationMarker } from "@/components/pcmax/hydration-marker";
 import { ServiceWorkerRegister } from "@/components/pcmax/sw-register";
+import { TapFocusRelease } from "@/components/pcmax/tap-focus-release";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getLocaleMeta, siteConfig } from "@/lib/seo";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
@@ -243,6 +244,9 @@ export default async function RootLayout({
             `html:not(.hydrated)` override at the end of globals.css so the
             pre-hydration (slow-JS / no-JS) page never renders blank. */}
         <HydrationMarker />
+        {/* Pointer taps must not leave a focus box painted on cards/menu
+            items (Task 32) — keyboard focus rings are preserved. */}
+        <TapFocusRelease />
         {/* Static-flavor-only service worker (repeat-visit cache layer —
             SSR/dev never registers it). Loaded after window load. */}
         <ServiceWorkerRegister />

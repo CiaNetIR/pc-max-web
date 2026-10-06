@@ -8,7 +8,7 @@
  *     routing and the streaming/counting download endpoint.
  *
  *  2. Static flavor — a fully static mirror published to GitHub Pages at
- *     https://dlsdt.github.io/pc-max-web (built by `scripts/gh-pages-build.sh`
+ *     https://cianetir.github.io/pc-max-web (built by `scripts/gh-pages-build.sh`
  *     with `output: 'export'` + `basePath: '/pc-max-web'`).
  *
  * `NEXT_PUBLIC_STATIC_EXPORT=1` is set at BUILD time by the script, so the
@@ -42,30 +42,31 @@ export function asset(path: string): string {
 }
 
 /** Public origin of the GitHub Pages deployment (no trailing slash). */
-export const PAGES_URL = "https://dlsdt.github.io/pc-max-web";
+export const PAGES_URL = "https://cianetir.github.io/pc-max-web";
 
 /** The GitHub repository backing the site. */
-export const GITHUB_REPO_URL = "https://github.com/DLSDT/pc-max-web";
+export const GITHUB_REPO_URL = "https://github.com/CiaNetIR/pc-max-web";
+
+/** The PC MAX APPLICATION repository — the real download source (Task 32).
+ * CANONICAL OWNER: CiaNetIR (the repo was transferred there from DLSDT
+ * on 2026-10-06 — old DLSDT links still work via GitHub's 301 redirects).
+ * Releases live at github.com/CiaNetIR/pc-max/releases; the download
+ * buttons resolve the newest tag live via lib/app-release.ts. */
+export const APP_REPO_URL = "https://github.com/CiaNetIR/pc-max";
 
 /**
- * Filename of the shipped installer — mirrors the latest release in
- * `prisma/seed.ts`. The static download buttons point at the artifact
- * deployed alongside the site (`${BASE_PATH}/releases/<file>` — GitHub Pages
- * serves `public/releases/*` verbatim), so bump this constant together with
- * the seed whenever a new PC MAX version ships.
+ * Filename of the local demo artifact — kept ONLY as the /api/download
+ * route's fallback (SSR-flavor legacy compat; external consumers may still
+ * hit the route). The user-facing download flow points at the REAL app
+ * releases on github.com/CiaNetIR/pc-max — see lib/app-release.ts.
  */
 export const INSTALLER_FILE = "PCMAX-Setup-2.4.1-x64.exe";
 
-/** Human version of the shipped release (hero kicker, meta copy). Sits next
- * to INSTALLER_FILE so the marketed version can never drift from the
- * artifact again (Task 28-c/C1: the hero said 1.2.5 for three releases).
- * Keep in sync with INSTALLER_FILE + prisma/seed.ts. */
-export const APP_VERSION = "2.4.1";
-
 /**
- * Download href for the installer.
- *  - SSR flavor: the counting/streaming API route (unchanged).
- *  - Static flavor: the artifact deployed with the site.
+ * Download href LEGACY — the old local-artifact flow. Kept for the SSR
+ * flavor's /api/download counting route only; every user-facing download
+ * button now resolves the newest GitHub release via lib/app-release.ts
+ * (no-JS href fallback: APP_RELEASES_URL from that module).
  */
 export function installerHref(fileName: string = INSTALLER_FILE): string {
   return IS_STATIC_EXPORT ? `${BASE_PATH}/releases/${fileName}` : "/api/download";

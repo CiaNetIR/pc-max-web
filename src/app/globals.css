@@ -94,7 +94,12 @@
   --destructive: #e8352c;
   --border: rgba(255, 255, 255, 0.09);
   --input: rgba(255, 255, 255, 0.14);
-  --ring: #ff3b30;
+  /* Focus ring — neutral white, NOT crimson (Task 32): the old #ff3b30
+     outline read as an error/selection box and burned into a "red square"
+     around tapped cards (Chrome matches :focus-visible after touch).
+     Crimson stays reserved for emphasis (CTAs, active states, metrics);
+     a neutral ring keeps WCAG-visible keyboard focus without the alarm. */
+  --ring: rgba(255, 255, 255, 0.6);
 }
 
 /* Crimson fill guard (unlayered wins over utilities): exact-class solid

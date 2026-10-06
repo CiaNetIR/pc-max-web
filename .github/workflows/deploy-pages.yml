@@ -2,7 +2,7 @@ name: Deploy website to GitHub Pages
 
 # Rebuilds the static mirror of the site and republishes the gh-pages branch
 # on every push to main (and on manual dispatch). The published site:
-#   https://dlsdt.github.io/pc-max-web/
+#   https://cianetir.github.io/pc-max-web/
 # Build pipeline lives in scripts/gh-pages-build.sh --in-place (CI mode).
 #
 # Quality gate (audit 29-c): the `check` job runs typecheck + lint BEFORE

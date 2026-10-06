@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { Loader2, X } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { DownloadIcon } from "@/components/pcmax/icons";
 import { cn } from "@/lib/utils";
-import { installerHref } from "@/lib/gh-pages";
+import {
+  APP_RELEASES_URL,
+  resolveLatestAppRelease,
+} from "@/lib/app-release";
 
 /*
  * MobileCtaBar — fixed bottom conversion bar, phones only (< 640px).
@@ -26,6 +29,7 @@ const FALLBACK_SHOW_AFTER_PX = 500;
 export function MobileCtaBar() {
   const { t } = useLanguage();
   const [visible, setVisible] = useState(false);
+  const [busy, setBusy] = useState(false);
   const downloadInView = useRef(false);
   const footerInView = useRef(false);
   const dismissedRef = useRef(false);
@@ -102,6 +106,18 @@ export function MobileCtaBar() {
     }
   }
 
+  /* Task 32: same resolver as the main download button — newest GitHub
+   * release live, releases-page fallback on any failure. */
+  async function onDownload(e: MouseEvent<HTMLAnchorElement>) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    const release = await resolveLatestAppRelease();
+    setBusy(false);
+    window.location.href = release?.url ?? APP_RELEASES_URL;
+  }
+
   return (
     <div
       inert={!visible}
@@ -130,11 +146,17 @@ export function MobileCtaBar() {
           </div>
 
           <a
-            href={installerHref()}
+            href={APP_RELEASES_URL}
+            onClick={onDownload}
             aria-label={t.cta.bottomBar.label}
+            aria-busy={busy}
             className="gc-btn-primary press inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-5 text-sm font-bold text-white"
           >
-            <DownloadIcon className="h-4 w-4" aria-hidden="true" />
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <DownloadIcon className="h-4 w-4" aria-hidden="true" />
+            )}
             {t.cta.bottomBar.label}
           </a>
 

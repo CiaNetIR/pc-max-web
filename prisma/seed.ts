@@ -1,11 +1,16 @@
-/* Seed: PC MAX releases + changelog history.
+/* Seed: PC MAX releases + changelog history (LEGACY data source).
  * Run: bun prisma/seed.ts
  *
- * The latest release's version + fileName are imported from
- * src/lib/gh-pages.ts (single source of truth, audit 29-c) so the seed can
- * never drift from the shipped artifact constant. */
+ * Task 32: the website UI now reads release facts from the app repo's real
+ * GitHub Releases (src/lib/app-release.ts); this seed only feeds the
+ * legacy /api/release + /api/changelog routes and the /api/download
+ * fallback — kept for external consumers, not the marketing surface. */
 import { PrismaClient } from "@prisma/client";
-import { APP_VERSION, INSTALLER_FILE } from "../src/lib/gh-pages";
+import { INSTALLER_FILE } from "../src/lib/gh-pages";
+
+/* Version of the local demo artifact tracked by INSTALLER_FILE (the file
+ * the /api/download route streams). */
+const APP_VERSION = "2.4.1";
 
 const db = new PrismaClient();
 

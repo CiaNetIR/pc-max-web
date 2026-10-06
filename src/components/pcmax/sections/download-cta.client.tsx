@@ -1,53 +1,39 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type MouseEvent, type ToggleEvent } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { Check, ChevronDown, Copy, Loader2, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Github, Loader2, Mail, Sparkles } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section } from "@/components/pcmax/ui/primitives";
 import { springFluid } from "@/components/pcmax/ui/motion";
-import { DownloadIcon, PerformanceIcon, ShieldIcon } from "@/components/pcmax/icons";
+import { DownloadIcon, PerformanceIcon } from "@/components/pcmax/icons";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { installerHref, IS_STATIC_EXPORT, GITHUB_REPO_URL } from "@/lib/gh-pages";
+import { useLatestAppRelease } from "@/hooks/use-app-release";
+import {
+  APP_RELEASES_URL,
+  resolveLatestAppRelease,
+  resolveAppReleases,
+  type AppRelease,
+} from "@/lib/app-release";
+import { APP_REPO_URL, IS_STATIC_EXPORT, GITHUB_REPO_URL } from "@/lib/gh-pages";
 import { cn } from "@/lib/utils";
 
-/* Prop payloads — serialized server → client. The server wrapper
- * (download-cta.tsx) queries the DB directly and seeds these, so no
- * /api/release or /api/changelog request ever happens on the client. */
-export type ReleaseInfo = {
-  version: string;
-  size: string;
-  channel: string;
-  releasedAt: string;
-  /* Truncated display form (chips). */
-  checksum: string | null;
-  /* FULL hex digest — powers the "Verify this download" row (copy +
-   * PowerShell re-check). Real data, measured from the shipped artifact. */
-  sha256: string | null;
-  /* Installer file name — resolves the download href (API route in the SSR
-   * flavor, deployed artifact in the static GitHub Pages flavor). */
-  fileName: string;
-};
-
-export type ChangelogGroup = {
-  version: string;
-  channel: string;
-  releasedAt: string;
-  entries: { tag: string; text: string }[];
-};
-
-/* "loading" is kept for the sub-component contracts; with SSR seeding this
- * component starts at "ready" or "error" — the skeleton states are defensive
- * only (they can no longer occur on the happy path). */
-export type DataState = "loading" | "ready" | "error";
-
-export type DownloadCtaClientProps = {
-  release: ReleaseInfo;
-  releaseState: DataState;
-  changelog: ChangelogGroup[];
-  changelogState: DataState;
-};
+/*
+ * Download CTA — the conversion section (Task 32: real GitHub releases).
+ *
+ * Every download surface resolves the NEWEST release of the PC MAX app
+ * repository live (api.github.com → newest tag → the x64 setup .exe), with
+ * a sessionStorage cache + in-flight memo so the whole page view costs one
+ * request (see lib/app-release.ts). The <a href> is always the releases
+ * page — the no-JS / crawler / middle-click truth — while the normal click
+ * is intercepted to hand the browser the direct installer URL.
+ *
+ * The chips (version / size / released) start from the hand-verified
+ * KNOWN_LATEST baseline painted with the SSR HTML and upgrade live via
+ * useLatestAppRelease() — never a fabricated version again. The changelog
+ * panel loads the real release list lazily on first open.
+ */
 
 type WaitlistState = "idle" | "submitting" | "success" | "duplicate" | "error";
 
@@ -55,115 +41,160 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /* ------------------------------ Sub-blocks ---------------------------- */
 
-/* Release meta chips — version / size / channel / released / checksum.
- * Rendered with the initial HTML (SSR-seeded props), aria-live announces
- * the defensive loading/error states. */
-function ReleaseChips({ state, release, locale }: { state: DataState; release: ReleaseInfo | null; locale: "en" | "fa" }) {
-  const { t } = useLanguage();
+/* Release meta chips — version / size / released / source. Seeded from the
+ * KNOWN_LATEST baseline in the SSR HTML, upgraded live after hydration;
+ * aria-live announces the swap when the API knows something newer. */
+function ReleaseChips() {
+  const { t, locale } = useLanguage();
+  const { release } = useLatestAppRelease();
 
-  const date = release
-    ? new Date(release.releasedAt).toLocaleDateString(locale === "fa" ? "fa-IR-u-ca-persian-nu-latn" : "en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "";
+  const date = new Date(release.releasedAt).toLocaleDateString(
+    locale === "fa" ? "fa-IR-u-ca-persian-nu-latn" : "en-US",
+    { year: "numeric", month: "short", day: "numeric" }
+  );
 
-  const chip = "rounded-full border border-border bg-[#121216] px-3 py-1 font-medium text-foreground/80";
+  const chip =
+    "rounded-full border border-border bg-[#121216] px-3 py-1 font-medium text-foreground/80";
 
   return (
     <div className="mt-5 flex min-h-8 flex-wrap items-center justify-center gap-2 text-xs" aria-live="polite">
-      {state === "loading" && <span className={chip}>{t.cta.fetching}</span>}
-      {state === "error" && <span className={chip}>{t.cta.error}</span>}
-      {/* Chips render for the live release OR the static fallback — the
-          error pill above stays honest about which one it is. */}
-      {release && (
-        <>
-          <span className="rounded-full border border-crimson/25 bg-crimson/10 px-3 py-1 font-mono font-bold text-crimson">
-            {t.cta.versionLabel} {release.version}
-          </span>
-          <span className={chip}>
-            {t.cta.sizeLabel} {release.size}
-          </span>
-          <span className={cn(chip, "flex items-center gap-1.5")}>
-            <ShieldIcon className="h-3.5 w-3.5 text-crimson" />
-            {t.cta.channelLabel}: {release.channel}
-          </span>
-          <span className={chip}>
-            {t.cta.releasedLabel}: {date}
-          </span>
-          {release.checksum && (
-            <span
-              dir="ltr"
-              className="rounded-full border border-border bg-[#121216] px-3 py-1 font-mono text-[11px] text-foreground/80"
-              title={release.checksum}
-            >
-              {t.cta.checksumLabel}: {release.checksum}
-            </span>
-          )}
-        </>
-      )}
+      <span className="rounded-full border border-crimson/25 bg-crimson/10 px-3 py-1 font-mono font-bold text-crimson">
+        {t.cta.versionLabel} {release.version}
+      </span>
+      <span className={chip}>
+        {t.cta.sizeLabel} {release.size}
+      </span>
+      <span className={chip}>
+        {t.cta.releasedLabel}: {date}
+      </span>
+      <a
+        href={APP_REPO_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(chip, "inline-flex items-center gap-1.5 transition-colors hover:border-crimson/40 hover:text-foreground")}
+      >
+        <Github className="h-3.5 w-3.5" aria-hidden="true" />
+        {t.cta.sourceLabel}: GitHub
+      </a>
     </div>
   );
 }
 
-/* Changelog — kept as real content (SSR-seeded from the DB), folded into a
- * collapsible hairline panel so the premium card stays focused on the
- * download action. Tag pills reuse the existing changelog.tags strings. */
-function Changelog({ state, groups }: { state: DataState; groups: ChangelogGroup[] }) {
-  const { t, locale } = useLanguage();
+/* Source row — the honest trust signal for a remote artifact: WHERE the
+ * installer ships from. Replaces the old local-file SHA-256 verify row
+ * (Task 32): a hash of the retired demo artifact next to the real GitHub
+ * download would be actively misleading. */
+function SourceRow() {
+  const { t } = useLanguage();
 
   return (
-    <details className="mt-8">
+    <div className="mt-4 rounded-xl border border-border/70 bg-[#121216] p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="type-eyebrow flex items-center gap-2 text-[11px] font-bold uppercase text-muted-foreground">
+          <Github className="h-3.5 w-3.5 text-crimson" aria-hidden="true" />
+          {t.cta.source.label}
+        </span>
+        <a
+          href={APP_REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          dir="ltr"
+          className="press inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border px-3 py-1 font-mono text-[11px] font-semibold text-foreground/85 transition-colors hover:border-crimson/40 hover:text-foreground"
+        >
+          {t.cta.source.value} <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+      <p className="mt-2 text-[10.5px] leading-relaxed text-muted-foreground/80">
+        {t.cta.source.note}
+      </p>
+    </div>
+  );
+}
+
+/* Changelog — the REAL release list from the app repository, resolved
+ * lazily the first time the panel is opened (no render-time request, no
+ * API burn for the ~99% of visitors who never open it). */
+function Changelog() {
+  const { t, locale } = useLanguage();
+  const [state, setState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [releases, setReleases] = useState<AppRelease[]>([]);
+
+  function onToggle(e: ToggleEvent<HTMLDetailsElement>) {
+    if (!e.currentTarget.open || state !== "idle") return;
+    setState("loading");
+    resolveAppReleases().then((list) => {
+      if (list) {
+        setReleases(list);
+        setState("ready");
+      } else {
+        setState("error");
+      }
+    });
+  }
+
+  return (
+    <details className="mt-8" onToggle={onToggle}>
       <summary className="press flex min-h-11 cursor-pointer list-none items-center justify-center gap-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
         <PerformanceIcon className="h-4 w-4 text-crimson" />
         {t.cta.changelog.title}
         <ChevronDown className="gc-chevron h-4 w-4 transition-transform duration-300" aria-hidden="true" />
       </summary>
 
-      {/* aria-live announces state swaps; the skeleton only ever shows for a
-          defensive "loading" state — server seeding renders entries at SSR. */}
       <div className="mt-5 max-h-80 space-y-6 overflow-y-auto pe-2 scrollbar-slim" aria-live="polite">
         {state === "loading" && (
           <div className="space-y-3" aria-hidden="true">
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-4 animate-pulse rounded-full bg-border/50" style={{ width: `${88 - i * 14}%` }} />
+              <div
+                key={i}
+                className="h-4 animate-pulse rounded-full bg-border/50"
+                style={{ width: `${88 - i * 14}%` }}
+              />
             ))}
           </div>
         )}
-        {state === "error" && <p className="text-sm text-muted-foreground">{t.cta.changelog.error}</p>}
-        {/* ready + empty — a real state on a fresh DB (C5/Task 28-c): say so
-            instead of rendering a silently blank open panel. */}
-        {state === "ready" && groups.length === 0 && (
+        {state === "error" && (
+          <p className="text-sm text-muted-foreground">
+            {t.cta.changelog.error}{" "}
+            <a
+              href={`${APP_REPO_URL}/releases`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-foreground underline decoration-crimson/50 underline-offset-4"
+            >
+              {t.cta.changelog.viewOnGithub} ↗
+            </a>
+          </p>
+        )}
+        {state === "ready" && releases.length === 0 && (
           <p className="text-sm text-muted-foreground">{t.cta.changelog.empty}</p>
         )}
         {state === "ready" &&
-          groups.map((group) => (
-            <div key={group.version}>
-              <div className="flex items-baseline gap-2.5">
-                <span className="font-mono text-sm font-bold text-crimson">v{group.version}</span>
-                <span className="text-xs text-muted-foreground">
-                  {new Date(group.releasedAt).toLocaleDateString(locale === "fa" ? "fa-IR-u-ca-persian-nu-latn" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
+          releases.map((release) => (
+            <div key={release.tag}>
+              <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                <span className="font-mono text-sm font-bold text-crimson" dir="ltr">
+                  v{release.version}
                 </span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(release.releasedAt).toLocaleDateString(
+                    locale === "fa" ? "fa-IR-u-ca-persian-nu-latn" : "en-US",
+                    { month: "short", day: "numeric", year: "numeric" }
+                  )}
+                </span>
+                <a
+                  href={`${APP_REPO_URL}/releases/tag/${release.tag}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ms-auto text-[11px] font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {t.cta.changelog.viewOnGithub} ↗
+                </a>
               </div>
-              <ul className="mt-2.5 space-y-2">
-                {group.entries.map((entry, i) => (
-                  <li key={i} className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground/85">
-                    <span
-                      className={
-                        entry.tag === "feature"
-                          ? "type-eyebrow mt-0.5 shrink-0 rounded-full border border-crimson/30 bg-crimson/10 px-2 py-0.5 text-[10px] font-bold uppercase text-crimson"
-                          : entry.tag === "fix"
-                            ? "type-eyebrow mt-0.5 shrink-0 rounded-full border border-border/70 px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground"
-                            : "type-eyebrow mt-0.5 shrink-0 rounded-full border border-crimson/20 px-2 py-0.5 text-[10px] font-bold uppercase text-crimson"
-                      }
-                    >
-                      {t.cta.changelog.tags[entry.tag as "feature" | "improvement" | "fix"] ?? entry.tag}
-                    </span>
-                    {entry.text}
-                  </li>
-                ))}
-              </ul>
+              {release.notes && (
+                <p className="mt-2 max-w-[60ch] text-sm leading-relaxed text-foreground/85">
+                  {release.notes}
+                </p>
+              )}
             </div>
           ))}
       </div>
@@ -232,65 +263,6 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
   );
 }
 
-/* Verify row — the FULL SHA-256 of the shipped artifact with a copy button
- * and the exact PowerShell re-check command. Replaces the fabricated
- * VirusTotal / "code-signed" trust claims with the strongest HONEST signal
- * we own: a checksum anyone can recompute locally (audit 29-b D3). */
-function VerifyRow({ release }: { release: ReleaseInfo | null }) {
-  const { t } = useLanguage();
-  const { toast } = useToast();
-  const [copied, setCopied] = useState(false);
-
-  if (!release?.sha256) return null;
-
-  const onCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(release.sha256!);
-      setCopied(true);
-      toast({ title: "PC MAX", description: t.cta.verify.copied });
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      /* Clipboard unavailable (permissions / non-secure context) — the hash
-       * stays selectable as plain text; no error toast needed. */
-    }
-  };
-
-  return (
-    <div className="mt-4 rounded-xl border border-border/70 bg-[#121216] p-3.5">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="type-eyebrow flex items-center gap-2 text-[11px] font-bold uppercase text-muted-foreground">
-          <ShieldCheck className="h-3.5 w-3.5 text-crimson" aria-hidden="true" />
-          {t.cta.verify.label}
-        </span>
-        <button
-          type="button"
-          onClick={onCopy}
-          className="gc-btn-ghost press inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold"
-          aria-label={t.cta.verify.copy}
-        >
-          {copied ? (
-            <Check className="h-3.5 w-3.5 text-crimson" aria-hidden="true" />
-          ) : (
-            <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-          )}
-          <span aria-hidden="true">{copied ? null : t.cta.verify.copy}</span>
-          <span className="sr-only">{t.cta.verify.copied}</span>
-        </button>
-      </div>
-      {/* Full digest — selectable, wraps anywhere (64 hex chars) */}
-      <code
-        dir="ltr"
-        className="mt-2 block break-all font-mono text-[11px] leading-relaxed text-foreground/80"
-      >
-        sha256: {release.sha256}
-      </code>
-      <p dir="ltr" className="mt-2 text-[10.5px] text-muted-foreground/80">
-        {t.cta.verify.howto}
-      </p>
-    </div>
-  );
-}
-
 function WaitlistCard() {
   const { t } = useLanguage();
   const { toast } = useToast();
@@ -352,11 +324,11 @@ function WaitlistCard() {
         </motion.div>
       ) : IS_STATIC_EXPORT ? (
         /* Static GitHub Pages mirror: there is no server to submit to —
-         * point Pro-curious visitors at the GitHub releases instead. */
+         * point Pro-curious visitors at the app repository instead. */
         <div className="mx-auto mt-6 flex max-w-md flex-1 flex-col items-center justify-center gap-4 rounded-2xl border border-crimson/25 bg-[#121216] px-6 py-8 text-center">
           <p className="text-sm leading-relaxed text-muted-foreground">{t.cta.waitlist.staticNote}</p>
           <a
-            href={`${GITHUB_REPO_URL}/releases`}
+            href={GITHUB_REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="gc-btn-ghost press inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-semibold"
@@ -404,19 +376,10 @@ function WaitlistCard() {
 
 /* ------------------------------ Section ------------------------------- */
 
-/* Same data/behavior as the pre-SSR version minus the two mount-time fetches
- * (release + changelog): the data arrives as props from the server render,
- * so chips + changelog paint with the HTML — no HTML → JS → fetch → render
- * waterfall. Waitlist submit stays a client POST; the download button keeps
- * its real href (SSR: /api/download counting route, static: the artifact). */
-export function DownloadCtaClient({
-  release,
-  releaseState,
-  changelog,
-  changelogState,
-}: DownloadCtaClientProps) {
-  const { t, locale } = useLanguage();
+export function DownloadCtaClient() {
+  const { t } = useLanguage();
   const reduce = useReducedMotion();
+  const [busy, setBusy] = useState(false);
 
   /* `.shcard.in` — lands the perks' staggered entrance once the card enters
    * the viewport (the orbit/glow/sheen run continuously via pure CSS). */
@@ -429,6 +392,22 @@ export function DownloadCtaClient({
     document
       .getElementById("waitlist")
       ?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+
+  /* The download action (Task 32): resolve the newest GitHub release and
+   * hand the browser the direct installer URL. The anchor's href is the
+   * releases page — the truth for no-JS, crawlers and modified clicks. */
+  async function onDownload(e: MouseEvent<HTMLAnchorElement>) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    const release = await resolveLatestAppRelease();
+    setBusy(false);
+    /* Direct .exe → the browser downloads without leaving the page; any
+     * resolve failure falls back to the releases page, which always
+     * serves the newest build. */
+    window.location.href = release?.url ?? APP_RELEASES_URL;
+  }
 
   /* Perks — 100% reused dictionary strings: hero bullets, platform facts,
    * and the Free edition's own tagline. */
@@ -550,25 +529,32 @@ export function DownloadCtaClient({
             <div className="min-w-0">
               <EditionPicker onPro={scrollToWaitlist} />
 
-              {/* REAL download — streams the installer from /api/download
-                  (SSR flavor) / the deployed artifact (static flavor) */}
+              {/* REAL download — resolves the newest release of
+                  github.com/CiaNetIR/pc-max live; href is the honest
+                  no-JS fallback (the releases page). */}
               <a
-                href={installerHref(release.fileName)}
-                aria-label={t.cta.button}
+                href={APP_RELEASES_URL}
+                onClick={onDownload}
+                aria-label={busy ? t.cta.buttonBusy : t.cta.button}
+                aria-busy={busy}
                 className="gc-btn-gold press mt-6 flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl text-[15px] font-extrabold"
               >
-                <DownloadIcon className="h-5 w-5" />
+                {busy ? (
+                  <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <DownloadIcon className="h-5 w-5" />
+                )}
                 {t.cta.button}
               </a>
 
-              <ReleaseChips state={releaseState} release={release} locale={locale} />
+              <ReleaseChips />
               <p className="mt-3 text-center text-xs text-muted-foreground">{t.cta.meta}</p>
-              <VerifyRow release={release} />
+              <SourceRow />
             </div>
           </div>
 
-          {/* changelog — collapsible */}
-          <Changelog state={changelogState} groups={changelog} />
+          {/* changelog — collapsible, loads the real release list on open */}
+          <Changelog />
 
           {/* foot — compatibility row (reference .instal__foot) */}
           <div className="mt-8 border-t border-border pt-6">

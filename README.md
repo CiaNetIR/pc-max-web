@@ -4,10 +4,10 @@
 
 # PC MAX — Official Website
 
-**Marketing & download site for [PC MAX](https://github.com/DLSDT/pc-max) — the Windows game-optimization platform.**
+**Marketing & download site for [PC MAX](https://github.com/CiaNetIR/pc-max) — the Windows game-optimization platform.**
 
-[![Live Site](https://img.shields.io/badge/live-site-GitHub_Pages-C1121F)](https://dlsdt.github.io/pc-max-web/)
-[![Product Repo](https://img.shields.io/badge/product-pc--max-111111)](https://github.com/DLSDT/pc-max)
+[![Live Site](https://img.shields.io/badge/live-site-GitHub_Pages-C1121F)](https://cianetir.github.io/pc-max-web/)
+[![Product Repo](https://img.shields.io/badge/product-pc--max-111111)](https://github.com/CiaNetIR/pc-max)
 [![Changelog](https://img.shields.io/badge/changelog-CHANGELOG.md-111111)](CHANGELOG.md)
 
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-111111)](https://nextjs.org/)
@@ -35,7 +35,7 @@
 
 ## ✨ Highlights
 
-- **Product-accurate bilingual landing (EN/FA)** — every fact on this site (install steps, Smart Profiles, transactional rollback, the 235 CI tests) is synchronized with the real [desktop application](https://github.com/DLSDT/pc-max), with full RTL and bidi-safe typography.
+- **Product-accurate bilingual landing (EN/FA)** — every fact on this site (install steps, Smart Profiles, transactional rollback, the 235 CI tests) is synchronized with the real [desktop application](https://github.com/CiaNetIR/pc-max), with full RTL and bidi-safe typography.
 - **Real-time 3D GPU hero** — a React-Three-Fiber graphics card with inertia/damping physics, contact shadows, theme-aware lighting, and a "PC MAX" LED backplate. Runs on a demand-driven render loop (`frameloop="never"` + one manual rAF) and **self-heals after WebGL context loss**.
 - **Mobile never ships the 3D** — dynamic import + `ssr:false` + a ≥1024px guard mean phones download zero WebGL code and get the full content instantly.
 - **Interactive product dashboard** — Home / Multi-Frame / Optimized Windows / Settings tabs that mirror the actual app, including the Windows tuning surface (Registry · Services · Scheduled tasks · Game files) with snapshot/rollback rows.
@@ -159,7 +159,7 @@ The helper bumps `package.json`, commits, tags, pushes, opens the GitHub Release
 | | SSR flavor (default) | Static flavor (GitHub Pages) |
 | --- | --- | --- |
 | Output | `output: "standalone"` (`bun run build`) | `output: "export"` + `basePath: "/pc-max-web"` |
-| Lives at | your server / the live preview | **https://dlsdt.github.io/pc-max-web/** |
+| Lives at | your server / the live preview | **https://cianetir.github.io/pc-max-web/** |
 | `/api/*` routes, waitlist, analytics | ✅ | stripped from the build tree (`src/app/api` + `src/proxy.ts`) |
 | Download button | `/api/download` — streams + counts | links directly to the deployed installer artifact |
 | Release / changelog / stats | Prisma per request | baked at build time from a deterministically re-seeded SQLite |
@@ -176,10 +176,10 @@ CI ([`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)) 
 
 ## 🇮🇷 فارسی
 
-**پی‌سی‌مکس وب** — وب‌سایت رسمی محصول [پی‌سی‌مکس](https://github.com/DLSDT/pc-max)، پلتفرم بهینه‌سازی بازی روی ویندوز.
+**پی‌سی‌مکس وب** — وب‌سایت رسمی محصول [پی‌سی‌مکس](https://github.com/CiaNetIR/pc-max)، پلتفرم بهینه‌سازی بازی روی ویندوز.
 
 - **دوزبانه و راست‌به‌چپ** — انگلیسی و فارسی با تایپوگرافی فارسی (وزیرمتن، آریوبرزن، استعداد) و جداسازی درست اعداد در متن RTL
-- **نسخهٔ زنده روی GitHub Pages** — [dlsdt.github.io/pc-max-web](https://dlsdt.github.io/pc-max-web/)؛ با هر push به شاخهٔ main به‌صورت خودکار بازسازی و منتشر می‌شود
+- **نسخهٔ زنده روی GitHub Pages** — [cianetir.github.io/pc-max-web](https://cianetir.github.io/pc-max-web/)؛ با هر push به شاخهٔ main به‌صورت خودکار بازسازی و منتشر می‌شود
 - **هیروی سه‌بعدی GPU** — فقط برای دسکتاپ؛ موبایل بدون هیچ کد WebGL محتوا را فوراً نمایش می‌دهد
 - **داشبورد محصول** — تب‌های خانه / مولتی‌فریم / ویندوز بهینه‌شده / تنظیمات، مطابق اپ واقعی
 - **دانلود واقعی** — دکمهٔ دانلود، نصب‌کنندهٔ واقعی را با هش SHA-256 سرو می‌کند و شمارنده را به‌صورت اتمیک افزایش می‌دهد
@@ -197,6 +197,6 @@ bun install && bun run db:push && bun prisma/seed.ts && bun run dev
 
 <div align="center">
 
-**PC MAX Web** · official site of [PC MAX](https://github.com/DLSDT/pc-max) · maintained by [DLSDT](https://github.com/DLSDT)
+**PC MAX Web** · official site of [PC MAX](https://github.com/CiaNetIR/pc-max) · maintained by [CiaNetIR](https://github.com/CiaNetIR)
 
 </div>

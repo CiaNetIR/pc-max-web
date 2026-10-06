@@ -244,7 +244,7 @@ const en = {
     trust: {
       title: "Trust, by design",
       items: [
-        { title: "Verify every install", desc: "Every release publishes its SHA-256 checksum — check the installer before you run it.", meta: "See the Download card", href: "#download" },
+        { title: "Verify every install", desc: "Every release is published on GitHub Releases with its installer and signature file — review the build before you run it.", meta: "See the Download card", href: "#download" },
         { title: "No telemetry", desc: "No analytics, no trackers in the desktop app. Optimizations run fully offline.", meta: "", href: "" },
         { title: "Open changelog", desc: "Every release is documented and dated — features, improvements, fixes.", meta: "View the changelog", href: "#download" },
       ],
@@ -388,14 +388,12 @@ const en = {
     title: "Your PC. Maxed.",
     sub: "Download PC MAX and prepare your machine for its best possible frames.",
     button: "Download PC MAX",
+    buttonBusy: "Fetching latest release…",
     meta: "Free download · Windows 10/11 · x64",
-    fetching: "Checking latest release…",
     versionLabel: "Latest",
     sizeLabel: "Installer",
-    channelLabel: "Channel",
-    checksumLabel: "SHA-256",
     releasedLabel: "Released",
-    error: "Release info unavailable — try again in a moment.",
+    sourceLabel: "Source",
     requirements: {
       os: "OS",
       osValue: "Windows 10 / 11 · 64-bit",
@@ -425,19 +423,18 @@ const en = {
     },
     changelog: {
       title: "What's new",
-      tags: { feature: "New", improvement: "Improved", fix: "Fixed" },
+      viewOnGithub: "View on GitHub",
       error: "Changelog unavailable right now.",
       empty: "No release notes yet.",
     },
-    /* Installer verification — the full SHA-256 of the shipped artifact,
-     * a copy button, and the exact PowerShell command to re-check it.
-     * Real, computable facts (audit 29-b D3) replacing the fabricated
-     * VirusTotal / code-signed claims. */
-    verify: {
-      label: "Verify this download",
-      copy: "Copy SHA-256",
-      copied: "SHA-256 copied to clipboard",
-      howto: "PowerShell: Get-FileHash <installer> -Algorithm SHA256",
+    /* Release provenance — replaces the old local-artifact SHA-256 row
+     * (Task 32): the installer now ships from the app repo's GitHub
+     * Releases, so the honest, verifiable signal is WHERE it comes from
+     * and that the button always fetches the newest tag live. */
+    source: {
+      label: "Official release",
+      value: "github.com/CiaNetIR/pc-max",
+      note: "The button always fetches the newest release, live from GitHub.",
     },
     waitlist: {
       title: "Get Pro early",
@@ -734,7 +731,7 @@ const fa: Dictionary = {
     trust: {
       title: "اعتماد، در طراحی",
       items: [
-        { title: "هر نصب را راستی‌آزمایی کنید", desc: "برای هر نسخه SHA-256 منتشر می‌شود — پیش از اجرا، نصب‌کننده را بررسی کنید.", meta: "در کارت دانلود", href: "#download" },
+        { title: "هر نصب را راستی‌آزمایی کنید", desc: "هر نسخه به‌همراه نصب‌کننده و فایل امضایش در ریلیزهای گیت‌هاب منتشر می‌شود — پیش از اجرا، بیلد را بررسی کنید.", meta: "در کارت دانلود", href: "#download" },
         { title: "بدون تله‌متری", desc: "اپ دسکتاپ هیچ تحلیلی نمی‌فرستد و ردیاب ندارد. بهینه‌سازی‌ها کاملاً آفلاین اجرا می‌شوند.", meta: "", href: "" },
         { title: "تاریخچه‌ی باز", desc: "هر نسخه مستند و تاریخ‌دار است — قابلیت‌ها، بهبودها و رفع اشکال‌ها.", meta: "مشاهده‌ی تاریخچه", href: "#download" },
       ],
@@ -878,14 +875,12 @@ const fa: Dictionary = {
     title: "رایانه‌ی شما. در اوج.",
     sub: "پی‌سی‌مکس را دانلود کنید و ماشین خود را برای بهترین فریم‌های ممکنش آماده کنید.",
     button: "دانلود PC MAX",
+    buttonBusy: "در حال دریافت آخرین نسخه…",
     meta: "دانلود رایگان · ویندوز 10/11 · 64بیتی",
-    fetching: "در حال بررسی آخرین نسخه…",
     versionLabel: "آخرین نسخه",
     sizeLabel: "نصب‌کننده",
-    channelLabel: "کانال انتشار",
-    checksumLabel: "SHA-256",
     releasedLabel: "انتشار",
-    error: "اطلاعات نسخه در دسترس نیست — کمی بعد دوباره تلاش کنید.",
+    sourceLabel: "منبع",
     requirements: {
       os: "سیستم‌عامل",
       osValue: "ویندوز 10 / 11 · 64بیتی",
@@ -915,15 +910,17 @@ const fa: Dictionary = {
     },
     changelog: {
       title: "چه چیزی جدید است",
-      tags: { feature: "جدید", improvement: "بهبود", fix: "رفع اشکال" },
+      viewOnGithub: "مشاهده در گیت‌هاب",
       error: "تاریخچه تغییرات در حال حاضر در دسترس نیست.",
       empty: "هنوز یادداشتی برای نسخه‌ها ثبت نشده است.",
     },
-    verify: {
-      label: "راستی‌آزمایی این دانلود",
-      copy: "کپی SHA-256",
-      copied: "SHA-256 در کلیپ‌بورد کپی شد",
-      howto: "PowerShell: Get-FileHash <installer> -Algorithm SHA256",
+    /* خاستگاه انتشار — جایگزین ردیف SHA-256 artifact محلی (تسک ۳۲):
+     * نصب‌کننده اکنون از ریلیزهای رسمی گیت‌هاب مخزن اپ توزیع می‌شود؛
+     * صادقانه‌ترین سیگنال قابل‌راستی‌آزمایی، خودِ منبع است. */
+    source: {
+      label: "انتشار رسمی",
+      value: "github.com/CiaNetIR/pc-max",
+      note: "دکمه همیشه جدیدترین نسخه را به‌صورت زنده از گیت‌هاب می‌گیرد.",
     },
     waitlist: {
       title: "پرو را زودتر بگیرید",

@@ -5,7 +5,8 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, ArrowRight, Check } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { DownloadIcon } from "@/components/pcmax/icons";
-import { APP_VERSION, asset } from "@/lib/gh-pages";
+import { useLatestAppRelease } from "@/hooks/use-app-release";
+import { asset } from "@/lib/gh-pages";
 import { cn } from "@/lib/utils";
 
 /*
@@ -57,6 +58,10 @@ function WordLine({
 export function Hero() {
   const { t, isRTL } = useLanguage();
   const reduce = useReducedMotion();
+  /* Real app version — KNOWN_LATEST baseline paints with the SSR HTML and
+   * upgrades live from the app repo's GitHub releases after hydration
+   * (Task 32: one shared request per page view, never a stale number). */
+  const { release } = useLatestAppRelease();
 
   /* Word-reveal landing: one rAF after mount flips `landed`, adding .in to
    * every .word so the split headline words rise in staggered. Pre-mount
@@ -76,14 +81,14 @@ export function Hero() {
     >
       {/* copy stack */}
       <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-        {/* kicker — version injected from APP_VERSION (Task 28-c/C1) so it
-            can never drift from the shipped installer again */}
+        {/* kicker — version injected from the live release store so it can
+            never drift from the installer the download button fetches */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <span className="kicker">{t.hero.kicker.replace("{version}", APP_VERSION)}</span>
+          <span className="kicker">{t.hero.kicker.replace("{version}", release.version)}</span>
         </motion.div>
 
         {/* headline — word-reveal; accessible text lives on the h1 label,
@@ -169,9 +174,12 @@ export function Hero() {
 
       {/* THE STAGE — framed app-window over artwork. An interface PREVIEW,
        * never a live feed: the badge says so, the chips carry static,
-       * verifiable product facts (version / installer size / checksum
-       * policy) instead of fabricated FPS/GPU/PING telemetry (audit 29-b
-       * D2), and the caption under the frame keeps the framing honest. */}
+       * verifiable product facts (version / platform / distribution source)
+       * instead of fabricated FPS/GPU/PING telemetry (audit 29-b D2), and
+       * the caption under the frame keeps the framing honest. The key art
+       * is GTA V's Los Santos at dusk — one of the most instantly
+       * recognizable vistas in gaming (Task 32) — served with a hand-rolled
+       * srcSet like the gallery (unoptimized static export). */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -207,7 +215,9 @@ export function Hero() {
              * verbatim in the download card; chips are visual shorthand) */}
             <div className="relative aspect-[16/10] overflow-hidden">
               <img
-                src={asset("/games/cyberpunk.webp")}
+                src={asset("/games/gtav-city.webp")}
+                srcSet={`${asset("/games/gtav-city-480.webp")} 480w, ${asset("/games/gtav-city-672.webp")} 672w, ${asset("/games/gtav-city.webp")} 840w`}
+                sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 944px) calc(100vw - 3rem), 896px"
                 alt=""
                 loading="eager"
                 decoding="async"
@@ -218,7 +228,7 @@ export function Hero() {
                 className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#08080a]/80 to-transparent"
               />
 
-              {/* fact chips — VER / SIZE / SHA — static, verifiable */}
+              {/* fact chips — VER / WIN / GITHUB — static, verifiable */}
               <div
                 aria-hidden="true"
                 className="gc-hud-chip hud-drift pointer-events-none absolute top-[6%] start-[4%] flex items-baseline gap-2 px-3.5 py-2"
@@ -227,7 +237,7 @@ export function Hero() {
                   VER
                 </span>
                 <b className="font-display text-xl font-bold tabular-nums text-[#1fbf9c]">
-                  {APP_VERSION}
+                  {release.version}
                 </b>
               </div>
               <div
@@ -244,7 +254,7 @@ export function Hero() {
                 className="gc-hud-chip hud-drift-3 pointer-events-none absolute bottom-[6%] end-[4%] flex items-baseline gap-2 px-3.5 py-2"
               >
                 <span className="text-[10px] font-bold tracking-wider text-muted-foreground">
-                  SHA-256
+                  GITHUB
                 </span>
                 <b className="font-display text-xl font-bold tabular-nums text-[#fedb29]">
                   ✓

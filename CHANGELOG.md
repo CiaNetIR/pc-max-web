@@ -4,6 +4,75 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.3.0] — 2026-10-06
+
+**Real GitHub-release downloads + a gamer-recognizable hero + the red focus
+box gone** — Task 32 (user feedback round), plus an urgent URL migration:
+both repositories were transferred to the **CiaNetIR** account mid-task
+(old `DLSDT` links still work through GitHub's 301 redirects).
+
+### Added — downloads now resolve the newest real release live
+- Every download surface (premium-card button, mobile CTA bar,
+  install-flow link) resolves the **newest release of
+  `github.com/CiaNetIR/pc-max`** through the GitHub REST API and hands the
+  browser the direct `x64-setup.exe` URL; the anchor `href` stays the
+  releases page (truth for no-JS, crawlers and modified clicks).
+  `src/lib/app-release.ts` owns the resolution: sessionStorage cache
+  (10 min) + in-flight memo — one request per page view — 6 s timeout,
+  graceful fallback to the releases page on any failure.
+- `useLatestAppRelease()` (`src/hooks/use-app-release.ts`): version, size
+  and release date render a **hand-verified baseline (v0.4.16 · 7.37 MB ·
+  2026-09-06)** with the SSR HTML and upgrade live after hydration — the
+  hero kicker, the VER stage chip and the download chips can never drift
+  from the shipped product again.
+- Lazy changelog: "What's new" now loads the **real release list** from the
+  app repository on first open (skeleton → per-release notes + "View on
+  GitHub" links to each tag); nothing is fetched at render time.
+- "Official release" provenance row (`github.com/CiaNetIR/pc-max`) +
+  Source chip replacing the local-artifact SHA-256 verify row — the honest
+  trust signal for a remote artifact is where it ships from.
+
+### Fixed — the "red square around the profile"
+- Focus rings are now **neutral white** (`--ring: rgba(255,255,255,0.6)`);
+  crimson stays reserved for emphasis (CTAs, active states, metrics). The
+  old `#ff3b30` outline read as an error/selection box.
+- New `TapFocusRelease` (root layout): pointer clicks/taps (click
+  `detail > 0`) blur the activated control **only when a `:focus-visible`
+  ring is showing** — no persistent box on profile cards, tabs, summaries
+  or links after touch, while keyboard focus rings are fully preserved
+  (WCAG 2.4.7).
+- Stale marketing data: the site advertised **v2.4.1** (the retired local
+  demo artifact) while the real app ships **v0.4.16**. The UI now shows
+  real, live values; the fabricated SHA-256/PowerShell verify copy and the
+  false "every release publishes its SHA-256 checksum" safety card were
+  replaced with verifiable GitHub-Releases facts (installer + `.sig`
+  signature per release).
+
+### Added — hero key art gamers recognize
+- GTA V's **Los Santos at dusk** (the IAA-building skyline, verified via
+  vision-model review of candidates — the most instantly recognizable
+  vista across CS2/GTA candidates, and the only one matching the dark
+  premium brand) replaces the generic cyberpunk artwork inside the
+  app-window stage. Hand-rolled srcSet like the gallery:
+  `gtav-city-480/672/840.webp` (16.6 / 27.6 / 39.2 KB) — the stage chip
+  SHA-256 became **GITHUB ✓**, and the VER chip shows the live version.
+
+### Changed — repository migration (DLSDT → CiaNetIR)
+- Discovered mid-task: `github.com/DLSDT/pc-max` 301 → `CiaNetIR/pc-max`
+  and `dlsdt.github.io/pc-max-web` now **404s** — the live Pages site is
+  `cianetir.github.io/pc-max-web`. All self-referential URLs updated from
+  the single `PAGES_URL`/`GITHUB_REPO_URL` constants: canonical, hreflang,
+  OG/Twitter, sitemap, robots, JSON-LD (`downloadUrl`/`installUrl` → the
+  app repo's releases page, new `codeRepository`, `softwareVersion:
+  0.4.16`), README, workflow comments, llms.txt / llms-full.txt, the git
+  remote, and `gh-pages-build.sh`.
+- `DownloadCta` server wrapper slimmed to a pass-through (no DB query, no
+  local checksum at render time); `/api/release`, `/api/changelog` and
+  `/api/download` stay untouched for external consumers, and the retired
+  demo installer is no longer attached to web-repo GitHub Releases.
+- `llms.txt` / `llms-full.txt` now cite the real download source and the
+  current release instead of the retired local artifact.
+
 ## [2.2.1] — 2026-10-06
 
 **Crawlable navigation + a dead language-toggle link fixed** — the final gap

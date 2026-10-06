@@ -79,22 +79,8 @@ else
   exit 1
 fi
 
-# ── 4. attach the installer artifact (best effort) ──────────────────────────
-RELEASE_ID="$(python3 -c 'import json;print(json.load(open("/tmp/pcmax-release-resp.json")).get("id",""))' 2>/dev/null || true)"
-if [[ -n "${RELEASE_ID}" ]]; then
-  for ARTIFACT in public/releases/*.exe; do
-    [[ -e "${ARTIFACT}" ]] || continue
-    NAME="$(basename "${ARTIFACT}")"
-    CODE="$(curl -s -o /tmp/pcmax-asset-resp.json -w '%{http_code}' -X POST \
-      -H "Authorization: token ${TOKEN}" \
-      -H "Content-Type: application/octet-stream" \
-      --data-binary "@${ARTIFACT}" \
-      "https://uploads.github.com/repos/${REMOTE_PATH}/releases/${RELEASE_ID}/assets?name=${NAME}")"
-    if [[ "${CODE}" == "201" ]]; then
-      echo "attached asset: ${NAME} → https://github.com/${REMOTE_PATH}/releases/download/${TAG}/${NAME}"
-    else
-      echo "asset upload failed for ${NAME} (HTTP ${CODE}):"
-      cat /tmp/pcmax-asset-resp.json
-    fi
-  done
-fi
+# ── 4. installer artifact — RETIRED (Task 32) ──────────────────────────────
+# The website no longer ships installers: downloads resolve the newest
+# release of the APP repository (github.com/CiaNetIR/pc-max) live. The old
+# local demo artifact (public/releases/*.exe) stays on disk only as the
+# /api/download route's legacy fallback and is NOT attached to web releases.

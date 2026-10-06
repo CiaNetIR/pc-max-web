@@ -1,10 +1,15 @@
 "use client";
 
+import { useState, type MouseEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { springFluid } from "@/components/pcmax/ui/motion";
 import { Reveal, Section, SectionHeading } from "@/components/pcmax/ui/primitives";
-import { installerHref } from "@/lib/gh-pages";
+import {
+  APP_RELEASES_URL,
+  resolveLatestAppRelease,
+} from "@/lib/app-release";
 import {
   GamepadIcon,
   FolderIcon,
@@ -24,11 +29,19 @@ const stepIcons = [DownloadIcon, WindowsIcon, LogoMark, ShieldIcon, FolderIcon, 
 
 export function InstallFlow() {
   const { t } = useLanguage();
-  /* Latest known installer — the step-1 card links straight to it (audit
-   * 29-b D13: this was the 4th scroll-CTA before the single real download
-   * button; a direct link removes the dead-end feel without competing with
-   * the premium card, which stays the canonical download surface). */
-  const downloadHref = installerHref();
+  const [busy, setBusy] = useState(false);
+  /* Task 32: the step-1 link resolves the newest GitHub release live —
+   * same resolver as the main download button (audit 29-b D13 heritage:
+   * a direct link, no dead-end, no competition with the premium card). */
+  async function onDownload(e: MouseEvent<HTMLAnchorElement>) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    const release = await resolveLatestAppRelease();
+    setBusy(false);
+    window.location.href = release?.url ?? APP_RELEASES_URL;
+  }
   /* motion-sensitive users get the same calm grid — no scroll hijacking,
    * no pinned rail; the entrance tween simply snaps in place. */
   const reduce = useReducedMotion();
@@ -83,14 +96,20 @@ export function InstallFlow() {
         })}
       </ol>
 
-      {/* terminal flourish — a REAL download link (SSR: counting route,
-          static: the deployed artifact), not another scroll-to-CTA */}
+      {/* terminal flourish — a REAL download link: the newest release of
+          github.com/CiaNetIR/pc-max, resolved live (href = releases page) */}
       <Reveal delay={0.15} className="mt-10 flex justify-center">
         <a
-          href={downloadHref}
+          href={APP_RELEASES_URL}
+          onClick={onDownload}
+          aria-busy={busy}
           className="gc-btn-primary press inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-bold"
         >
-          <DownloadIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+          {busy ? (
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />
+          ) : (
+            <DownloadIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+          )}
           {t.hero.primary}
         </a>
       </Reveal>

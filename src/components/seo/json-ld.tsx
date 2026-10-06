@@ -5,9 +5,9 @@ import {
   getLocaleMeta,
   siteConfig,
 } from "@/lib/seo";
-import { IS_STATIC_EXPORT, INSTALLER_FILE } from "@/lib/gh-pages";
+import { APP_REPO_URL } from "@/lib/gh-pages";
+import { KNOWN_LATEST } from "@/lib/app-release";
 import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
-import { db } from "@/lib/db";
 
 /**
  * Schema.org structured data for PC MAX — one connected @graph.
@@ -17,40 +17,24 @@ import { db } from "@/lib/db";
  * LLMs can resolve "PC MAX" as a single, verifiable brand entity. WebSite,
  * WebPage, SoftwareApplication, FAQPage and HowTo all reference it by @id.
  *
- * Locale-aware: the FA document (`/?lang=fa`) ships Persian FAQ/HowTo text
+ * Locale-aware: the FA document (`/fa`) ships Persian FAQ/HowTo text
  * and fa-IR language tags; the EN canonical ships English. Both mirror the
  * on-page copy verbatim (pulled from the same dictionary the UI renders).
  *
- * Pure render, no hooks or browser APIs. Async only to read the live
- * release version from the database (same source as /api/release), so
- * `softwareVersion` can never drift from the shipped product; on any DB
- * error the field is simply omitted instead of failing the page.
+ * Pure render, no hooks or browser APIs (Task 32): the release facts come
+ * from the hand-verified KNOWN_LATEST snapshot of the app repo's real
+ * GitHub release — the same baseline the download UI paints with — and the
+ * download/install URLs point at the repository's releases page, which
+ * always serves the newest build.
  */
-async function getLatestReleaseInfo(): Promise<{
-  version: string | null;
-  fileName: string | null;
-}> {
-  try {
-    const latest = await db.release.findFirst({
-      orderBy: { releasedAt: "desc" },
-      select: { version: true, fileName: true },
-    });
-    return { version: latest?.version ?? null, fileName: latest?.fileName ?? null };
-  } catch {
-    return { version: null, fileName: null };
-  }
-}
 
 export async function JsonLd({ locale = "en" }: { locale?: Locale }): Promise<ReactNode> {
   const meta = getLocaleMeta(locale);
   const dict = dictionary[locale];
   const pageUrl = `${siteConfig.url}${meta.path === "/" ? "" : meta.path}`;
-  const { version: softwareVersion, fileName } = await getLatestReleaseInfo();
-  /* Static GitHub Pages flavor: download/install URLs point at the artifact
-   * deployed with the site; the SSR flavor keeps the API route. */
-  const downloadPath = IS_STATIC_EXPORT
-    ? `/releases/${fileName ?? INSTALLER_FILE}`
-    : "/api/download";
+  /* Task 32: the download/install URL is the app repository's releases
+   * page — the canonical, always-newest download location. */
+  const downloadUrl = `${APP_REPO_URL}/releases/latest`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -138,12 +122,15 @@ export async function JsonLd({ locale = "en" }: { locale?: Locale }): Promise<Re
         publisher: { "@id": `${siteConfig.url}/#organization` },
         brand: { "@id": `${siteConfig.url}/#organization` },
         isAccessibleForFree: true,
-        downloadUrl: `${siteConfig.url}${downloadPath}`,
-        installUrl: `${siteConfig.url}${downloadPath}`,
+        /* The real distribution source + the hand-verified current release
+         * (kept in sync with lib/app-release.ts KNOWN_LATEST). */
+        codeRepository: APP_REPO_URL,
+        downloadUrl,
+        installUrl: downloadUrl,
         fileSize: siteConfig.app.diskSpace,
         softwareRequirements: siteConfig.app.requirements,
         featureList: getFeatureList(locale),
-        softwareVersion: softwareVersion ?? undefined,
+        softwareVersion: KNOWN_LATEST.version,
         screenshot: `${siteConfig.url}${siteConfig.ogImage}`,
         offers: {
           "@type": "Offer",

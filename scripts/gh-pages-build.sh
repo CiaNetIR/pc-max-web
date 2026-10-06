@@ -2,7 +2,7 @@
 # PC MAX Web — GitHub Pages static-export builder.
 #
 # Produces a fully static mirror of the website (./out) deployable to GitHub
-# Pages at https://dlsdt.github.io/pc-max-web.
+# Pages at https://cianetir.github.io/pc-max-web.
 #
 # Usage:
 #   bash scripts/gh-pages-build.sh              → build inside an isolated copy
@@ -28,8 +28,8 @@ SRC_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 IN_PLACE=0
 [[ "${1:-}" == "--in-place" ]] && IN_PLACE=1
 
-PAGES_URL="https://dlsdt.github.io/pc-max-web"
-REPO_URL="https://github.com/DLSDT/pc-max-web"
+PAGES_URL="https://cianetir.github.io/pc-max-web"
+REPO_URL="https://github.com/CiaNetIR/pc-max-web"
 # Single source of truth (audit 29-c): read the installer filename straight
 # from src/lib/gh-pages.ts so the script can never drift from the code.
 INSTALLER="$(bun -e 'const m = await import("./src/lib/gh-pages.ts"); console.log(m.INSTALLER_FILE);' 2>/dev/null)"
