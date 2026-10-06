@@ -1,37 +1,27 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { Gauge, TriangleAlert } from "lucide-react";
+import { Check, Gauge, TriangleAlert } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading, AnimatedCounter } from "@/components/pcmax/ui/primitives";
 import { BackupIcon } from "@/components/pcmax/icons";
 import { springFluid } from "@/components/pcmax/ui/motion";
-import { cn } from "@/lib/utils";
 
 /*
- * System Safety — one calm two-pane section on Guardian surface cards.
+ * System Safety — one calm two-pane section on gc-card surfaces.
  * Pane A: Windows Optimizer (inset gc-stat tiles).
- * Pane B: Backup & Restore (numbered vertical safety timeline, 01→04).
+ * Pane B: Backup & Restore — the rollback guarantees as a compat-strip
+ *         panel (reference .compat / .ticks, Task 42-B6): a hairline
+ *         tinted strip of success-tick items. All safety copy kept.
  * Below both panes: the gold caveat strip (reference .caveat) carrying the
  * package-security warning.
- *
- * Timeline geometry (logical props, RTL-safe): each li carries `ps-8` so the
- * absolutely-positioned node (`start-0` resolves against the li's padding box,
- * i.e. the gutter start) sits at 0px while text starts at 32px; the connector
- * `start-[13px]` on the <ol> threads the 28px node centers (0..28 → 14px).
  */
-
-/* the terminal "Restore" node — the one solid crimson circle on the line */
-const NODE_LAST = "specular border border-crimson bg-crimson text-white";
-const NODE_STEP =
-  "bg-[#1b1b21] text-crimson ring-1 ring-inset ring-crimson/25";
 
 export function SystemSafety() {
   const { t } = useLanguage();
   const reduce = useReducedMotion();
 
   const steps = t.safety.backup.steps;
-  const lastStep = steps.length - 1;
 
   return (
     <Section id="safety" className="relative overflow-hidden">
@@ -68,7 +58,7 @@ export function SystemSafety() {
             </div>
           </div>
 
-          {/* inset stat tiles — Guardian stat language (teal Sora numerals) */}
+          {/* inset stat tiles — count-up numerals on tinted tiles */}
           <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4">
             {t.safety.optimizer.stats.map((stat) => (
               <div
@@ -111,12 +101,11 @@ export function SystemSafety() {
             </div>
           </div>
 
-          {/* vertical safety timeline: Backup → Optimize → Verify → Restore */}
-          <ol className="relative mt-8 space-y-5">
-            <span
-              className="absolute start-[13px] top-2 bottom-2 w-px bg-border"
-              aria-hidden="true"
-            />
+          {/* rollback guarantees — compat-strip pattern: a hairline tinted
+              panel strip of success-tick items (Snapshot → Apply →
+              Rollback → Restore); copy unchanged, the v2.8 numbered
+              timeline nodes are retired */}
+          <ol className="mt-8 grid gap-5 rounded-md bg-foreground/[0.03] p-5 ring-1 ring-inset ring-white/[0.07] sm:grid-cols-2 sm:gap-x-6 sm:p-6">
             {steps.map((step, i) => (
               <motion.li
                 key={step.title}
@@ -124,20 +113,17 @@ export function SystemSafety() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "0px 0px -40px 0px" }}
                 transition={{ ...springFluid, delay: 0.18 + i * 0.08 }}
-                className="relative ps-8"
+                className="flex gap-3"
               >
-                <span
-                  className={cn(
-                    "absolute start-0 top-0 flex h-7 w-7 items-center justify-center rounded-full font-mono text-[11px] font-bold",
-                    i === lastStep ? NODE_LAST : NODE_STEP
-                  )}
-                >
-                  {String(i + 1).padStart(2, "0")}
+                <span className="tick mt-0.5">
+                  <Check className="h-3 w-3" strokeWidth={3.5} />
                 </span>
-                <h4 className="type-title font-display text-sm font-bold text-foreground">{step.title}</h4>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                  {step.desc}
-                </p>
+                <div className="min-w-0">
+                  <h4 className="type-title font-display text-sm font-bold text-foreground">{step.title}</h4>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                    {step.desc}
+                  </p>
+                </div>
               </motion.li>
             ))}
           </ol>

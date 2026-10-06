@@ -4,6 +4,89 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.9.0] — 2026-10-07
+
+**TweakFa Crimson** — owner request: "open and review all the tweakfa.com
+links; my site should be like it in everything except the color, which
+stays red/black — work on it with dozens of agents." Six parallel review
+agents audited 12 TweakFa pages (home/guardian EN+FA/login/hub/plans/
+consult/3 calculators/edu/blog) and produced a unified design spec
+(`.tweakfa-review/DESIGN-SPEC.md`); a foundation agent + seven parallel
+component agents then re-skinned the entire site onto TweakFa's design
+language with the crimson accent swapped in for their violet. Content,
+IA, data and every product claim are untouched — this is a pure visual
+re-skin on TweakFa's structural grammar.
+
+### Added — TweakFa's design language (red/black edition)
+- **Token system**: TweakFa's exact structural ramp (base `#08080a`,
+  surface `#121216`, elevated `#1b1b21`, text `#ededef/#a7a7b0/#7a7a85`,
+  hairlines `.08/.16`, white tints `.03/.06/.12/.22`, radii 11/14/16,
+  `--ease-ui`/`--ease-unfold` curves) with violet→crimson everywhere
+  (`#ff3b30` accent, `#e50914` fills, `#ff8a80` ink, dim `.16`); gold
+  `#fedb29`, success `#1fbf9c`, warning `#e08a00`, cyan `#6fd0ff`
+  adopted as the secondary accents.
+- **Inset-ring material system**: cards/panels/buttons paint
+  `box-shadow: inset 0 0 0 1px hairline` instead of borders — hover =
+  ring brightens + `-3px` lift, zero layout shift.
+- **Kicker pills**: chamfered clip-path pills (crimson-tint) replace the
+  v2.8 numbered mono kickers; CSS-counter section numbering retired.
+- **Seam dividers**: gradient hairlines (`min(720px,80%)` centered fade)
+  between sections replace hard full-width border-tops.
+- **Header**: sticky blur-12 header (`rgba(8,8,10,.72)`) that tightens
+  (`.tight` at scrollY>8: `.96` + hairline); 14px/500 nav links; 40px
+  compact CTA buttons; ghost language pill.
+- **Mobile menu (mpanel)**: burger (3-bar→X) opens a radius-20 panel
+  under the header with clip-path wipe (`.38s ease-unfold`) + staggered
+  children + scrim + `html.mnav-on` scroll lock + Escape/inert/close-on-
+  click; 11 real section anchors from the HUD list + lang row + CTA.
+- **Word-reveal hero headline**: masked per-word `wordIn .6s` stagger
+  gated on a synchronous `html.fx-on` head script — no-JS/reduced-motion
+  render plain visible text with zero CLS.
+- **Ambient atmosphere (perf-disciplined)**: crimson radial `.glow` orbs
+  (23.41s/26.53s non-synced drift, transform-only, no `filter:blur`) +
+  6 hero `.spark` motes; the shcard premium card wears the rotating
+  conic-gradient border (`#7a0810→#e50914→#fedb29`, 12.8s) + sheen sweep
+  (14.4s) + breathing logo mark + gold CTA with pulsing halo.
+- **fpill tab indicator** (app showcase): measured sliding pill
+  (physical `--px/--py/--pw/--ph` vars, rAF-coalesced, resize/font-load/
+  locale re-measure) on transparent `.showcase-tab` pills — the 1.5s
+  auto-rotate is preserved.
+- **Benchmarks → uv-frame**: the before/after FPS grid became TweakFa's
+  framed comparison panel — tabular Poppins digits, RTL-aware arrows,
+  delta chips, solid crimson meter fills (data byte-identical).
+- **FAQ → native details cards** (2-col grid, `+`→`×` rotating glyph);
+  **footer → TweakFa anatomy** (4 columns, breathing emblem, toTop with
+  9.13s hint nudge, hairline fbar); safety → compat-strip pattern with
+  success-dot ticks; install journey static grid gains 54px
+  CSS-counter step circles (journey pinning logic untouched).
+- **Typography**: EN voice = **Poppins** 400/600/700/800 latin subsets
+  (~8KB each, self-hosted, EN-only preloads — matches the reference's EN
+  pages); FA unchanged (IRANYekanX + Poppins digit grafts — the latin
+  cuts never download in FA, verified). Space Grotesk retired and deleted.
+
+### Fixed
+- `.press` transition is now additive (scale + bg/shadow/translate/
+  color/border) so gc-btn hovers survive the combo (B1 gap).
+- The phones-only conversion bar hides under `html.mnav-on` while the
+  mobile menu is open (was floating above the scrim at z-70).
+- `.fcols` link styles cover `<button>` rows (legal dialogs triggers).
+- Kicker/gc-btn/gc-card competing utility sweep across 10 components
+  (classes own geometry now).
+
+### Verified (E2E, agent-browser + VLM)
+- EN 1440: Poppins 4 weights loaded, kicker clip-path + crimson pill,
+  6 word-mask spans, fpill measured (0→245px slide on tab click),
+  journey pins (stageTop=0 @ 12210), HUD "08/10 · Install", FAQ details
+  open with +→× 45° rotation, zero console errors, overflowX=0.
+- FA 1440: dir=rtl, IRANYekanX 400–800, Poppins latin NOT loaded (byte
+  saving contract holds), overflowX=0; VLM: hero 9/10 "cohesive,
+  custom-built", EN hero 9/10 premium, mobile 390px 9/10.
+- Mobile 390/320: burger visible, menu opens (12 rows, panel inert↔
+  live, scrim, CTA bar hidden) and Escape closes + refocuses.
+- Reduced-motion reload: fx-on withheld, plain visible headline, journey
+  unmounted + static 7-step grid present, ticker/emblem animations none.
+- shcard conic ring live in DOM (`shcardSpin` + `shSheen` + `breathe`).
+
 ## [2.8.0] — 2026-10-07
 
 **Atelier** — owner request: "the UI/UX is very bad, the worst

@@ -265,7 +265,9 @@ function Changelog() {
 }
 
 /* Editions — Free (current, the download itself) and Pro (coming, waitlist).
- * Restyled as dark selectable rows inside the premium card's action column. */
+ * Restyled as dark selectable rows inside the premium card's action column.
+ * TweakFa chip duality: the live Free edition reads success, the premium
+ * Pro edition reads gold (`.tick` / `.tick-gold` + tinted chips). */
 function EditionPicker({ onPro }: { onPro: () => void }) {
   const { t } = useLanguage();
 
@@ -285,7 +287,7 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
           <div className="min-w-0">
             <span className="flex flex-wrap items-center gap-2 font-display text-sm font-bold text-foreground">
               {t.cta.editions.free.name}
-              <span className="type-eyebrow rounded-full border border-crimson/30 bg-crimson/10 px-2 py-0.5 text-[10px] font-bold uppercase text-crimson">
+              <span className="type-eyebrow rounded-full border border-success-gc/30 bg-success-gc/10 px-2 py-0.5 text-[10px] font-bold uppercase text-success-ink-gc">
                 {t.cta.editions.free.badge}
               </span>
             </span>
@@ -297,13 +299,13 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
       {/* Pro — coming */}
       <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-[#121216] px-4 py-3.5">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex h-[21px] w-[21px] flex-none items-center justify-center text-crimson/70">
+          <span className="tick tick-gold">
             <Sparkles className="h-4 w-4" />
           </span>
           <div className="min-w-0">
             <span className="flex flex-wrap items-center gap-2 font-display text-sm font-bold text-foreground">
               {t.cta.editions.pro.name}
-              <span className="type-eyebrow rounded-full border border-border px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">
+              <span className="type-eyebrow rounded-full border border-gold-gc/30 bg-gold-gc/10 px-2 py-0.5 text-[10px] font-bold uppercase text-gold-gc">
                 {t.cta.editions.pro.badge}
               </span>
             </span>
@@ -315,7 +317,7 @@ function EditionPicker({ onPro }: { onPro: () => void }) {
           <button
             type="button"
             onClick={onPro}
-            className="gc-btn-ghost press min-h-11 rounded-full px-3.5 py-1.5 text-[11px] font-bold"
+            className="gc-btn-ghost press"
           >
             {t.cta.editions.pro.cta}
           </button>
@@ -393,7 +395,7 @@ function WaitlistCard() {
             href={GITHUB_REPO_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="gc-btn-ghost press inline-flex h-11 items-center justify-center rounded-full px-6 text-sm font-semibold"
+            className="gc-btn-ghost press inline-flex items-center justify-center"
           >
             GitHub <span aria-hidden="true">↗</span>
           </a>
@@ -420,7 +422,7 @@ function WaitlistCard() {
           <button
             type="submit"
             disabled={state === "submitting"}
-            className="gc-btn-primary press inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-bold disabled:opacity-60"
+            className="gc-btn-primary press inline-flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {state === "submitting" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {t.cta.waitlist.button}
@@ -494,12 +496,15 @@ export function DownloadCtaClient() {
 
   return (
     <Section id="download" className="overflow-hidden">
-      {/* ambient crimson glow behind the card — physical centering (D2/Task
-          28-d): start-1/2 + a physical -translate-x-1/2 never flips in RTL and
-          pushed this glow fully off-screen in FA. */}
+      {/* ambient orbs — the TweakFa shcard zone carries two glows (crimson
+          + gold companion, dA/dB non-synced drift loops). The old 130px
+          filter-blur slab is retired: the v3 perf contract allows NO blur
+          outside the header. Physical left/right offsets — RTL-safe. */}
+      <div aria-hidden="true" className="glow dA" style={{ left: "3%", top: 280 }} />
       <div
-        className="pointer-events-none absolute left-1/2 top-16 h-[420px] w-[820px] max-w-none -translate-x-1/2 rounded-full bg-crimson/[0.1] blur-[130px]"
         aria-hidden="true"
+        className="glow glow-gold dB"
+        style={{ right: "2%", top: 640, width: 320, height: 320 }}
       />
 
       {/* heading — gold kicker (built manually: SectionHeading renders the
@@ -516,11 +521,11 @@ export function DownloadCtaClient() {
         </motion.div>
 
         <motion.h2
-          initial={reduce ? false : { opacity: 0, y: 32, filter: "blur(8px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={reduce ? false : { opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px 0px -80px 0px" }}
           transition={springFluid}
-          className="type-display font-display text-[clamp(24px,2.9vw,34px)] font-bold text-foreground"
+          className="type-display font-display text-[clamp(24px,2.9vw,34px)] font-extrabold text-foreground"
         >
           {t.cta.title.split(".").map((part, i, arr) =>
             part.trim() ? (
@@ -543,9 +548,11 @@ export function DownloadCtaClient() {
         </motion.p>
       </div>
 
-      {/* premium card — v2.8 "Atelier": one flat card with a 2px crimson
-          top rule and the static three-bar mark (the conic orbit border,
-          drifting glows and sheen sweep are retired; see globals.css) */}
+      {/* premium card — the TweakFa shcard (globals.css v3): a 1px wrapper
+          whose ::before sweeps the rotating conic ring (deep crimson →
+          gold → deep), the premium-tint inner surface with its slow sheen
+          and the breathing three-bar mark — all pseudo-element driven,
+          zero extra markup layers */}
       <div ref={cardRef} className={cn("shcard", cardInView && "in")}>
         <div className="shcard__in">
           {/* top grid — brand lock + perks ⇄ editions + download */}
@@ -595,7 +602,7 @@ export function DownloadCtaClient() {
                 onClick={onDownload}
                 aria-label={busy ? t.cta.buttonBusy : t.cta.button}
                 aria-busy={busy}
-                className="gc-btn-gold press mt-6 flex h-[52px] w-full items-center justify-center gap-2.5 rounded-xl text-[15px] font-bold"
+                className="gc-btn-gold press mt-6 flex w-full items-center justify-center gap-2.5"
               >
                 {busy ? (
                   <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />

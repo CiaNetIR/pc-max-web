@@ -528,6 +528,7 @@ const en = {
   common: {
     switchTo: "فارسی",
     skipToContent: "Skip to main content",
+    backToTop: "Back to top",
   },
   error404: {
     title: "Lost in optimization.",
@@ -1051,6 +1052,7 @@ const fa: Dictionary = {
   common: {
     switchTo: "English",
     skipToContent: "پرش به محتوای اصلی",
+    backToTop: "بازگشت به بالا",
   },
   error404: {
     title: "در بهینه‌سازی گم شدید.",

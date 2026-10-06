@@ -12,20 +12,26 @@ import { Toaster } from "@/components/ui/toaster";
 import "../globals.css";
 
 /* ---------------------------------------------------------------------
- * Self-hosted fonts (v2.8 "Atelier"):
+ * Self-hosted fonts (v3.0 "TweakFa Crimson", Task 42):
  *   IRANYekanX      — Persian face, 5 weights (400/500/600/700/800)
  *   Poppins digits  — U+0030-0039 declared UNDER 'IRANYekanX' with a
  *                     unicode-range, so Latin digits inside Persian text
  *                     render in Poppins (the signature TweakFa move)
- *   Space Grotesk   — the EN display face: ONE variable latin cut
- *                     (~22KB, weights 300–700). The EN body rides the
- *                     platform system stack — zero font bytes, the honest
- *                     utility-tool choice (and no Poppins/Inter cliché).
+ *   Poppins         — the EN display + body face: four self-hosted
+ *                     latin-subset cuts (400/600/700/800, ~8KB each,
+ *                     downloaded from Google Fonts' latin unicode-range
+ *                     files). Space Grotesk (v2.8) is retired; the file
+ *                     stays on disk until Wave C decides deletion.
  *
  * @font-face lives in an injected <style> (not globals.css) because CSS
  * url() refs to /public are NOT basePath-prefixed in the static export —
  * the injected tag interpolates BASE_PATH explicitly (the proven pattern
  * from the old Ariobarzan contract). font-display:swap throughout.
+ *
+ * FA never downloads the latin Poppins faces: the RTL document resolves
+ * every stack to IRANYekanX (html[dir="rtl"] override in globals.css),
+ * so no element ever references the 'Poppins' family there — only the
+ * digit graft files load, exactly as before.
  * ------------------------------------------------------------------- */
 type LocalFace = { family: string; file: string; weight: number | string; range?: string };
 
@@ -46,11 +52,14 @@ const LOCAL_FACES: LocalFace[] = [
   { family: "IRANYekanX", file: "Poppins-SemiBold.digits.woff2", weight: 600, range: "U+0030-0039" },
   { family: "IRANYekanX", file: "Poppins-Bold.digits.woff2", weight: 700, range: "U+0030-0039" },
   { family: "IRANYekanX", file: "Poppins-Bold.digits.woff2", weight: 800, range: "U+0030-0039" },
-  /* v2.8 — the EN display face: Space Grotesk variable (latin subset,
-   * weights 300–700 in one 22KB file). The Persian document keeps
-   * IRANYekanX via html[dir=rtl]'s --font-display override in globals.css
-   * and never downloads this file. */
-  { family: "Space Grotesk", file: "SpaceGrotesk-Var.latin.woff2", weight: "300 700", range: LATIN_RANGE },
+  /* v3.0 — the EN face pair: Poppins latin subsets (400/600/700/800).
+   * The Persian document keeps IRANYekanX via html[dir=rtl]'s
+   * --font-sans/--font-display override in globals.css and never
+   * downloads these files (no FA element references 'Poppins'). */
+  { family: "Poppins", file: "Poppins-Regular.latin.woff2", weight: 400, range: LATIN_RANGE },
+  { family: "Poppins", file: "Poppins-SemiBold.latin.woff2", weight: 600, range: LATIN_RANGE },
+  { family: "Poppins", file: "Poppins-Bold.latin.woff2", weight: 700, range: LATIN_RANGE },
+  { family: "Poppins", file: "Poppins-ExtraBold.latin.woff2", weight: 800, range: LATIN_RANGE },
 ];
 
 const localFontFace = LOCAL_FACES.map((f) => {
@@ -58,12 +67,12 @@ const localFontFace = LOCAL_FACES.map((f) => {
   return `@font-face{font-family:'${f.family}';font-weight:${f.weight};src:url('${BASE_PATH}/fonts/${f.file}') format('woff2');${range}font-display:swap;}`;
 }).join("");
 
-/* Above-the-fold preloads per locale (tiny subsets): EN paints the
- * single Space Grotesk variable cut (canonical document — the body is
- * the system stack, so this one file is the entire EN font payload);
- * FA paints IRANYekanX (a real prerendered /fa document). */
+/* Above-the-fold preloads per locale (tiny subsets): EN paints Poppins
+ * SemiBold + Bold (the display/heading weights — Regular streams via
+ * swap for body copy); FA paints IRANYekanX (a real prerendered /fa
+ * document — the latin Poppins cuts never load there). */
 const FONT_PRELOADS: Record<Locale, string[]> = {
-  en: ["SpaceGrotesk-Var.latin.woff2"],
+  en: ["Poppins-SemiBold.latin.woff2", "Poppins-Bold.latin.woff2"],
   fa: ["IRANYekanX-Regular.woff2", "IRANYekanX-Bold.woff2", "IRANYekanX-ExtraBold.woff2"],
 };
 
@@ -192,8 +201,9 @@ export async function generateMetadata({
 
 export const viewport: Viewport = {
   /* Dark-only since the Guardian redesign (Task 26) — the light theme no
-   * longer exists; a single dark theme-color keeps the UA chrome matched. */
-  themeColor: "#0a0a0c",
+   * longer exists; a single dark theme-color keeps the UA chrome matched.
+   * v3.0: adopted TweakFa's base #08080a (Task 42 token map). */
+  themeColor: "#08080a",
   width: "device-width",
   initialScale: 1,
   /* Emits <meta name="color-scheme" content="dark"> — native scrollbars,
@@ -214,8 +224,8 @@ export default async function RootLayout({
   const dir = locale === "fa" ? "rtl" : "ltr";
 
   return (
-    /* Fonts are self-hosted and resolved by family name ('Space Grotesk'
-     * + the system stack in LTR / 'IRANYekanX' RTL — see globals.css
+    /* Fonts are self-hosted and resolved by family name ('Poppins' +
+     * the system fallbacks in LTR / 'IRANYekanX' RTL — see globals.css
      * @theme + html[dir="rtl"] stacks); no next/font variables are needed
      * on <html> anymore. */
     <html
@@ -249,6 +259,19 @@ export default async function RootLayout({
         />
       ))}
       <body className="antialiased bg-background text-foreground min-h-screen flex flex-col">
+        {/* fx-on gate (Task 42 §3): adds the effects class to <html>
+            synchronously BEFORE any section renders, so CSS-keyed motion
+            (the hero word-reveal masks) starts from its hidden state with
+            zero CLS. Reduced-motion visitors (and no-JS) never get the
+            gate — globals.css renders everything plainly visible. Runs
+            from the top of <body>; suppressHydrationWarning on <html>
+            absorbs the class diff during hydration. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(!matchMedia('(prefers-reduced-motion:reduce)').matches)document.documentElement.classList.add('fx-on')}catch(e){}",
+          }}
+        />
         {/* Progressive enhancement: flags React as mounted — pairs with the
             `html:not(.hydrated)` override at the end of globals.css so the
             pre-hydration (slow-JS / no-JS) page never renders blank. */}

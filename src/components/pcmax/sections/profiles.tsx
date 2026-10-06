@@ -13,42 +13,46 @@ type ProfileKey = "yellow" | "green";
 /* Guardian accents (Task 26-d1): the two optimization tiers ride the
  * brand's premium pair — "yellow" (High Quality) → gold, "green"
  * (Maximum FPS) → teal. The keys keep their dictionary names; only the
- * presentation changed. Dark-only site — no light-mode color cuts anymore. */
+ * presentation changed. v3.0: raw values sit on the Wave A tokens
+ * (gold-gc #fedb29 / success-gc #1fbf9c) and the checklist renders the
+ * TweakFa tick square (tick / tick-gold). Dark-only site — no light-mode
+ * color cuts anymore. */
 const accents: Record<
   ProfileKey,
   {
     /** tier pill variant (kicker-gold / kicker-teal) */
     kicker: string;
-    /** accent text — point checks, active switch label */
+    /** accent text — active switch option label */
     text: string;
-    /** sliding switch thumb border */
+    /** sliding switch thumb inset ring */
     thumb: string;
     /** status icon chip bg + ring */
     chip: string;
     /** status / switch dot */
     dot: string;
-    /** raw hex for the meter fill (inline styles) */
+    /** raw hex for the meter fill + switch dot (inline styles) */
     hex: string;
-    borderTint: string;
+    /** checklist tick variant — default success tick or tick-gold */
+    tick: string;
   }
 > = {
   yellow: {
     kicker: "kicker-gold",
     text: "text-gold-gc",
-    thumb: "border-[rgba(255,213,74,0.3)]",
-    chip: "bg-[rgba(255,213,74,0.1)] ring-[rgba(255,213,74,0.26)]",
+    thumb: "ring-[rgba(254,219,41,0.32)]",
+    chip: "bg-gold-gc/10 ring-gold-gc/25",
     dot: "bg-gold-gc",
-    hex: "#ffd54a",
-    borderTint: "rgba(255,213,74,0.3)",
+    hex: "#fedb29",
+    tick: "tick-gold",
   },
   green: {
     kicker: "kicker-teal",
     text: "text-success-gc",
-    thumb: "border-[rgba(69,212,171,0.3)]",
-    chip: "bg-[rgba(69,212,171,0.12)] ring-[rgba(69,212,171,0.28)]",
+    thumb: "ring-[rgba(31,191,156,0.32)]",
+    chip: "bg-success-gc/10 ring-success-gc/25",
     dot: "bg-success-gc",
-    hex: "#45d4ab",
-    borderTint: "rgba(69,212,171,0.3)",
+    hex: "#1fbf9c",
+    tick: "",
   },
 };
 
@@ -107,7 +111,7 @@ export function Profiles() {
                     layoutId="profile-thumb"
                     transition={springFluid}
                     className={cn(
-                      "pointer-events-none absolute inset-0 -z-10 rounded-full border bg-card specular",
+                      "pointer-events-none absolute inset-0 -z-10 rounded-full bg-secondary ring-1 ring-inset",
                       a.thumb
                     )}
                   />
@@ -145,19 +149,21 @@ export function Profiles() {
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "0px 0px -60px 0px" }}
-              /* a11y: the inactive card recedes via scale + losing its accent
-               * skin (border/glow/pills) — every string stays at full WCAG
-               * contrast, no opacity dimming. */
+              /* a11y: the inactive card recedes via scale + losing its
+               * accent skin (ring / tick tints) — every string stays at
+               * full WCAG contrast, no opacity dimming. */
               animate={{ scale: isActive ? 1 : 0.965 }}
               whileTap={whileTapPress}
               transition={springFluid}
               className="gc-card press group relative flex flex-col p-6 text-start sm:p-8"
+              /* The active surface states itself in the brand accent —
+               * the same crimson inset-ring value the FAQ open state
+               * carries. Inline so it layers over .gc-card's class-owned
+               * resting ring (cards paint rings, never borders, in v3.0;
+               * the old drop shadow is retired with them). */
               style={
                 isActive
-                  ? {
-                      borderColor: a.borderTint,
-                      boxShadow: "0 14px 36px -18px rgba(0, 0, 0, 0.4)",
-                    }
+                  ? { boxShadow: "inset 0 0 0 1px rgba(255, 59, 48, 0.4)" }
                   : undefined
               }
             >
@@ -185,7 +191,8 @@ export function Profiles() {
                 {isActive && <span className="kicker">{t.profiles.active}</span>}
               </div>
 
-              {/* points */}
+              {/* points — TweakFa tick bullets; the tier keeps its tone
+               * via the tick modifier (gold / default success) */}
               <ul className="flex-1 space-y-3.5">
                 {data.points.map((point, i) => (
                   <motion.li
@@ -196,10 +203,9 @@ export function Profiles() {
                     transition={{ ...springFluid, delay: isActive ? i * 0.05 : 0 }}
                     className="flex items-start gap-3 text-sm leading-relaxed text-foreground/80"
                   >
-                    <Check
-                      className={cn("mt-0.5 h-4 w-4 shrink-0", a.text)}
-                      strokeWidth={3}
-                    />
+                    <span className={cn("tick mt-0.5", a.tick)}>
+                      <Check className="h-3 w-3" strokeWidth={3.5} />
+                    </span>
                     {point}
                   </motion.li>
                 ))}

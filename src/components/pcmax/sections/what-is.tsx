@@ -80,10 +80,13 @@ export function WhatIsPcMax() {
         })}
       </ol>
 
-      {/* Part 2 — the three disciplines. A compact mid-section heading
+      {/* Part 2 — the three disciplines. The band boundary is a .seam
+       * gradient hairline (TweakFa divider language — v3.0 retired the
+       * hard full-width border-top rules); a compact mid-section heading
        * (not a second full SectionHeading) keeps one visual owner per band
        * while the editorial rows below carry the depth. */}
-      <div className="mt-20 border-t border-border/60 pt-16 text-center sm:mt-24 sm:pt-20">
+      <div className="seam mt-20 sm:mt-24" aria-hidden="true" />
+      <div className="pt-16 text-center sm:pt-20">
         <h3 className="type-display font-display text-[clamp(22px,2.6vw,30px)] font-bold text-foreground">
           {t.features.title}
         </h3>

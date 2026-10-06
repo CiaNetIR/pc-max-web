@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore, type ComponentProps } from "react";
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type ComponentProps } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Cloud, Lock, Pause, Play } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
@@ -254,6 +254,70 @@ export function AppShowcase() {
     }
   }, [tab, locale]);
 
+  /* --- fpill sliding indicator (TweakFa tab pattern, Wave A contract) ---
+   * JS measures the ACTIVE pill against the pill row's top-left corner and
+   * writes the physical vars (--px/--py/--pw/--ph) on the .fpill element;
+   * `.ready` fades it in after the first measurement. getBoundingClientRect
+   * returns PHYSICAL (viewport) rects, so the numbers are RTL-safe with zero
+   * scrollLeft sign-juggling — and because the indicator lives INSIDE the
+   * scrolling pill row, strip scrolling (the reveal effect above, touch
+   * swipes) carries it along with the tabs: no scroll listener, no drift.
+   * Triggers: mount, tab/locale switch (label widths change with the
+   * language), window resize, and font-load (Poppins/IRANYekanX swapping in
+   * reflows the labels — a language switch can land with fonts already
+   * cached, so the locale dep is required, not just `loadingdone`). Every
+   * trigger funnels through one rAF-coalesced scheduler: at most a single
+   * read-modify-write per frame, no layout-thrash loops. The .42s
+   * ease-unfold slide itself is pure CSS (killed by the global
+   * reduced-motion guard); only geometry is measured here. */
+  const fpillRef = useRef<HTMLSpanElement>(null);
+  const pillRowRef = useRef<HTMLDivElement>(null);
+  const fpillRaf = useRef(0);
+
+  const measureFpill = useCallback(() => {
+    const row = pillRowRef.current;
+    const btn = activeTabRef.current;
+    const pill = fpillRef.current;
+    if (!row || !btn || !pill) return;
+    const br = btn.getBoundingClientRect();
+    const rr = row.getBoundingClientRect();
+    const s = pill.style;
+    s.setProperty("--px", `${br.left - rr.left}px`);
+    s.setProperty("--py", `${br.top - rr.top}px`);
+    s.setProperty("--pw", `${br.width}px`);
+    s.setProperty("--ph", `${br.height}px`);
+    pill.classList.add("ready");
+  }, []);
+
+  const scheduleFpill = useCallback(() => {
+    if (fpillRaf.current) return;
+    fpillRaf.current = requestAnimationFrame(() => {
+      fpillRaf.current = 0;
+      measureFpill();
+    });
+  }, [measureFpill]);
+
+  /* Passive observers — attached once for the section's lifetime. */
+  useEffect(() => {
+    window.addEventListener("resize", scheduleFpill);
+    const fonts = document.fonts;
+    fonts.addEventListener("loadingdone", scheduleFpill);
+    void fonts.ready.then(scheduleFpill);
+    return () => {
+      window.removeEventListener("resize", scheduleFpill);
+      fonts.removeEventListener("loadingdone", scheduleFpill);
+      if (fpillRaf.current) cancelAnimationFrame(fpillRaf.current);
+      fpillRaf.current = 0;
+    };
+  }, [scheduleFpill]);
+
+  /* Re-measure whenever the active pill — or the label rendering it —
+   * changes (runs after the reveal effect above; irrelevant for the row-
+   * relative math, but keeps the two effects from interleaving reads). */
+  useEffect(() => {
+    scheduleFpill();
+  }, [tab, locale, scheduleFpill]);
+
   /* Accessible tabs pattern — works identically in EN and FA: arrow keys
    * move the active tab (direction-aware: in RTL, ArrowLeft means "next"),
    * Home/End jump to the ends, focus follows the roving tabindex. */
@@ -385,7 +449,14 @@ export function AppShowcase() {
 
       {/* Tab strip — Guardian .ftabs language: pill tabs on a hairline-
           scrollable strip, hidden scrollbar, centered when it fits. The
-          whole <button> is the hit area; snap keeps pills readable mid-scroll. */}
+          whole <button> is the hit area; snap keeps pills readable mid-scroll.
+          TweakFa restyle (Task 42): the pills are TRANSPARENT — .showcase-tab
+          owns the colors (text-mid → hover → white) — and the active state is
+          drawn by the .fpill indicator sliding underneath, so the per-tab
+          bg/ring/shadow utilities are retired per the Wave A contract. The
+          strip splits in two layers: the tablist stays the (scrollable)
+          viewport, while the inner pill row (position:relative) anchors the
+          fpill and scrolls WITH the pills. */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -398,34 +469,40 @@ export function AppShowcase() {
           role="tablist"
           aria-label={t.showcase.eyebrow}
           onKeyDown={onTablistKeyDown}
-          className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:justify-center"
+          className="-mx-4 overflow-x-auto snap-x snap-mandatory px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {tabs.map(({ key, label }) => (
-            <button
-              key={key}
-              data-tab={key}
-              id={`${panelId}-${key}`}
-              type="button"
-              role="tab"
-              tabIndex={tab === key ? 0 : -1}
-              aria-selected={tab === key}
-              aria-controls={panelId}
-              ref={tab === key ? activeTabRef : undefined}
-              onClick={() => {
-                /* manual selection takes the wheel — auto-rotation stops */
-                setAutoOn(false);
-                setTab(key);
-              }}
-              className={cn(
-                "press showcase-tab h-10 flex-none snap-center rounded-full px-4 text-[13.5px] font-bold transition-colors",
-                tab === key
-                  ? "bg-[#e50914] text-white shadow-[0_8px_24px_rgba(229,9,20,0.35)]"
-                  : "bg-[#1b1b21] text-muted-foreground ring-1 ring-inset ring-border hover:text-foreground"
-              )}
-            >
-              <span className="whitespace-nowrap">{label}</span>
-            </button>
-          ))}
+          {/* pill row — w-max + sm:mx-auto reproduces the old
+              flex+justify-center centering (and scrolls cleanly when it
+              overflows, in either direction); role=presentation keeps the
+              tablist's a11y tree flat around the wrapper. */}
+          <div
+            ref={pillRowRef}
+            role="presentation"
+            className="relative flex w-max gap-2 sm:mx-auto"
+          >
+            <span ref={fpillRef} className="fpill" aria-hidden="true" />
+            {tabs.map(({ key, label }) => (
+              <button
+                key={key}
+                data-tab={key}
+                id={`${panelId}-${key}`}
+                type="button"
+                role="tab"
+                tabIndex={tab === key ? 0 : -1}
+                aria-selected={tab === key}
+                aria-controls={panelId}
+                ref={tab === key ? activeTabRef : undefined}
+                onClick={() => {
+                  /* manual selection takes the wheel — auto-rotation stops */
+                  setAutoOn(false);
+                  setTab(key);
+                }}
+                className="press showcase-tab h-10 flex-none snap-center rounded-full px-4 text-[13.5px] font-bold"
+              >
+                <span className="whitespace-nowrap">{label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </motion.div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Fragment, useRef, type CSSProperties, type ReactNode } from "react";
 import { motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 import { ArrowDown, ArrowRight, Check } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
@@ -11,28 +11,34 @@ import { cn } from "@/lib/utils";
 
 /*
  * Guardian hero (reference word-reveal landing): a centered copy stack —
- * kicker, masked word-reveal headline, lead, tick bullets, CTAs — over
- * a framed "app window" stage with static HUD fact chips. v2.8
- * "Atelier": the targeting rings, drifting chips, media sheen sweep and
- * neon accents are retired — flat surfaces, one crimson accent word.
+ * chamfered kicker pill, masked word-reveal headline, lead, tick bullets,
+ * TweakFa CTA row, compat-style trust strip — over a gradient-bezel
+ * framed "app window" stage with static HUD fact chips, plus one ambient
+ * glow orb and rising sparks behind the stage (Task 42-B2, globals v3.0).
  *
- * Progressive enhancement: the whole copy block is server-rendered;
- * entrance motion is opacity/transform-only (covered by the
- * `html:not(.hydrated)` overrides) and the word-reveal masks are forced
- * open until hydration adds `.hydrated` (see globals.css).
+ * Progressive enhancement: the whole copy block is server-rendered. The
+ * word-reveal runs purely in CSS — gated on `html.fx-on`, which the
+ * layout's inline script adds synchronously before first paint (never
+ * for reduced-motion visitors). No-JS / reduced-motion: no gate, no
+ * transform — plain visible words, zero CLS, because the mask boxes
+ * occupy their final space either way.
  */
 
-/* One headline line split into word-reveal masks (reference .w/.wi):
- * each word rises out of its overflow mask with a per-word `--wd` delay
- * once `landed` adds `.in`. `wordClassName` colors the second line. */
+/* One headline line split into word-reveal masks (Wave A contract):
+ * `<span class="w"><span class="wi">word</span></span>` — each word
+ * rises out of its overflow mask with a per-word `--wd` delay once
+ * `html.fx-on` is on <html> (see globals.css). `base` continues the
+ * stagger across lines so the headline reads as one sweep; the split
+ * spans are aria-hidden while the accessible string rides the h1's
+ * aria-label. `accentClassName` colors the second line. */
 function WordLine({
   text,
-  landed,
-  wordClassName,
+  base = 0,
+  accentClassName,
 }: {
   text: string;
-  landed: boolean;
-  wordClassName?: string;
+  base?: number;
+  accentClassName?: string;
 }) {
   const words = text.split(" ").filter(Boolean);
   return (
@@ -40,10 +46,10 @@ function WordLine({
       {words.map((word, i) => (
         <Fragment key={`${word}-${i}`}>
           {i > 0 && " "}
-          <span className={cn("word", landed && "in")}>
+          <span className="w">
             <span
-              className={cn("wi", wordClassName)}
-              style={{ "--wd": `${i * 70}ms` } as CSSProperties}
+              className={cn("wi", accentClassName)}
+              style={{ "--wd": `${base + i * 80}ms` } as CSSProperties}
             >
               {word}
             </span>
@@ -53,6 +59,20 @@ function WordLine({
     </span>
   );
 }
+
+/* Rising motes (Wave A `.spark` contract): per-instance vars — origin
+ * (--x/--y), size --s, loop --t (22–27s, never equal), delay --d, drift
+ * --dx/--dy, pulse --p, tint --sc (crimson default, `254,219,41` = gold)
+ * and peak opacity --so. Non-integer durations keep them out of sync
+ * with each other and with the orb's 23.41s drift loop. */
+const SPARKS = [
+  { x: "10%", y: "86%", s: "4px", t: "23.11s", d: "-2.1s", dx: "24px", dy: "-330px", p: "3.13s", sc: "255,59,48", so: ".65" },
+  { x: "24%", y: "92%", s: "3px", t: "23.69s", d: "-7.4s", dx: "-30px", dy: "-420px", p: "4.27s", sc: "255,59,48", so: ".55" },
+  { x: "38%", y: "80%", s: "5px", t: "24.31s", d: "-13.9s", dx: "18px", dy: "-360px", p: "3.71s", sc: "255,59,48", so: ".6" },
+  { x: "52%", y: "95%", s: "3px", t: "24.93s", d: "-5.2s", dx: "-22px", dy: "-460px", p: "5.09s", sc: "254,219,41", so: ".5" },
+  { x: "68%", y: "84%", s: "4px", t: "25.57s", d: "-18.6s", dx: "28px", dy: "-390px", p: "4.61s", sc: "255,59,48", so: ".6" },
+  { x: "86%", y: "90%", s: "3px", t: "26.23s", d: "-9.8s", dx: "-16px", dy: "-440px", p: "3.37s", sc: "254,219,41", so: ".5" },
+] as const;
 
 /* Magnetic — the CTA drifts toward the pointer while it hovers (spring
  * physics, ±~10px max), settling back dead-center on leave. Reduced-motion
@@ -116,16 +136,17 @@ export function Hero() {
    * (Task 32: one shared request per page view, never a stale number). */
   const { release } = useLatestAppRelease();
 
-  /* Word-reveal landing: one rAF after mount flips `landed`, adding .in to
-   * every .word so the split headline words rise in staggered. Pre-mount
-   * (SSR + first paint) the masks are forced open by the
-   * `html:not(.hydrated) .wi` override — no-JS visitors always see the
-   * full headline. */
-  const [landed, setLanded] = useState(false);
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setLanded(true));
-    return () => cancelAnimationFrame(raf);
-  }, []);
+  /* Word-reveal stagger: line 2 continues 80ms/word after line 1 so the
+   * headline animates as one choreographed sweep. */
+  const line1Words = t.hero.title1.split(" ").filter(Boolean).length;
+
+  /* Trust strip items — the compat-strip presentation (hairline panel +
+   * success dots) replaces the old "a · b · c" sentence; every segment's
+   * text is kept verbatim, only the separator glyph became layout. */
+  const trustItems = t.hero.trustLine
+    .split("·")
+    .map((item) => item.trim())
+    .filter(Boolean);
 
   return (
     <section
@@ -133,11 +154,50 @@ export function Hero() {
       id="top"
       className="relative overflow-hidden pt-[clamp(96px,12vw,140px)] pb-16 sm:pb-24"
     >
+      {/* ambient layer (Task 42 §3): one crimson glow orb drifting behind
+       * the stage side + six rising motes. Decorative only — aria-hidden,
+       * pointer-dead, clipped to the hero; globals kills the loops under
+       * reduced-motion / reduced-transparency. Negative z keeps it behind
+       * the copy and the opaque stage panel no matter what transforms
+       * framer holds at rest. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <div
+          className="glow dA"
+          style={{ width: 480, height: 480, top: "52%", insetInlineStart: "-170px" }}
+        />
+        {SPARKS.map((spark) => (
+          <span
+            key={spark.x}
+            className="spark"
+            style={
+              {
+                "--x": spark.x,
+                "--y": spark.y,
+                "--s": spark.s,
+                "--t": spark.t,
+                "--d": spark.d,
+                "--dx": spark.dx,
+                "--dy": spark.dy,
+                "--p": spark.p,
+                "--sc": spark.sc,
+                "--so": spark.so,
+              } as CSSProperties
+            }
+          >
+            <i />
+          </span>
+        ))}
+      </div>
+
       {/* copy stack */}
       <motion.div style={parallax}>
       <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-        {/* kicker — version injected from the live release store so it can
-            never drift from the installer the download button fetches */}
+        {/* kicker — chamfered TweakFa pill (globals v3.0); version injected
+            from the live release store so it can never drift from the
+            installer the download button fetches */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -147,13 +207,18 @@ export function Hero() {
         </motion.div>
 
         {/* headline — word-reveal; accessible text lives on the h1 label,
-         * the split spans are hidden from the a11y tree */}
+         * the split spans are hidden from the a11y tree. The whole second
+         * line keeps its solid-crimson accent (text-glow-crimson). */}
         <h1
           aria-label={`${t.hero.title1} ${t.hero.title2}`}
           className="type-display font-display font-bold leading-tight text-[clamp(30px,4.4vw,54px)] sm:text-[clamp(34px,5vw,58px)]"
         >
-          <WordLine text={t.hero.title1} landed={landed} />
-          <WordLine text={t.hero.title2} landed={landed} wordClassName="text-glow-crimson" />
+          <WordLine text={t.hero.title1} />
+          <WordLine
+            text={t.hero.title2}
+            base={line1Words * 80}
+            accentClassName="text-glow-crimson"
+          />
         </h1>
 
         {/* lead */}
@@ -188,7 +253,8 @@ export function Hero() {
          * in-page navigation does the scrolling — CSS scroll-behavior + its
          * prefers-reduced-motion override + the sections' scroll-mt-24 — so
          * no JS handler is needed (audit 29-a D7). Magnetic wrapper drifts
-         * them toward the pointer (Task 38 motion pass). */}
+         * them toward the pointer (Task 38 motion pass). Geometry (46px /
+         * radius 12 / 14.5-700) now ships with the .gc-btn-* classes. */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -198,7 +264,7 @@ export function Hero() {
           <Magnetic>
           <a
             href="#download"
-            className="gc-btn-primary press group inline-flex h-[52px] items-center gap-2.5 rounded-xl px-7 text-[15px] font-bold text-white"
+            className="gc-btn-primary press inline-flex items-center gap-2.5"
           >
             <DownloadIcon className="h-5 w-5" aria-hidden="true" />
             {t.hero.primary}
@@ -207,7 +273,7 @@ export function Hero() {
           <Magnetic>
           <a
             href="#install"
-            className="gc-btn-ghost press group inline-flex h-[52px] items-center gap-2 rounded-xl px-7 text-[15px] font-bold"
+            className="gc-btn-ghost press group inline-flex items-center gap-2"
           >
             {t.hero.secondary}
             <ArrowRight
@@ -221,16 +287,27 @@ export function Hero() {
           </Magnetic>
         </motion.div>
 
-        {/* trust line — the verifiable platform facts under the CTA pair
-         * (audit 29-b: Free/OS/arch stated once, near the primary action) */}
-        <motion.p
+        {/* trust strip — the verifiable platform facts under the CTA pair
+         * (audit 29-b: Free/OS/arch stated once, near the primary action),
+         * restyled as the TweakFa compat strip: hairline surface panel +
+         * success-dot items. Text unchanged — the "·" separators became
+         * the panel's item layout. */}
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.66, ease: "easeOut" }}
-          className="mt-5 text-[13px] font-medium tracking-wide text-muted-foreground"
+          className="mx-auto mt-6 flex w-fit max-w-full flex-wrap items-center justify-center gap-x-6 gap-y-2 rounded-[14px] bg-[#121216] px-6 py-3.5 text-[13.5px] text-muted-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
         >
-          {t.hero.trustLine}
-        </motion.p>
+          {trustItems.map((item) => (
+            <span key={item} className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 flex-none rounded-full bg-success-gc"
+              />
+              {item}
+            </span>
+          ))}
+        </motion.div>
       </div>
       </motion.div>
 
@@ -242,7 +319,8 @@ export function Hero() {
        * is Ghost — Call of Duty's masked operator, one of the most
        * instantly recognizable characters in gaming (Task 33) — served
        * with a hand-rolled srcSet like the gallery (unoptimized static
-       * export). */}
+       * export). The .gc-frame bezel (globals v3.0) draws the crimson
+       * gradient ring through its clamp()'d padding. */}
       <motion.div style={stageParallax} className="mt-12 px-4 sm:px-6">
       <motion.div
         initial={{ opacity: 0, y: 40 }}
@@ -336,7 +414,8 @@ export function Hero() {
 
       {/* scroll hint — content-flow below the stage (hero is no longer
        * 100svh), pointing at the first content section; a real anchor —
-       * native in-page navigation + CSS smooth scroll like the CTAs */}
+       * native in-page navigation + CSS smooth scroll like the CTAs. The
+       * tile is the 40px .gc-btn-icon circle (Wave A risk #1 fix). */}
       <motion.a
         href="#showcase"
         className="press type-eyebrow mx-auto mt-12 flex w-fit flex-col items-center gap-1.5 text-[10px] font-semibold uppercase text-muted-foreground transition-colors hover:text-foreground"
@@ -349,9 +428,9 @@ export function Hero() {
         <motion.span
           animate={reduce ? {} : { y: [0, 7, 0] }}
           transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          className="gc-btn-ghost flex h-9 w-9 items-center justify-center rounded-full"
+          className="gc-btn-ghost gc-btn-icon flex items-center justify-center"
         >
-          <ArrowDown className="h-4 w-4" />
+          <ArrowDown className="h-4 w-4" aria-hidden="true" />
         </motion.span>
       </motion.a>
     </section>

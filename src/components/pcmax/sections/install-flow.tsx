@@ -212,7 +212,7 @@ function StepScene({
                 </div>
               ))}
             </div>
-            <span className="gc-btn-primary mt-1 inline-flex h-9 items-center justify-center self-end rounded-xl px-5 text-[12.5px] font-bold text-white">
+            <span className="gc-btn-primary mt-1 inline-flex items-center justify-center self-end">
               {copy.install}
             </span>
           </div>
@@ -265,7 +265,7 @@ function StepScene({
                 </span>
               </div>
             ))}
-            <span className="gc-btn-primary mt-1 inline-flex h-9 items-center justify-center self-end rounded-xl px-5 text-[12.5px] font-bold text-white">
+            <span className="gc-btn-primary mt-1 inline-flex items-center justify-center self-end">
               {copy.signIn}
             </span>
             <span className="self-center text-[10.5px] font-semibold text-white/40">{copy.syncs}</span>
@@ -331,7 +331,7 @@ function StepScene({
               {copy.applied}
             </span>
           </div>
-          <span className="gc-btn-primary inline-flex h-9 items-center justify-center rounded-full px-6 text-[12.5px] font-bold text-white">
+          <span className="gc-btn-primary inline-flex items-center justify-center">
             {copy.play}
           </span>
         </div>
@@ -571,37 +571,57 @@ function Journey({
 function StaticGrid({ steps }: { steps: { title: string; desc: string }[] }) {
   const reduce = useReducedMotion();
   return (
-    <ol
-      role="list"
-      style={{ counterReset: "gcstep" }}
-      className="steps-ambient grid gap-x-6 min-[821px]:grid-cols-2 min-[821px]:gap-y-10 lg:grid-cols-4"
-    >
-      {steps.map((step, i) => {
-        const Icon = stepIcons[i] ?? PerformanceIcon;
-        return (
-          <motion.li
-            key={step.title}
-            initial={reduce ? false : { opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "0px 0px -40px 0px" }}
-            transition={{ ...springFluid, delay: i * 0.07 }}
-            className="gc-step"
-          >
-            <div>
-              <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25 min-[821px]:mx-auto">
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <h3 className="type-title font-display text-[16px] font-bold text-foreground">
-                {step.title}
-              </h3>
-              <p className="mt-2 max-w-[34ch] text-[13.5px] leading-relaxed text-muted-foreground min-[821px]:mx-auto">
-                {step.desc}
-              </p>
-            </div>
-          </motion.li>
-        );
-      })}
-    </ol>
+    <>
+      {/* Scoped step-circle skin — globals.css is frozen for this wave, so
+       * the shipped .gc-step counter badge gets its TweakFa install-step
+       * look (reference .step::before) via a tiny local sheet: the 54px
+       * counter badge becomes a ring CIRCLE carrying the counter-generated
+       * Latin digit. Visual only — the reveal choreography below is the
+       * E2E-proven original. */}
+      <style>{`
+.pcx-isteps .gc-step::before {
+  border-radius: 50%;
+  content: counter(gcstep);
+  font-size: 20px;
+  font-weight: 700;
+}
+@media (max-width: 820px) {
+  .pcx-isteps .gc-step::before {
+    font-size: 15px;
+  }
+}`}</style>
+      <ol
+        role="list"
+        style={{ counterReset: "gcstep" }}
+        className="pcx-isteps grid gap-x-6 min-[821px]:grid-cols-2 min-[821px]:gap-y-10 lg:grid-cols-4"
+      >
+        {steps.map((step, i) => {
+          const Icon = stepIcons[i] ?? PerformanceIcon;
+          return (
+            <motion.li
+              key={step.title}
+              initial={reduce ? false : { opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "0px 0px -40px 0px" }}
+              transition={{ ...springFluid, delay: i * 0.07 }}
+              className="gc-step"
+            >
+              <div>
+                <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25 min-[821px]:mx-auto">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <h3 className="type-title font-display text-[17px] font-bold text-foreground">
+                  {step.title}
+                </h3>
+                <p className="mt-2 max-w-[34ch] text-[13.5px] leading-[1.95] text-muted-foreground min-[821px]:mx-auto">
+                  {step.desc}
+                </p>
+              </div>
+            </motion.li>
+          );
+        })}
+      </ol>
+    </>
   );
 }
 
@@ -664,7 +684,7 @@ export function InstallFlow() {
           href={APP_RELEASES_URL}
           onClick={onDownload}
           aria-busy={busy}
-          className="gc-btn-primary press inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-bold"
+          className="gc-btn-primary press inline-flex items-center gap-2.5"
         >
           {busy ? (
             <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden="true" />

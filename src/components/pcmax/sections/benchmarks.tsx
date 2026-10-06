@@ -2,30 +2,46 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section, SectionHeading, Reveal } from "@/components/pcmax/ui/primitives";
 import { springFluid } from "@/components/pcmax/ui/motion";
 import { cn } from "@/lib/utils";
 
 /* ------------------------------------------------------------------ */
-/*  Benchmarks — the headline numbers as Guardian stat tiles, then    */
-/*  the per-game chart with crimson gradient bars on elevated tracks. */
+/*  Benchmarks — the TweakFa "uv-frame" before/after comparison        */
+/*  presentation (Task 42-B6): one framed panel (gc-card, radius-18    */
+/*  feel, reference .uv-frame) with hairline-divided rows of          */
+/*  label | before → after. Values are Poppins tabular digits with    */
+/*  unit chips, delta chips carry the computed gain, and the meter    */
+/*  bars stay solid crimson on quiet tint tracks.                     */
 /*  Section 37: +34% → few samples → view-all.                        */
 /* ------------------------------------------------------------------ */
 
 const VISIBLE = 3;
 
-/* bar tracks sit on the elevated surface; the after fill is one solid
-   crimson statement (v2.8: the three-stop gradient ramp is retired) */
-const BAR_TRACK =
-  "h-2.5 min-w-0 flex-1 rounded-full bg-[#1b1b21] ring-1 ring-inset ring-white/[0.06] sm:h-3";
+/* meter rails are quiet tint tracks; the after fill stays one solid
+   crimson statement (the before fill keeps its muted semantics) */
+const BAR_TRACK = "mt-2 h-2 min-w-0 overflow-hidden rounded-full bg-foreground/[0.07] sm:h-2.5";
 const BEFORE_FILL = "h-full rounded-full bg-foreground/30";
 const AFTER_FILL = "h-full rounded-full bg-crimson";
-const CHIP =
-  "inline-flex items-center gap-2 rounded-full bg-[#1b1b21] px-3 py-1 text-xs font-semibold text-foreground ring-1 ring-inset ring-white/[0.09]";
-const VALUE =
-  "w-16 shrink-0 whitespace-nowrap text-end font-mono text-[11px] font-bold tabular-nums";
+/* unit + delta chips — display face, tabular digits */
+const UNIT_BEFORE =
+  "rounded-full bg-white/[0.05] px-2 py-0.5 text-[10.5px] font-semibold leading-none text-muted-foreground";
+const UNIT_AFTER =
+  "rounded-full bg-crimson/10 px-2 py-0.5 text-[10.5px] font-semibold leading-none text-crimson";
+const DELTA_CHIP =
+  "inline-flex shrink-0 items-center rounded-[10px] bg-crimson/10 px-2.5 py-1 font-display text-xs font-bold tabular-nums text-crimson ring-1 ring-inset ring-crimson/25";
+
+/* the comparison row grid — mobile stacks the label above a
+   [before | → | after] triple; ≥md it becomes the 4-column uv-row.
+   The head row inside the frame reuses the same templates so the
+   column labels sit exactly over the value columns. */
+const ROW_GRID =
+  "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 border-b border-white/[0.08] py-4 md:grid-cols-[minmax(140px,1fr)_minmax(0,1.5fr)_auto_minmax(0,1.5fr)] md:gap-x-4 md:py-5 lg:gap-x-6";
+/* same column templates, no row chrome — the frame's head row */
+const ROW_HEAD_GRID =
+  "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 md:grid-cols-[minmax(140px,1fr)_minmax(0,1.5fr)_auto_minmax(0,1.5fr)] md:gap-x-4 lg:gap-x-6";
 
 /** A single animated bar filling its track. Renders its final width when
  *  reduced motion is on. */
@@ -55,6 +71,52 @@ function Bar({
   );
 }
 
+/** One before/after value cell — tabular display digits with a unit chip
+ *  over a tint meter rail (the fill animates via <Bar/>). */
+function ValueCell({
+  value,
+  label,
+  unit,
+  chip,
+  tone,
+  pct,
+  delay,
+  fill,
+  reduce,
+}: {
+  value: number;
+  label: string;
+  unit: string;
+  chip: string;
+  tone: string;
+  pct: string;
+  delay: number;
+  fill: string;
+  reduce: boolean;
+}) {
+  return (
+    <div className="min-w-0">
+      {/* dir="ltr" keeps the Latin digits + "fps" unit in reading order
+          inside RTL Persian copy (site convention) */}
+      <span dir="ltr" className="flex items-baseline gap-2 whitespace-nowrap">
+        <span className="sr-only">{label}: </span>
+        <b
+          className={cn(
+            "font-display text-xl font-bold tabular-nums leading-none sm:text-2xl",
+            tone
+          )}
+        >
+          {value}
+        </b>
+        <span className={chip}>{unit}</span>
+      </span>
+      <div className={BAR_TRACK}>
+        <Bar pct={pct} delay={delay} className={fill} reduce={reduce} />
+      </div>
+    </div>
+  );
+}
+
 type BenchGame = { name: string; before: number; after: number };
 
 /** One benchmark row — shared by the always-visible list and the
@@ -72,45 +134,53 @@ function BenchRow({
   pctAfter: string;
   reduce: boolean;
 }) {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const gain = Math.round(((game.after - game.before) / game.before) * 100);
+  /* the comparison arrow always points from the "before" column toward
+   * the "after" column — leftward in RTL, rightward in LTR */
+  const Arrow = isRTL ? ArrowLeft : ArrowRight;
 
   return (
-    <li className="gc-card grid grid-cols-1 gap-3 p-4 sm:grid-cols-[180px_1fr_auto] sm:items-center sm:gap-5 sm:p-5">
-      <h3 className="type-title min-w-0 truncate font-display text-sm font-bold text-foreground sm:text-base">
-        {game.name}
-      </h3>
-
-      {/* Stacked before / after bars on elevated tracks */}
-      <div className="flex min-w-0 flex-col">
-        <div className="flex items-center gap-2">
-          <div className={BAR_TRACK}>
-            <Bar pct={pctBefore} delay={delay} className={BEFORE_FILL} reduce={reduce} />
-          </div>
-          <span className={`${VALUE} text-muted-foreground`}>
-            <span className="sr-only">{t.bench.beforeLabel}: </span>
-            {game.before} {t.bench.unit}
-          </span>
-        </div>
-
-        <div className="mt-1.5 flex items-center gap-2">
-          <div className={BAR_TRACK}>
-            <Bar pct={pctAfter} delay={delay + 0.12} className={AFTER_FILL} reduce={reduce} />
-          </div>
-          <span className={`${VALUE} text-crimson`}>
-            <span className="sr-only">{t.bench.afterLabel}: </span>
-            {game.after} {t.bench.unit}
-          </span>
-        </div>
+    <li className={ROW_GRID}>
+      {/* label cell — game title with the delta chip beneath (beside it
+       * on mobile). dir="ltr" on the chip keeps "+38%" intact in RTL. */}
+      <div className="col-span-3 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 md:col-span-1 md:flex-col md:items-start">
+        <h3 className="type-title min-w-0 flex-1 truncate font-display text-sm font-bold text-foreground sm:text-base md:w-full md:flex-none">
+          {game.name}
+        </h3>
+        <span dir="ltr" className={DELTA_CHIP}>
+          +{gain}%
+        </span>
       </div>
 
-      {/* Gain badge — Latin numerals, keep LTR inside RTL copy */}
-      <span
-        dir="ltr"
-        className="justify-self-start whitespace-nowrap rounded-full border border-crimson/25 bg-crimson/10 px-2.5 py-1 font-mono text-xs font-bold tabular-nums text-crimson"
-      >
-        +{gain}%
-      </span>
+      <ValueCell
+        value={game.before}
+        label={t.bench.beforeLabel}
+        unit={t.bench.unit}
+        chip={UNIT_BEFORE}
+        tone="text-muted-foreground"
+        pct={pctBefore}
+        delay={delay}
+        fill={BEFORE_FILL}
+        reduce={reduce}
+      />
+
+      <Arrow
+        className="h-4 w-4 justify-self-center text-muted-foreground/60 sm:h-5 sm:w-5"
+        aria-hidden="true"
+      />
+
+      <ValueCell
+        value={game.after}
+        label={t.bench.afterLabel}
+        unit={t.bench.unit}
+        chip={UNIT_AFTER}
+        tone="text-crimson"
+        pct={pctAfter}
+        delay={delay + 0.12}
+        fill={AFTER_FILL}
+        reduce={reduce}
+      />
     </li>
   );
 }
@@ -144,7 +214,7 @@ export function Benchmarks() {
         align="center"
       />
 
-      {/* Headline numbers — reference .stats grid (teal Sora numerals) */}
+      {/* Headline numbers — gc-stat tiles (display face, tabular digits) */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {headline.map((stat, i) => (
           <motion.div
@@ -167,20 +237,26 @@ export function Benchmarks() {
         ))}
       </div>
 
-      {/* Chart canvas */}
+      {/* Comparison frame — reference .uv-frame: one framed panel,
+          hairline rows, column heads over the before/after values. */}
       <div className="relative mt-10 sm:mt-12">
         <Reveal y={32}>
-          <div className="gc-card relative p-6 sm:p-10">
-            {/* Legend */}
-            <div className="mb-6 flex flex-wrap items-center gap-2 sm:mb-8 sm:gap-3">
-              <span className={CHIP}>
-                <span
-                  className="h-2 w-2 rounded-full bg-foreground/30"
-                  aria-hidden="true"
-                />
+          {/* radius-18 feel per the uv-frame reference (gc-card default
+              is 16 — the inline value wins without fighting utilities) */}
+          <div
+            className="gc-card px-4 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5"
+            style={{ borderRadius: 18 }}
+          >
+            {/* Column heads — the before/after legend sits over its value
+                columns (mobile: over the [before | → | after] triple) */}
+            <div className={cn(ROW_HEAD_GRID, "border-b border-white/[0.08] pb-3")}>
+              <span className="hidden md:block" aria-hidden="true" />
+              <span className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+                <span className="h-2 w-2 rounded-full bg-foreground/30" aria-hidden="true" />
                 {t.bench.beforeLabel}
               </span>
-              <span className={CHIP}>
+              <span aria-hidden="true" />
+              <span className="flex items-center gap-2 text-xs font-bold text-crimson">
                 <span className="h-2 w-2 rounded-full bg-crimson" aria-hidden="true" />
                 {t.bench.afterLabel}
               </span>
@@ -190,7 +266,7 @@ export function Benchmarks() {
             <ul
               role="list"
               aria-label={`${t.bench.eyebrow}: ${t.bench.avgLabel} ${t.bench.avg}`}
-              className="flex flex-col gap-4 sm:gap-5"
+              className="flex flex-col"
             >
               {games.slice(0, VISIBLE).map((game, i) => (
                 <BenchRow
@@ -216,7 +292,7 @@ export function Benchmarks() {
                 aria-hidden={!showAll}
                 inert={!showAll}
               >
-                <ul role="list" className="flex flex-col gap-4 pt-4 sm:gap-5 sm:pt-5">
+                <ul role="list" className="flex flex-col">
                   {games.slice(VISIBLE).map((game, i) => (
                     <BenchRow
                       key={game.name}
@@ -231,14 +307,15 @@ export function Benchmarks() {
               </motion.div>
             )}
 
-            {/* View-all — the rest of the bench, one tap away */}
+            {/* View-all — the rest of the bench, one tap away. The gc
+                button owns its geometry (46px / radius 12 / 14.5px). */}
             {games.length > VISIBLE && (
               <button
                 type="button"
                 onClick={() => setShowAll((v) => !v)}
                 aria-expanded={showAll}
                 aria-controls="bench-extra"
-                className="gc-btn-ghost mx-auto mt-7 flex min-h-11 items-center gap-2 rounded-full px-5 text-xs font-bold"
+                className="gc-btn-ghost mx-auto mt-6 flex items-center gap-2"
               >
                 {showAll ? t.bench.viewLess : t.bench.viewAll}
                 <ChevronDown
@@ -250,8 +327,10 @@ export function Benchmarks() {
 
             {/* Methodology + illustrative-data disclosure — the per-game rows
              * are examples; only the headline average is a measured figure
-             * (audit 29-b D6: unsourced pairs must be labeled as such). */}
-            <p className="gc-logline mt-8 max-w-2xl rounded-xl bg-[#1b1b21]/70 p-4 text-xs leading-relaxed ring-1 ring-inset ring-white/[0.08] sm:p-5">
+             * (audit 29-b D6: unsourced pairs must be labeled as such).
+             * Text kept byte-identical; presentation = uv-note (centered,
+             * dim, gc-logline's "//" console marker). */}
+            <p className="gc-logline mx-auto mt-6 max-w-2xl text-center leading-relaxed">
               {t.bench.gamesNote}{" "}
               {t.bench.note}
             </p>

@@ -121,11 +121,13 @@ export function MobileCtaBar() {
   return (
     <div
       inert={!visible}
+      data-mobile-cta-bar=""
       className={cn(
         /* z-[70]: floats above page content and the sticky header (it is a
          * dismissible phones-only bar and the page auto-hides it around the
          * dialog-bearing #download/footer zones). sm:hidden — phones only;
-         * never renders on ≥sm viewports. */
+         * never renders on ≥sm viewports. data-mobile-cta-bar: globals hides
+         * it while the mobile nav scrim (html.mnav-on) is open. */
         "fixed inset-x-0 bottom-0 z-[70] transition-transform duration-300 ease-out motion-reduce:transition-none sm:hidden",
         visible ? "translate-y-0" : "pointer-events-none translate-y-full"
       )}
@@ -150,7 +152,7 @@ export function MobileCtaBar() {
             onClick={onDownload}
             aria-label={t.cta.bottomBar.label}
             aria-busy={busy}
-            className="gc-btn-primary press inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-5 text-sm font-bold text-white"
+            className="gc-btn-primary press inline-flex shrink-0 items-center gap-2"
           >
             {busy ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

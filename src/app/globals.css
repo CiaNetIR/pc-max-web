@@ -9,64 +9,71 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ------------------------------------------------------------------ */
-/*  PC MAX DESIGN SYSTEM v2.8 — "ATELIER"                              */
+/*  PC MAX DESIGN SYSTEM v3.0 — "TWEAKFA CRIMSON" (Task 42)            */
 /*                                                                     */
-/*  A deliberate reset after v2.7 "Neon Ops": the maximalist gamer     */
-/*  stack (film grain, scanlines, CRT bloom, targeting rings, glow     */
-/*  everywhere, gaming cursor, spotlight cards, tri-color accents,     */
-/*  gradient text) read as machine-generated decoration and cost real  */
-/*  scroll performance (fixed full-viewport overlay layers,           */
-/*  backdrop-filters, global pointermove JS, a dozen infinite          */
-/*  animations). v2.8 strips all of it and rebuilds on the            */
-/*  hand-crafted fundamentals:                                        */
+/*  Adopts tweakfa.com's design language with the PC MAX crimson       */
+/*  accent in place of TweakFa's violet. Values and patterns only      */
+/*  (easings, radii, inset hairline rings, glow orbs, chamfered        */
+/*  kicker pills, conic premium borders, non-integer ambient loops)    */
+/*  — no reference code or content. Built on the v2.8 selector        */
+/*  contract: every legacy class keeps its selector so 165+ call-     */
+/*  sites re-skin without markup churn; new utilities are additive.    */
 /*                                                                     */
-/*    • FLAT, CONFIDENT SURFACES — one near-black background,         */
-/*      hairline rules, zero glows, zero gradients-as-decoration      */
-/*    • TYPOGRAPHY THAT HUMAN TEAMS SHIP — Space Grotesk (variable,   */
-/*      latin, ~22KB) carries the EN display voice; the EN body rides */
-/*      the platform's own system stack; Persian keeps IRANYekanX     */
-/*      (TweakFa pair, Poppins digits) untouched                      */
-/*    • NUMBERED SECTIONS — pure-CSS counters stamp "01 / BENCHMARKS" */
-/*      mono kickers: editorial rigor, zero markup changes            */
-/*    • ONE ACCENT — crimson for CTAs, indices and active states;     */
-/*      teal survives only as the semantic success/metric color       */
-/*    • CALM INTERACTION — hovers change color/border, never lift,   */
-/*      bloom or sweep; motion budget = ticker + scroll-linked only   */
-/*    • PERF BUDGET — no fixed overlay pseudo-layers, no backdrop-    */
-/*      filter, no global pointer listeners, two animations total     */
-/*                                                                     */
-/*  Every legacy class name survives with new values, so 165+ call-   */
-/*  sites re-skin without touching a single component file (except   */
-/*  where decoration was hardcoded — see the Task 41 component edits).*/
+/*    • BASE #08080a / SURFACE #121216 / ELEVATED #1b1b21 — flat,     */
+/*      confident near-black; premium surfaces get a crimson tint     */
+/*      (#1c1015 / #140c10)                                           */
+/*    • INSET HAIRLINE RINGS (box-shadow, never borders) on cards;    */
+/*      hover warms the ring to .16 + a -3px lift on ease-ui          */
+/*    • TYPOGRAPHY — Poppins (latin, self-hosted) carries the EN      */
+/*      voice; body 15px/1.9; IRANYekanX + Poppins digits in RTL      */
+/*      (the TweakFa pair, untouched). FA letter-spacing stays 0      */
+/*    • BUTTONS — 46px, radius 12, 14.5/700; primary #e50914 with a   */
+/*      real crimson glow shadow; gold premium inverse with a slow    */
+/*      pulsing gold halo                                              */
+/*    • AMBIENCE — .glow orbs (driftA 23.41s / driftB 26.53s) and     */
+/*      hero .spark motes rise on non-integer loops so nothing        */
+/*      ever syncs; transform/opacity/background-position only,       */
+/*      killed wholesale under prefers-reduced-motion                 */
+/*    • MOTION TOKENS — --ease-ui / --ease-unfold drive every         */
+/*      transition; the ONLY blur on the site is the sticky header's  */
+/*      12px backdrop-filter                                          */
 /* ------------------------------------------------------------------ */
 
 @theme {
   /* Crimson ramp carried by the legacy `crimson` names — 165 call-sites
      (text-crimson / bg-crimson/10 / border-crimson/25 …) re-skin to the
      brand without touching a single component file.
-       #ff3b30 ≈ 5.7:1 on #0a0a0c (text, Task-25 approved hue) ·
+       #ff3b30 ≈ 5.7:1 on #08080a (text, Task-25 approved hue) ·
        #e50914 brand fill (white label 4.8:1) · #c1121f deep stop */
   --color-crimson: #ff3b30;
   --color-crimson-bright: #ff3b30;
   --color-crimson-deep: #c1121f;
 
-  /* Named accents kept for compatibility (semantic use only):
-     success/metric teal, tier amber, warm warning. v2.8 softens the
-     saturated legacy hues so semantic color whispers instead of shouts. */
+  /* Named accents (TweakFa token set, Task 42 §1): gold #fedb29 for the
+     premium tier, success #1fbf9c (+ ink #3fd6b4) for ticks/metrics,
+     warning #e08a00, cyan #6fd0ff for info. crimson-gc-soft is the
+     accent ink (light crimson for text on dim fills). */
   --color-crimson-gc: #e50914;
   --color-crimson-gc-soft: #ff8a80;
-  --color-gold-gc: #ffd54a;
-  --color-success-gc: #45d4ab;
-  --color-warning-gc: #e8a33d;
+  --color-gold-gc: #fedb29;
+  --color-success-gc: #1fbf9c;
+  --color-success-ink-gc: #3fd6b4;
+  --color-warning-gc: #e08a00;
+  --color-cyan-gc: #6fd0ff;
   --color-danger-gc: #e8352c;
 
-  /* v2.8 typography. EN body = the platform's own system stack (zero
-     font bytes, the honest utility-tool choice); EN display = Space
-     Grotesk (self-hosted variable latin cut). IRANYekanX takes over
-     under html[dir="rtl"] below. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, -apple-system,
+  /* Motion tokens (adopted from the TweakFa easing set) — referenced by
+     every gc-* transition below and available as utilities (ease-ui /
+     ease-unfold) for component-side motion. */
+  --ease-ui: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-unfold: cubic-bezier(0.33, 0.9, 0.3, 1);
+
+  /* v3.0 typography. EN display + body = Poppins (self-hosted latin
+     subsets 400/600/700/800, declared in layout.tsx). IRANYekanX takes
+     over under html[dir="rtl"] below. */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas,
     "Liberation Mono", monospace;
@@ -91,10 +98,11 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 8px);
-  --radius-md: calc(var(--radius) - 4px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* TweakFa radius scale: sm 11 / md 14 / cards 16 / pills 999 / buttons 12 */
+  --radius-sm: 11px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 }
 
 /* DARK-ONLY site (Task 26): :root and .dark carry identical values —
@@ -104,28 +112,27 @@
 :root,
 .dark {
   color-scheme: dark;
-  /* 12px — the precise card radius (v2.8 tightened from 16px) */
-  --radius: 0.75rem;
-  --background: #0a0a0c;
-  --foreground: #ffffff;
-  --card: #101013;
-  --card-foreground: #ffffff;
-  --popover: #151519;
-  --popover-foreground: #ffffff;
+  --radius: 1rem;
+  --background: #08080a;
+  --foreground: #ededef;
+  --card: #121216;
+  --card-foreground: #ededef;
+  --popover: #1b1b21;
+  --popover-foreground: #ededef;
   --primary: #e50914;
   --primary-foreground: #ffffff;
-  --secondary: #151519;
-  --secondary-foreground: #f5f5f7;
-  --muted: #131316;
-  --muted-foreground: rgba(255, 255, 255, 0.64);
-  --accent: rgba(229, 9, 20, 0.16);
-  --accent-foreground: #ffb3ab;
+  --secondary: #17171c;
+  --secondary-foreground: #ededef;
+  --muted: #131318;
+  --muted-foreground: #a7a7b0;
+  --accent: rgba(255, 59, 48, 0.16);
+  --accent-foreground: #ff8a80;
   --destructive: #e8352c;
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.14);
-  /* Focus ring — neutral white, NOT crimson (Task 32): crimson outlines
-     read as error/selection boxes. Crimson stays reserved for emphasis. */
-  --ring: rgba(255, 255, 255, 0.6);
+  /* Focus ring — accent ink #ff8a80 (Task 42 a11y contract: 2px,
+     offset 3px). */
+  --ring: #ff8a80;
 }
 
 /* Crimson fill guard (unlayered wins over utilities): exact-class solid
@@ -166,8 +173,10 @@ html:root {
   }
   body {
     @apply bg-background text-foreground antialiased;
-    /* 1.75 for latin prose; Persian prose is lifted to 1.9 below */
-    line-height: 1.75;
+    /* TweakFa body scale: 15px / 1.9 (both locales; FA prose keeps its
+       explicit [lang] rules below). */
+    font-size: 15px;
+    line-height: 1.9;
   }
   ::selection {
     background: #e50914;
@@ -175,7 +184,7 @@ html:root {
   }
   :focus-visible {
     outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
   @media (prefers-reduced-motion: reduce) {
     html {
@@ -185,194 +194,456 @@ html:root {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Section chrome — hairline separators + numbered mono kickers       */
-/*  (v2.8: the "data conduit" glow + diamond node became a plain       */
-/*  full-width hairline; sections gained pure-CSS decimal indices)     */
+/*  Section chrome — gradient hairline seams (TweakFa `.sect + .sect`) */
+/*  v3.0: the hard full-width border-top became a centered gradient    */
+/*  hairline, min(720px, 80%) wide, drawn by a ::before on the second  */
+/*  adjacent section (no markup change). The v2.8 CSS-counter          */
+/*  "01 /" kicker numbering is retired with the pill kickers below.    */
 /* ------------------------------------------------------------------ */
 
 .gc-sect {
   position: relative;
-  counter-increment: gcsect;
 }
-/* The separator — one calm full-width hairline between sections. */
-.gc-sect + .gc-sect {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+/* The seam — one centered gradient hairline between adjacent sections. */
+.gc-sect + .gc-sect::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(720px, 80%);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.14),
+    transparent
+  );
+  pointer-events: none;
 }
-/* The index — <main> resets the counter; every .gc-sect stamps its
-   kicker with a crimson two-digit index. Pure CSS: works in SSR, in the
-   static export and with JS disabled. Hero/ticker are not .gc-sect and
-   stay unnumbered. */
-main {
-  counter-reset: gcsect;
+/* Explicit seam element (Task 42 §3) — same hairline as a real divider
+   for places the adjacent-sibling pattern can't reach. */
+.seam {
+  height: 1px;
+  width: min(720px, 80%);
+  margin-inline: auto;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.14),
+    transparent
+  );
 }
 
 /* ------------------------------------------------------------------ */
-/*  Kicker — the section eyebrow, v2.8: a bare mono label              */
-/*  "01 / BENCHMARKS". No pill, no notch, no glowing status dot.       */
+/*  Kicker — the TweakFa chamfered pill (Task 42 §2). Crimson dim      */
+/*  fill, accent-ink text, clip-path chamfered ends. Plain text now —  */
+/*  the v2.8 CSS-counter "01 /" prefix is gone. Same `.kicker` hook    */
+/*  every section already uses.                                        */
 /* ------------------------------------------------------------------ */
 
 .kicker {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   font-size: 12.5px;
-  font-weight: 600;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.55);
-}
-.gc-sect .kicker::before {
-  content: counter(gcsect, decimal-leading-zero);
-  margin-inline-end: 10px;
-  color: var(--color-crimson);
   font-weight: 700;
+  line-height: 1.6;
+  padding: 6px 14px;
+  background: rgba(255, 59, 48, 0.16);
+  color: #ff8a80;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
-/* EN only: mono uppercase readout; Persian keeps the sans face and
-   NEVER letterspaces (cursive-script rule). */
+/* EN: the display face (Poppins 700) carries the pill. Persian keeps
+   the sans face and NEVER letterspaces (cursive-script rule). */
 html:not([dir="rtl"]) .kicker {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--font-display);
 }
 [dir="rtl"] .kicker {
   letter-spacing: 0;
 }
-/* Tier variants (profiles) — bare tinted text, no pill chrome. */
+/* Tier variants (profiles / premium card) — gold + success pills. */
 .kicker-gold {
-  color: #ffd54a;
+  background: rgba(254, 219, 41, 0.13);
+  color: #fedb29;
 }
 .kicker-teal {
-  color: #45d4ab;
+  background: rgba(31, 191, 156, 0.14);
+  color: #3fd6b4;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Buttons — flat, quiet, precise (v2.8: solid fills, hairline        */
-/*  ghosts, color-only hovers; the gradient ramp / inner top-light /   */
-/*  glow shadow / sheen sweep are retired)                             */
+/*  Buttons — TweakFa push buttons (Task 42 §3): 46px height (min),    */
+/*  radius 12, 14.5px/700, padding 13px 24px. Geometry now lives here  */
+/*  (unlayered beats utilities) — components should drop their own     */
+/*  height/padding/radius/font utilities on gc-btn elements.           */
+/*    primary: #e50914 + crimson glow; hover #ff2a1f, -2px lift,       */
+/*    deeper glow · ghost: inset hairline ring · gold: #fedb29 fill,   */
+/*    #1a1500 label, slow pulsing gold halo.                           */
+/*  Lift/press use the individual `translate`/`scale` properties so     */
+/*  framer-motion inline transforms compose instead of clobbering.     */
 /* ------------------------------------------------------------------ */
 
 .gc-btn-primary {
-  border-radius: 10px;
+  min-height: 46px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
   background: #e50914;
   color: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 10px 30px rgba(229, 9, 20, 0.36);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    translate 0.16s ease,
+    scale 0.16s ease;
 }
 .gc-btn-primary:hover {
-  background: #ff1a15;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.5),
-    0 10px 28px -12px rgba(0, 0, 0, 0.65);
+  background: #ff2a1f;
+  translate: 0 -2px;
+  box-shadow: 0 16px 40px rgba(229, 9, 20, 0.5);
 }
 .gc-btn-primary:active {
-  background: #c00d11;
+  background: #c1121f;
+  translate: 0 0;
+  scale: 0.97;
 }
 .gc-btn-gold {
-  /* the premium inverse: white fill, near-black label — the highest-
-     contrast surface on the page, no gold anywhere */
-  border-radius: 10px;
-  background: #ffffff;
-  color: #101013;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  transition: background-color 0.15s ease;
+  /* the premium inverse: gold fill, near-black label — the shcard CTA */
+  position: relative;
+  isolation: isolate;
+  min-height: 46px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: #fedb29;
+  color: #1a1500;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    translate 0.16s ease,
+    scale 0.16s ease;
 }
 .gc-btn-gold:hover {
-  background: #f2f2f4;
+  background: #ffe14d;
+  translate: 0 -2px;
 }
 .gc-btn-gold:active {
-  background: #e6e6e9;
+  background: #edc81f;
+  translate: 0 0;
+  scale: 0.97;
+}
+/* Slow pulsing gold halo (opacity-only — the perf contract allows no
+   box-shadow keyframes; the shadow rides a pseudo under the label). */
+.gc-btn-gold::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 10px 30px rgba(254, 219, 41, 0.32);
+  opacity: 0.55;
+  z-index: -1;
+  pointer-events: none;
+  animation: goldPulse 3.4s ease-in-out infinite;
+}
+@keyframes goldPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 .gc-btn-ghost {
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
+  min-height: 46px;
+  padding: 13px 24px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: transparent;
   color: var(--foreground);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    translate 0.16s ease,
+    scale 0.16s ease;
 }
 .gc-btn-ghost:hover {
   background: rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+  translate: 0 -2px;
 }
 .gc-btn-ghost:active {
   background: rgba(255, 255, 255, 0.04);
+  translate: 0 0;
+  scale: 0.97;
+}
+/* Compact variant — header actions / dense rows (Task 42 §3 "sm 40px,
+   header 40px"). Additive; opt in per element. */
+.gc-btn-sm {
+  min-height: 40px;
+  padding: 9px 17px;
+  font-size: 13.5px;
+  border-radius: 10px;
+}
+/* Icon-square variant — 40px circular ghost tiles (scroll hints, icon
+   buttons). Additive; opt in per element. */
+.gc-btn-icon {
+  min-height: 40px;
+  width: 40px;
+  padding: 0;
+  border-radius: 999px;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Surfaces — flat panels + hairline borders (v2.8: no gradient       */
-/*  washes, no inner top-lights, no ambient crimson blooms, no         */
-/*  backdrop-filters, no cursor-following spotlights)                  */
+/*  Surfaces — flat #121216 panels with INSET hairline rings           */
+/*  (box-shadow, never borders — the TweakFa card system). Hover:      */
+/*  ring .08 → .16 + a -3px lift on ease-ui. No drop shadows on        */
+/*  cards; only popovers / the mobile panel carry the deep black       */
+/*  0 26px 52px shadow.                                                */
 /* ------------------------------------------------------------------ */
 
-/* Surface card: one material, one border, one hover state. */
+/* Surface card: one material, one ring, one hover state. */
 .gc-card {
-  background: var(--card);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius);
-  transition: border-color 0.18s ease, background-color 0.18s ease;
+  background: #121216;
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition:
+    box-shadow 0.22s var(--ease-ui),
+    translate 0.22s var(--ease-ui),
+    background-color 0.22s var(--ease-ui);
   /* keeps any abs-positioned children card-scoped */
   position: relative;
 }
 .gc-card:hover {
-  border-color: rgba(255, 255, 255, 0.17);
-  background: #131317;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  translate: 0 -3px;
 }
 
-/* Media frame — a thin dark bezel around framed media. The crimson
-   gradient ramp + floor bloom are retired. */
+/* Media frame — the TweakFa gradient-hairline bezel: a crimson        */
+/* gradient ramp shows through the clamp()'d padding ring.            */
 .gc-frame {
   --fpad: clamp(4px, 0.55vw, 7px);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: var(--fpad);
-  background: #0e0e11;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 24px 60px -36px rgba(0, 0, 0, 0.9);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 59, 48, 0.3),
+    rgba(255, 59, 48, 0.05)
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 44px rgba(0, 0, 0, 0.35);
 }
 .gc-frame > * {
-  border-radius: calc(14px - var(--fpad));
+  border-radius: calc(16px - var(--fpad));
 }
 
-/* HUD chip for media overlays — flat, near-opaque, hairline. */
+/* HUD chip for media overlays — near-opaque, inset hairline. */
 .gc-hud-chip {
   background: rgba(13, 13, 16, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 /* Legacy glass utilities — now flat dark surfaces (kept for un-rebuilt
    bits like the navbar's mobile panel). */
 .glass {
-  background: #101013;
+  background: #121216;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .specular {
   box-shadow: none;
 }
 
-/* Sticky header material — SOLID (v2.8: the blurred glass is retired;
-   a solid bar over the same background color is seamless and free). */
+/* Sticky header material — TweakFa blurred bar (Task 42 §3): the ONLY
+   blur on the site. Resting state is translucent over the page; JS
+   toggles `.tight` at scrollY > 8 to solidify + drop a hairline. */
 .gc-hdr {
-  background: #0a0a0c;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(8, 8, 10, 0.72);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+.gc-hdr.tight {
+  background: rgba(8, 8, 10, 0.96);
+  border-bottom-color: rgba(255, 255, 255, 0.09);
 }
 
-/* Press feedback */
+/* Header nav links — 14px/500 text-mid lifting to the text token on
+   hover/current (Task 42 §3). Additive; B1 opts links in. */
+.gc-nav-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: #a7a7b0;
+  transition: color 0.18s ease;
+}
+.gc-nav-link:hover,
+.gc-nav-link[aria-current="true"],
+.gc-nav-link[aria-current="page"] {
+  color: #ededef;
+}
+
+/* Press feedback — transition list is ADDITIVE so the gc-btn-*
+   background/shadow/translate hovers keep working when .press rides
+   the same element (Task 42-B1 gap #1). */
 .press {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 120ms cubic-bezier(0, 0, 0.2, 1);
+  transition:
+    scale 120ms cubic-bezier(0, 0, 0.2, 1),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    translate 0.16s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
 }
 .press:active {
-  transform: scale(0.96);
+  scale: 0.97;
 }
 
-/* Accessibility — materials degrade gracefully */
+/* Accessibility — materials degrade gracefully. The ring carriers get a
+   stronger inset ring (they no longer paint borders); .glass keeps its
+   legacy border. New materials (mpanel/burger) are covered too. */
 @media (prefers-contrast: more) {
   .glass,
   .gc-card,
   .gc-frame,
   .gc-btn-ghost,
-  .gc-hud-chip {
+  .gc-hud-chip,
+  .mpanel,
+  .burger {
     border-color: rgba(255, 255, 255, 0.45);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  }
+}
+/* Reduced transparency — no blurred header, no translucent ambience. */
+@media (prefers-reduced-transparency: reduce) {
+  .gc-hdr {
+    background: #08080a;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .glow,
+  .spark,
+  .shcard__in::after,
+  .gc-btn-gold::after {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Ambient layer — glow orbs + hero sparks (Task 42 §3).              */
+/*  Decorative divs: aria-hidden + pointer-events:none in markup.      */
+/*  Transform-only loops on non-integer durations (23.41s / 26.53s)    */
+/*  so ambient layers never sync with each other.                      */
+/* ------------------------------------------------------------------ */
+
+.glow {
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 59, 48, 0.14),
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+/* Gold companion orb (premium zones / shcard). */
+.glow-gold {
+  background: radial-gradient(
+    closest-side,
+    rgba(254, 219, 41, 0.09),
+    transparent 70%
+  );
+}
+.glow.dA {
+  animation: driftA 23.41s ease-in-out infinite alternate;
+}
+.glow.dB {
+  animation: driftB 26.53s ease-in-out infinite alternate;
+}
+@keyframes driftA {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(38px, 24px) scale(1.12);
+  }
+}
+@keyframes driftB {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-34px, -20px) scale(1.08);
+  }
+}
+
+/* Rising sparks — 3–4px motes drifting up out of the hero. Per-spark
+   tuning via custom properties: --x/--y origin, --s size, --t duration
+   (22–27s, never equal), --d delay, --dx/--dy drift, --sc rgb triplet
+   tint (crimson default; gold via --sc: 254,219,41). */
+.spark {
+  position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 80%);
+  width: var(--s, 4px);
+  height: var(--s, 4px);
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: sparkRise var(--t, 24s) linear var(--d, 0s) infinite;
+}
+.spark i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(var(--sc, 255, 59, 48), 0.95),
+    rgba(var(--sc, 255, 59, 48), 0) 70%
+  );
+  animation: sparkPulse var(--p, 4s) ease-in-out infinite;
+}
+@keyframes sparkRise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  9%,
+  84% {
+    opacity: var(--so, 0.8);
+  }
+  100% {
+    transform: translate3d(var(--dx, 0px), var(--dy, -200px), 0);
+    opacity: 0;
+  }
+}
+@keyframes sparkPulse {
+  0%,
+  100% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1.75);
   }
 }
 
@@ -382,26 +653,27 @@ html:not([dir="rtl"]) .kicker {
 
 .type-display {
   font-optical-sizing: auto;
-  letter-spacing: -0.025em;
-  line-height: 1.08;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  text-wrap: balance;
 }
 .type-title {
   font-optical-sizing: auto;
-  letter-spacing: -0.014em;
-  line-height: 1.16;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
 }
 .type-eyebrow {
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   line-height: 1.5;
 }
-/* EN eyebrows read as mono terminal labels; Persian keeps the sans
+/* EN eyebrows ride the display face (Poppins); Persian keeps the sans
    face (mono stacks carry no Arabic glyphs — per-script fallback
    would render mixed faces inside one label). */
 html:not([dir="rtl"]) .type-eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-display);
 }
 .type-lead {
-  line-height: 1.6;
+  line-height: 2.05;
 }
 
 /* Persian (Arabic script) — letter-spacing is NEVER allowed: it breaks
@@ -412,10 +684,10 @@ html[lang="fa"] .type-eyebrow {
   letter-spacing: 0;
 }
 html[lang="fa"] .type-display {
-  line-height: 1.25;
+  line-height: 1.4;
 }
 html[lang="fa"] .type-title {
-  line-height: 1.45;
+  line-height: 1.5;
 }
 html[lang="fa"] h1,
 html[lang="fa"] h2,
@@ -436,40 +708,52 @@ html[lang="fa"] h2 {
   font-weight: 800;
 }
 
-/* Accent word — SOLID crimson (v2.8: the gradient ramp + neon
-   drop-shadow bloom were the loudest machine-generated tells).
-   #ff3b30 on #0a0a0c ≈ 5.7:1 — headline-sized text passes easily. */
+/* Accent word — SOLID crimson (headline-sized #ff3b30 on #08080a ≈
+   5.7:1 — passes easily). */
 .text-glow-crimson {
   color: #ff3b30;
 }
 
-/* Hero word-reveal (reference .w/.wi): split headline words rise out of
-   an overflow mask; .in lands them. Pre-hydration override below keeps
-   no-JS visitors seeing full text. */
+/* Hero word-reveal (Task 42 §3, TweakFa .w/.wi): words rise out of an
+   overflow mask, gated on `html.fx-on` — a class the layout's inline
+   <head>-area script adds synchronously (skipping reduced-motion
+   visitors). No gate (no JS / reduced motion) = plain visible text,
+   zero CLS. Per-word stagger comes from an inline animation-delay
+   (`--wd`), 80ms steps upstream. The legacy `.word`/`.in` transition
+   system keeps working under the same rules. */
+.w,
 .word {
   display: inline-block;
   overflow: hidden;
-  vertical-align: bottom;
+  vertical-align: top;
 }
 .wi {
   display: inline-block;
-  transform: translateY(115%);
-  transition: transform 0.55s cubic-bezier(0.2, 0.7, 0.2, 1);
-  transition-delay: var(--wd, 0ms);
 }
+html.fx-on .wi {
+  transform: translateY(115%);
+  animation: wordIn 0.6s var(--ease-ui) forwards;
+  animation-delay: var(--wd, 0ms);
+}
+@keyframes wordIn {
+  to {
+    transform: translateY(0);
+  }
+}
+/* Legacy hook — inert under the animation (fill-mode wins), kept so
+   pre-Task-42 markup keeps rendering. */
 .word.in .wi {
   transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .wi {
+  html.fx-on .wi {
+    animation: none;
     transform: none;
-    transition: none;
   }
 }
 
-/* Hero check strip (v2.8.1) — a bare centered feature row: no box, no
-   glass, no crimson block edge (the boxed "trust strip" read as a
-   template pattern; the checks now sit directly on the canvas). */
+/* Hero check strip — a bare centered feature row: no box, no glass; the
+   checks sit directly on the canvas. */
 .gc-check-strip {
   padding: 0;
   color: rgba(255, 255, 255, 0.72);
@@ -501,27 +785,27 @@ html:not([dir="rtl"]) .gc-logline {
 /*  Tick bullets + stats                                               */
 /* ------------------------------------------------------------------ */
 
+/* TweakFa tick: 21×21, radius 7, success-dim fill, success ink glyph. */
 .tick {
-  width: 19px;
-  height: 19px;
-  border-radius: 6px;
+  width: 21px;
+  height: 21px;
+  border-radius: 7px;
   flex: none;
   display: grid;
   place-items: center;
-  background: rgba(31, 191, 156, 0.12);
-  color: #35c9a6;
+  background: rgba(31, 191, 156, 0.14);
+  color: #3fd6b4;
 }
 .tick-gold {
-  background: rgba(254, 219, 41, 0.1);
-  color: #e5c247;
+  background: rgba(254, 219, 41, 0.12);
+  color: #fedb29;
 }
 .tick-crimson {
   background: rgba(229, 9, 20, 0.12);
-  color: #ff6f64;
+  color: #ff8a80;
 }
 
-/* Stat tile numbers — display face, tabular, SOLID white (v2.8: the
-   teal + luminous bloom retired; the number states itself). */
+/* Stat tile numbers — display face, tabular, solid white. */
 .gc-stat b,
 .gc-stat .stat-num {
   font-family: var(--font-display);
@@ -531,7 +815,8 @@ html:not([dir="rtl"]) .gc-logline {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Install steps (reference .steps) — counter squares                 */
+/*  Install steps — CSS-counter squares (54px, TweakFa consult         */
+/*  pattern). The counter scope is set inline by install-flow.tsx.     */
 /* ------------------------------------------------------------------ */
 
 .gc-step {
@@ -548,15 +833,15 @@ html:not([dir="rtl"]) .gc-logline {
   width: 54px;
   height: 54px;
   margin: 0 auto 18px;
-  border-radius: 10px;
-  background: #151519;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  background: #17171c;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: rgba(255, 255, 255, 0.56);
-  transition: color 0.3s ease, border-color 0.3s ease;
+  transition: color 0.3s ease, box-shadow 0.3s ease;
 }
 @media (max-width: 820px) {
   .gc-step {
@@ -598,9 +883,9 @@ html:not([dir="rtl"]) .gc-logline {
 /*  framer's rAF useScroll + a scrub spring; every animated property   */
 /*  is transform/opacity. Motion-sensitive visitors never see this     */
 /*  markup at all — they keep the calm static grid above.              */
-/*  v2.8 restyles the console as a clean product window (the CRT       */
-/*  scanline / bracket-glow kit is retired); every structural rule     */
-/*  below is byte-identical to the E2E-proven v2.7 values.            */
+/*  v3.0 re-skins the surfaces to the new token set; every            */
+/*  structural rule below is byte-identical to the E2E-proven         */
+/*  v2.7/v2.8 values.                                                  */
 /* ------------------------------------------------------------------ */
 
 .gc-journey {
@@ -680,8 +965,8 @@ html:not([dir="rtl"]) .gc-logline {
   gap: 4px;
   padding: 6px;
   border-radius: 12px;
-  background: #101013;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #121216;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
   overflow-x: auto;
   scrollbar-width: none;
   /* no scroll-snap here on purpose: the keep-in-view effect sets exact
@@ -731,7 +1016,7 @@ html:not([dir="rtl"]) .gc-logline {
   color: #fff;
   background: rgba(255, 255, 255, 0.05);
 }
-/* the visual path (v2.8): future steps recede, past steps stay legible,
+/* the visual path: future steps recede, past steps stay legible,
    the active chip lights — a readable trail down the rail. */
 .gc-jrail-btn[data-jstate="future"] {
   color: rgba(255, 255, 255, 0.34);
@@ -750,7 +1035,7 @@ html:not([dir="rtl"]) .gc-logline {
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: #151519;
+  background: #17171c;
   border: 1px solid rgba(255, 255, 255, 0.09);
   font-family: var(--font-display);
   font-size: 12px;
@@ -761,7 +1046,7 @@ html:not([dir="rtl"]) .gc-logline {
   flex: none;
 }
 .gc-jrail-btn[aria-current="step"] .gc-jnum {
-  color: #ff6f64;
+  color: #ff8a80;
   border-color: rgba(229, 9, 20, 0.5);
   background: rgba(229, 9, 20, 0.1);
 }
@@ -788,17 +1073,17 @@ html:not([dir="rtl"]) .gc-logline {
   gap: 8px;
   min-height: 0;
 }
-/* v2.8: a clean product window — flat #0f0f12, one hairline border, one
-   soft black ambient shadow. No scanlines, no crimson radial, no corner
-   brackets. */
+/* A clean product window — flat #0f0f12, one hairline ring, one soft
+   black ambient shadow. */
 .gc-jpanel {
   position: relative;
   flex: 1;
   min-height: 150px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 30px 80px -48px rgba(0, 0, 0, 0.9);
   background: #0f0f12;
-  box-shadow: 0 30px 80px -48px rgba(0, 0, 0, 0.9);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -810,7 +1095,7 @@ html:not([dir="rtl"]) .gc-logline {
   width: min(82%, 400px);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #101013;
+  background: #121216;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
@@ -933,7 +1218,7 @@ html:not([dir="rtl"]) .gc-jcount {
   color: rgba(255, 255, 255, 0.55);
   padding: 8px 14px;
   border-radius: 999px;
-  background: #141417;
+  background: #17171c;
   border: 1px solid rgba(255, 255, 255, 0.09);
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -947,7 +1232,7 @@ html:not([dir="rtl"]) .gc-jcount {
   color: rgba(255, 255, 255, 0.55);
   padding: 8px 14px;
   border-radius: 999px;
-  background: #141417;
+  background: #17171c;
   border: 1px solid rgba(255, 255, 255, 0.09);
   cursor: pointer;
   transition: color 0.25s ease, border-color 0.25s ease;
@@ -965,7 +1250,7 @@ html:not([dir="rtl"]) .gc-jcount {
 
 /* ------------------------------------------------------------------ */
 /*  Task 39 — the sector HUD: the fixed scroll menu box (lg+ only)     */
-/*  v2.8: flat materials, no backdrop blur, no glow dots.              */
+/*  Flat materials, no glow dots.                                       */
 /* ------------------------------------------------------------------ */
 
 .gc-sector-hud {
@@ -984,8 +1269,8 @@ html:not([dir="rtl"]) .gc-jcount {
   align-items: center;
   gap: 10px;
   padding: 9px 13px;
-  border-radius: 10px;
-  background: rgba(16, 16, 19, 0.95);
+  border-radius: 11px;
+  background: rgba(18, 18, 22, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #fff;
   cursor: pointer;
@@ -1029,10 +1314,11 @@ html:not([dir="rtl"]) .gc-jcount {
   width: 248px;
   max-height: min(56vh, 500px);
   overflow-y: auto;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: #101013;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    0 24px 60px rgba(0, 0, 0, 0.55);
+  background: #121216;
   padding: 8px;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
@@ -1085,10 +1371,13 @@ html:not([dir="rtl"]) .gc-jcount {
 }
 
 /* ------------------------------------------------------------------ */
-/*  shcard — premium plan/download card (reference .shcard)            */
-/*  v2.8: the tri-color conic border, orbiting light, drifting glows   */
-/*  and sheen sweep are retired. One flat card + one crimson rule on   */
-/*  its top edge — the single confident accent on the page.            */
+/*  shcard — premium download card (Task 42 §3): a 1px rotating       */
+/*  conic border (crimson #e50914 → gold #fedb29 → deep #7a0810,      */
+/*  12.8s) around a premium-tinted inner surface, with a slow sheen   */
+/*  sweep (14.4s, background-position) and a breathing logo mark.     */
+/*  The wrapper carries `padding:1px`; ::before is a 4×-oversized     */
+/*  rotating conic layer clipped to the rounded ring — transform-only */
+/*  (compositor), so the ring sweeps without repaints.                */
 /*  Usage: <div class="shcard in"> <div class="shcard__in"> …          */
 /* ------------------------------------------------------------------ */
 
@@ -1100,18 +1389,31 @@ html:not([dir="rtl"]) .gc-jcount {
   max-width: 1180px;
   margin-inline: auto;
   border-radius: 20px;
-  background: #101013;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1px;
+  /* premium surface tint bleeding through the rotating ring gaps */
+  background: #1c1015;
 }
-/* the signature — a 2px crimson rule along the card's top edge */
+/* the signature — the rotating conic border ring */
 .shcard::before {
   content: "";
   position: absolute;
-  top: 0;
-  inset-inline: 0;
-  height: 2px;
-  background: #e50914;
-  z-index: 4;
+  inset: -150%;
+  z-index: 0;
+  pointer-events: none;
+  background: conic-gradient(
+    from 0deg,
+    #7a0810,
+    #e50914 30%,
+    #fedb29 50%,
+    #e50914 70%,
+    #7a0810
+  );
+  animation: shcardSpin 12.8s linear infinite;
+}
+@keyframes shcardSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .shcard__in {
   position: relative;
@@ -1120,10 +1422,37 @@ html:not([dir="rtl"]) .gc-jcount {
   min-width: 0;
   border-radius: 19px;
   overflow: hidden;
-  background: #101013;
+  /* premium tint at the top easing into the standard surface */
+  background: linear-gradient(180deg, #1c1015, #121216 42%);
   padding: clamp(28px, 3.2vw, 42px) clamp(20px, 3.4vw, 44px);
 }
-/* retired decorative layers — kept in markup, hidden here */
+/* slow sheen sweep — background-position only (perf contract) */
+.shcard__in::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.07) 50%,
+    transparent 58%
+  );
+  background-size: 220% 100%;
+  background-repeat: no-repeat;
+  animation: shSheen 14.4s cubic-bezier(0.4, 0, 0.3, 1) infinite;
+}
+@keyframes shSheen {
+  0% {
+    background-position: 100% 0;
+  }
+  36%,
+  100% {
+    background-position: 0% 0;
+  }
+}
+/* retired decorative layers — kept for markup compat, hidden here */
 .shcard__edge,
 .shcard__gA,
 .shcard__gB,
@@ -1131,19 +1460,21 @@ html:not([dir="rtl"]) .gc-jcount {
   display: none;
 }
 
-/* The mark — three static vertical bars (success/crimson/gold). */
+/* The mark — three vertical bars (success/crimson/gold), breathing. */
 .shmark {
+  position: relative;
   width: 54px;
   height: 54px;
   flex: none;
-  border-radius: 12px;
-  background: #141417;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: flex-end;
   justify-content: center;
   gap: 3.8px;
   padding-bottom: 10.5px;
+  animation: breathe 3.4s ease-in-out infinite;
 }
 .shmark i {
   width: 7.5px;
@@ -1151,15 +1482,25 @@ html:not([dir="rtl"]) .gc-jcount {
 }
 .shmark .f1 {
   height: 16px;
-  background: #2fbf9a;
+  background: #3fd6b4;
 }
 .shmark .f2 {
   height: 25px;
-  background: #e5484d;
+  background: #ff3b30;
 }
 .shmark .f3 {
   height: 16px;
-  background: #d9b53b;
+  background: #fedb29;
+}
+/* shared 3.4s scale(1.012) breathing — shcard mark + footer emblem */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.012);
+  }
 }
 
 /* Perks grid + staggered entrance when .shcard.in lands (one-shot,
@@ -1178,7 +1519,7 @@ html:not([dir="rtl"]) .gc-jcount {
   color: #fff;
   line-height: 1.6;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
 }
 .shperks li b {
@@ -1189,7 +1530,7 @@ html:not([dir="rtl"]) .gc-jcount {
   transform: rotate(20deg);
 }
 .shcard.in .shperks li {
-  animation: perkIn 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+  animation: perkIn 0.5s var(--ease-ui) backwards;
 }
 .shcard.in .shperks li:nth-child(1) {
   animation-delay: 0.2s;
@@ -1220,13 +1561,13 @@ html:not([dir="rtl"]) .gc-jcount {
   }
 }
 .shperks li:nth-child(3n + 1) b {
-  background: #2fbf9a;
+  background: #1fbf9c;
 }
 .shperks li:nth-child(3n + 2) b {
-  background: #e5484d;
+  background: #ff3b30;
 }
 .shperks li:nth-child(3n + 3) b {
-  background: #d9b53b;
+  background: #fedb29;
 }
 @media (max-width: 760px) {
   .shperks ul {
@@ -1240,15 +1581,17 @@ html:not([dir="rtl"]) .gc-jcount {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Native <details> open-state helpers                                */
-/*  Tailwind 4 (this setup) does not emit the group-open:/open:        */
-/*  variants, so the open-state styles are hand-rolled on stable       */
-/*  marker classes (see faq.tsx / download-cta.client.tsx).            */
+/*  Native <details> open-state helpers — the FAQ pattern (Task 42    */
+/*  §3): 15px/700 summaries, "+" glyph rotating 45° into a cross,      */
+/*  crimson-warmed ring while open. Tailwind 4 (this setup) does not   */
+/*  emit the group-open:/open: variants, so the open-state styles are  */
+/*  hand-rolled on stable marker classes (see faq.tsx).                */
 /* ------------------------------------------------------------------ */
 
-/* FAQ disclosure card — crimson border + plus→cross flip when open.
-   interpolate-size + ::details-content animate the height where supported
-   (Chrome 129+); other engines keep the native instant snap (Task 28-b/B3). */
+details.gc-q > summary {
+  font-size: 15px;
+  font-weight: 700;
+}
 details.gc-q {
   interpolate-size: allow-keywords;
 }
@@ -1257,7 +1600,7 @@ details.gc-q::details-content {
   overflow: clip;
 }
 details.gc-q[open] {
-  border-color: rgba(255, 59, 48, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(255, 59, 48, 0.4);
 }
 details.gc-q[open] > summary .gc-glyph {
   transform: rotate(45deg);
@@ -1267,6 +1610,252 @@ details.gc-q[open] > summary .gc-glyph {
 /* Generic summary chevron — rotates 180° when its parent details opens */
 details[open] > summary .gc-chevron {
   transform: rotate(180deg);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Mobile menu — burger tile + mpanel + scrim (Task 42 §3, NEW).     */
+/*  Burger: 40px tile, 2px bars → X, crimson-tinted when open         */
+/*  (aria-expanded), visible ≤900px only. Panel: absolute under the    */
+/*  header, inset-inline 12px, radius 20, #121216 + deep black        */
+/*  shadow, clip-path inset reveal on .38s ease-unfold; children       */
+/*  stagger 30–60ms. Scrim: rgba(0,0,0,.6), NO blur.                  */
+/*                                                                     */
+/*  WIRING (Wave B1): <html> gets `.mnav-on` while open (Escape/       */
+/*  scrim/link clicks close + remove it; the panel is `inert` while    */
+/*  hidden). The scrim must be rendered OUTSIDE the blurred header     */
+/*  element — backdrop-filter makes the header a containing block for  */
+/*  fixed descendants — e.g. as the header's next sibling.             */
+/* ------------------------------------------------------------------ */
+
+.burger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #a7a7b0;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.burger span {
+  display: block;
+  width: 17px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition:
+    transform 0.22s var(--ease-ui),
+    opacity 0.16s ease;
+}
+.burger:hover {
+  color: #ededef;
+}
+.burger[aria-expanded="true"] {
+  background: rgba(255, 59, 48, 0.18);
+  color: #ff8a80;
+  box-shadow: inset 0 0 0 1px rgba(255, 59, 48, 0.4);
+}
+.burger[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+.burger[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+.burger[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+.mpanel {
+  position: absolute;
+  inset-inline: 12px;
+  top: calc(100% + 8px);
+  z-index: 45;
+  max-height: min(78svh, 640px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 14px 16px 20px;
+  border-radius: 20px;
+  background: #121216;
+  box-shadow:
+    0 26px 52px rgba(0, 0, 0, 0.66),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  clip-path: inset(0 0 100% 0 round 20px);
+  translate: 0 -6px;
+  pointer-events: none;
+  transition:
+    clip-path 0.38s var(--ease-unfold),
+    translate 0.38s var(--ease-unfold);
+}
+.mpanel::-webkit-scrollbar {
+  display: none;
+}
+/* crimson bloom washing down from the panel's top edge */
+.mpanel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 130px;
+  pointer-events: none;
+  background: radial-gradient(
+    72% 100% at 50% 0,
+    rgba(255, 59, 48, 0.2),
+    transparent 74%
+  );
+}
+html.mnav-on .mpanel {
+  clip-path: inset(0 0 0 0 round 20px);
+  translate: 0 0;
+  pointer-events: auto;
+}
+/* children stagger in under the unfold */
+.mpanel > * {
+  opacity: 0;
+  translate: 0 -9px;
+  transition:
+    opacity 0.26s var(--ease-ui),
+    translate 0.3s var(--ease-ui);
+}
+html.mnav-on .mpanel > * {
+  opacity: 1;
+  translate: 0 0;
+}
+html.mnav-on .mpanel > *:nth-child(1) {
+  transition-delay: 0.06s;
+}
+html.mnav-on .mpanel > *:nth-child(2) {
+  transition-delay: 0.09s;
+}
+html.mnav-on .mpanel > *:nth-child(3) {
+  transition-delay: 0.12s;
+}
+html.mnav-on .mpanel > *:nth-child(4) {
+  transition-delay: 0.15s;
+}
+html.mnav-on .mpanel > *:nth-child(5) {
+  transition-delay: 0.18s;
+}
+html.mnav-on .mpanel > *:nth-child(6) {
+  transition-delay: 0.2s;
+}
+html.mnav-on .mpanel > *:nth-child(7) {
+  transition-delay: 0.22s;
+}
+html.mnav-on .mpanel > *:nth-child(8) {
+  transition-delay: 0.24s;
+}
+/* mpanel row primitives (labels + anchor rows) */
+.mp-lb {
+  display: block;
+  margin: 15px 2px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #7a7a85;
+}
+.mp-lb:first-child {
+  margin-top: 2px;
+}
+[dir="rtl"] .mp-lb {
+  letter-spacing: 0;
+}
+.mp-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 8px;
+  margin-inline: -8px;
+  border-radius: 13px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ededef;
+  transition: background-color 0.18s ease;
+}
+.mp-row:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mnav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+html.mnav-on .mnav-scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* body scroll lock while the panel is open (JS toggles .mnav-on) */
+html.mnav-on {
+  overflow: hidden;
+}
+/* the phones-only conversion bar (z-70) must not float above the menu
+   scrim (z-55) while the mobile nav is open (Task 42-B1 gap #2). */
+html.mnav-on [data-mobile-cta-bar] {
+  display: none;
+}
+@media (max-width: 900px) {
+  .burger {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 4.5px;
+  }
+}
+@media (min-width: 901px) {
+  .mpanel,
+  .mnav-scrim {
+    display: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mpanel,
+  .mpanel > * {
+    transition-duration: 0.01ms !important;
+  }
+  .mpanel > * {
+    translate: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  fpill — sliding tab indicator (Task 42 §3, NEW for the            */
+/*  app-showcase pill strip). JS measures the active tab and writes    */
+/*  physical CSS vars on the element: --px/--py (translate from the    */
+/*  strip's top-left), --pw/--ph (size). `.ready` fades it in after    */
+/*  the first measurement. transform/width ride ease-unfold .42s.      */
+/* ------------------------------------------------------------------ */
+
+.fpill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--pw, 80px);
+  height: var(--ph, 40px);
+  border-radius: 999px;
+  background: rgba(255, 59, 48, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 59, 48, 0.4);
+  translate: var(--px, 0px) var(--py, 0px);
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    translate 0.42s var(--ease-unfold),
+    width 0.42s var(--ease-unfold),
+    height 0.42s var(--ease-unfold),
+    opacity 0.2s ease;
+}
+.fpill.ready {
+  opacity: 1;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1282,26 +1871,33 @@ details[open] > summary .gc-chevron {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* ambient motes vanish outright (the compressed loops would strobe) */
+  .spark {
+    display: none;
+  }
+  .glow {
+    animation: none;
+  }
 }
 
 /* ------------------------------------------------------------------ */
-/*  Scrollbar — global slim dark, neutral thumb (v2.8: crimson hover   */
-/*  retired) + the .scrollbar-slim inner-element variant               */
+/*  Scrollbar — global slim dark, neutral thumb + the .scrollbar-slim  */
+/*  inner-element variant                                              */
 /* ------------------------------------------------------------------ */
 
 html {
-  scrollbar-color: #26262d #0a0a0c;
+  scrollbar-color: #26262d #08080a;
 }
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0a0c;
+  background: #08080a;
 }
 ::-webkit-scrollbar-thumb {
   background: #26262d;
-  border: 2px solid #0a0a0c;
+  border: 2px solid #08080a;
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -1334,10 +1930,28 @@ html {
   }
 }
 
+/* Showcase pill tabs (Task 42 §3): 13.5px/700 pills, text-mid resting,
+   #23242c hover, white on the crimson fpill. Geometry stays in the
+   component; only color/motion lives here so the utilities keep
+   composing. */
+.showcase-tab {
+  position: relative;
+  color: #a7a7b0;
+  transition:
+    color 0.22s var(--ease-ui),
+    background-color 0.22s var(--ease-ui);
+}
+.showcase-tab:hover {
+  color: #ededef;
+}
+.showcase-tab[aria-selected="true"] {
+  color: #fff;
+}
+
 /* ------------------------------------------------------------------ */
-/*  Scroll progress bar — 2px SOLID crimson (v2.8: gradient retired).  */
-/*  Scroll-LINKED (moves only as the visitor scrolls) — safe for       */
-/*  everyone. Origin flips to the right on the RTL document.           */
+/*  Scroll progress bar — 2px SOLID crimson. Scroll-LINKED (moves      */
+/*  only as the visitor scrolls) — safe for everyone. Origin flips to  */
+/*  the right on the RTL document.                                     */
 /* ------------------------------------------------------------------ */
 
 .gc-scroll-progress {
@@ -1361,7 +1975,6 @@ html[dir="rtl"] .gc-scroll-progress {
 /*  own trailing margin (margin-inline-end) so the track is exactly    */
 /*  2× one copy — translateX(-50%) lands on the pixel twin (a flex gap */
 /*  would drift half a gap per loop). RTL reverses the direction.      */
-/*  v2.8: dimmer names, plain 3px separators — no glow.                */
 /* ------------------------------------------------------------------ */
 
 .gc-ticker {
@@ -1437,17 +2050,134 @@ html[dir="rtl"] .gc-ticker-track {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Footer (Task 42 §3, NEW utilities — B3 wires the markup):          */
+/*    .fcols  — 4 link columns (13px/700 @70% titles, 14px lh 2.2     */
+/*              links, hover #ededef); 2 columns ≤900px               */
+/*    .fbar   — hairline-top grid `1fr auto 1fr`: © line | emblem |   */
+/*              trust badges                                           */
+/*    .emblem — the logo mark, breathing scale(1.012) on 3.4s         */
+/*    .toTop  — 40px circular chevron button, toTopHint 9.13s nudge   */
+/* ------------------------------------------------------------------ */
+
+.fcols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 48px;
+  margin-top: 56px;
+}
+.fcols h3 {
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.7;
+  margin: 0 0 14px;
+}
+.fcols a,
+.fcols button {
+  display: block;
+  font-size: 14px;
+  line-height: 2.2;
+  color: #a7a7b0;
+  transition: color 0.18s ease;
+}
+.fcols a:hover,
+.fcols button:hover {
+  color: #ededef;
+}
+.fbar {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 48px;
+  padding-block: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+}
+.fbar .fmeta {
+  justify-self: start;
+}
+.emblem {
+  animation: breathe 3.4s ease-in-out infinite;
+}
+.toTop {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.09);
+  color: #a7a7b0;
+  cursor: pointer;
+  margin-inline: auto;
+  transition:
+    color 0.2s var(--ease-ui),
+    background-color 0.2s var(--ease-ui);
+}
+.toTop:hover {
+  color: #ededef;
+  background: rgba(255, 255, 255, 0.06);
+}
+.toTop svg {
+  transition: transform 0.2s var(--ease-ui);
+  animation: toTopHint 9.13s ease-in-out infinite;
+}
+.toTop:hover svg {
+  animation: none;
+  transform: translateY(-4px);
+}
+@keyframes toTopHint {
+  0%,
+  80% {
+    transform: translateY(0);
+  }
+  85% {
+    transform: translateY(-6px);
+  }
+  90% {
+    transform: translateY(0);
+  }
+  95% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@media (max-width: 900px) {
+  .fcols {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+  .fbar {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+  .fbar .fmeta {
+    justify-self: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .emblem,
+  .toTop svg {
+    animation: none;
+  }
+}
+
 /* ── Progressive enhancement: content must never need JS to appear ─────────
    Every scroll-reveal element (framer-motion whileInView / mount initials)
    ships hidden styles in the static HTML and only becomes visible after JS
    hydrates. Until <HydrationMarker/> adds `.hydrated`, force inline-hidden
-   reveal targets fully visible — INCLUDING the hero word-reveal masks. */
+   reveal targets fully visible. The hero word-reveal masks are covered by
+   the fx-on gate instead (v3.0): no gate = no transform at all, so no-JS
+   and reduced-motion visitors see plain visible text with zero CLS. */
 html:not(.hydrated) [style*="opacity:0;"],
 html:not(.hydrated) [style$="opacity:0"] {
   opacity: 1 !important;
   transform: none !important;
   filter: none !important;
-}
-html:not(.hydrated) .wi {
-  transform: none !important;
 }

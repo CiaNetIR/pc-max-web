@@ -10,12 +10,14 @@ import { cn } from "@/lib/utils";
 
 /*
  * Frame Generation — Guardian cards (Task 26-d1). Three surface cards carry
- * only the essential (name, tagline, compatibility pills, two tick bullets);
- * the Streamline hardware guard becomes a gold warning chip (reference
- * .caveat tone). Below the grid sits a .compat-style strip — the
- * "Compatibility" label plus teal-dotted platform items — then the
+ * only the essential (name, tagline, compatibility chips, two tick bullets);
+ * the Streamline hardware guard becomes a warning chip (TweakFa .chip.warn
+ * recipe on the warning-gc token). Below the grid sits a .compat-style strip
+ * — the "Compatibility" label plus teal-dotted platform items — then the
  * expandable technical disclosure and the note. Content is fully
  * server-rendered; the disclosure only toggles animation, never mounts.
+ * v3.0: the one .glow orb for the B5 section trio sits behind this flagship
+ * moment (transform-only drift; reduced-motion stills it in globals).
  */
 
 const cardEnter = [
@@ -54,6 +56,15 @@ export function MultiFrame() {
 
   return (
     <Section id="multiframe" className="relative overflow-hidden">
+      {/* ambient crimson orb — the section's hero moment backdrop (and the
+       * single glow across the B5 trio). inset-inline keeps it RTL-safe;
+       * .glow is pointer-events:none + aria-hidden by contract. */}
+      <div
+        className="glow dA"
+        style={{ top: "-150px", insetInlineEnd: "-110px" }}
+        aria-hidden="true"
+      />
+
       <SectionHeading
         eyebrow={t.multiframe.eyebrow}
         title={t.multiframe.title}
@@ -81,7 +92,7 @@ export function MultiFrame() {
                     {card.name}
                   </h3>
                   {isStreamline && "warning" in card && (
-                    <span className="inline-flex items-center gap-2 rounded-lg bg-[rgba(224,138,0,0.14)] px-3 py-1.5 text-[12.5px] font-bold text-[#f3c07a] ring-1 ring-inset ring-[rgba(224,138,0,0.26)]">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-warning-gc/15 px-3 py-1.5 text-[12.5px] font-bold text-warning-gc ring-1 ring-inset ring-warning-gc/30">
                       <TriangleAlert className="h-3.5 w-3.5" />
                       {card.warning}
                     </span>
@@ -90,14 +101,16 @@ export function MultiFrame() {
                 <p className="mt-1.5 text-sm text-muted-foreground">{card.tagline}</p>
               </div>
 
-              {/* compatibility pills — this card's own accent tone */}
+              {/* compatibility chips — this card's own accent tone
+                 * (TweakFa chip recipe: 12.5px/700 pill, tinted fill +
+                 * inset ring, tone-colored label) */}
               {"badges" in card && (
                 <div className="mb-5 flex flex-wrap gap-2">
                   {(card.badges ?? []).map((badge) => (
                     <span
                       key={badge}
                       className={cn(
-                        "rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 ring-inset",
+                        "rounded-full px-3 py-[5px] text-[12.5px] font-bold ring-1 ring-inset",
                         badgeTone[i % badgeTone.length]
                       )}
                     >
@@ -149,7 +162,7 @@ export function MultiFrame() {
           onClick={() => setTechOpen((v) => !v)}
           aria-expanded={techOpen}
           aria-controls={techId}
-          className="press group flex w-full items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card/60 px-5 py-4 text-start transition-colors hover:border-crimson/40"
+          className="press group gc-card flex w-full items-center justify-between gap-4 px-5 py-4 text-start"
         >
           <span className="flex items-center gap-3 text-sm font-bold text-foreground">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-crimson/10 text-crimson ring-1 ring-inset ring-crimson/25">
@@ -173,7 +186,9 @@ export function MultiFrame() {
           className="overflow-hidden"
           aria-hidden={!techOpen}
         >
-          <div className="mt-4 space-y-6 rounded-2xl border border-border/60 bg-card/40 p-5 sm:p-6">
+          {/* .gc-card owns the surface: bg #121216, radius 16, inset
+           * hairline ring — the old border/bg-card utilities are gone. */}
+          <div className="gc-card mt-4 space-y-6 p-5 sm:p-6">
             {t.multiframe.tech.entries.map((entry, i) => (
               <div key={CARD_IDS[i]}>
                 <h4 className="font-display text-sm font-bold text-foreground">

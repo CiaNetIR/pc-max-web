@@ -65,8 +65,10 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
         align="start"
       />
 
-      {/* stats — reference .stats grid of Guardian stat tiles (AnimatedCounter
-          drives the count-up inside the <b>). DB-derived where possible. */}
+      {/* stats — TweakFa count-up moments: AnimatedCounter animates the
+          EXISTING value inside the <b> (never changes it — SSR/no-JS show
+          the final number); gc-stat b gives the Poppins tabular digits.
+          DB-derived where possible. */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((stat, i) => (
           <motion.div
@@ -171,13 +173,13 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
         <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#benchmarks"
-            className="gc-btn-ghost inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold"
+            className="gc-btn-ghost inline-flex items-center gap-2 font-bold"
           >
             {t.social.artifacts.benchmarks}
           </a>
           <a
             href="#download"
-            className="gc-btn-ghost inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold"
+            className="gc-btn-ghost inline-flex items-center gap-2 font-bold"
           >
             {t.social.artifacts.changelog}
           </a>

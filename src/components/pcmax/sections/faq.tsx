@@ -16,23 +16,24 @@ import { springFluid } from "@/components/pcmax/ui/motion";
 type FaqItem = { q: string; a: string };
 
 /** One native disclosure card (reference .q). `.gc-q` + `.gc-glyph` are
- *  hand-rolled in globals.css (details[open] state) — the plus flips into
- *  a cross and the border warms crimson while the details is open; the
- *  height animates via interpolate-size/::details-content where the
- *  engine supports it (Task 28-b/B3). */
+ *  hand-rolled in globals.css (details[open] state) — the 22px Poppins
+ *  plus rotates 45° into a cross and the inset ring warms crimson while
+ *  the details is open; the height animates via
+ *  interpolate-size/::details-content where the engine supports it
+ *  (Task 28-b/B3 → v3 TweakFa details pattern: 2-col grid, 1-col ≤800px). */
 function FaqCard({ item }: { item: FaqItem }) {
   return (
-    <details className="gc-card gc-q overflow-hidden p-0">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-[15px] font-bold text-foreground [&::-webkit-details-marker]:hidden">
+    <details className="gc-card gc-q overflow-hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-6 py-5 text-foreground [&::-webkit-details-marker]:hidden">
         <span className="min-w-0 flex-1">{item.q}</span>
         <span
           aria-hidden="true"
-          className="gc-glyph flex h-7 w-7 shrink-0 items-center justify-center font-display text-xl font-bold leading-none text-muted-foreground transition-transform duration-200"
+          className="gc-glyph flex h-7 w-7 shrink-0 items-center justify-center font-display text-[22px] font-bold leading-none text-muted-foreground transition-transform duration-200 ease-ui"
         >
           +
         </span>
       </summary>
-      <p className="px-6 pb-5 text-sm leading-relaxed text-muted-foreground">
+      <p className="px-6 pb-5 text-sm leading-[1.95] text-muted-foreground">
         {item.a}
       </p>
     </details>
@@ -60,7 +61,7 @@ export function Faq() {
         className="mx-auto max-w-5xl"
       >
         {/* the five that matter */}
-        <div className="grid items-start gap-3 md:grid-cols-2">
+        <div className="grid items-start gap-3 min-[801px]:grid-cols-2">
           {t.faq.core.map((item) => (
             <FaqCard key={item.q} item={item} />
           ))}
@@ -74,7 +75,7 @@ export function Faq() {
           </h3>
           <span className="h-px flex-1 bg-border" aria-hidden="true" />
         </div>
-        <div className="mt-4 grid items-start gap-3 md:grid-cols-2">
+        <div className="mt-4 grid items-start gap-3 min-[801px]:grid-cols-2">
           {t.faq.full.map((item) => (
             <FaqCard key={item.q} item={item} />
           ))}
@@ -99,7 +100,7 @@ export function Faq() {
           href="https://discord.gg/pcmax"
           target="_blank"
           rel="noopener noreferrer"
-          className="gc-btn-primary mt-6 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold"
+          className="gc-btn-primary mt-6 inline-flex items-center gap-2"
         >
           <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
           {t.faq.stillHave.cta}

@@ -16,7 +16,7 @@
  * Registered ONLY in the GitHub Pages static export (see
  * src/components/pcmax/sw-register.tsx — the SSR/dev flavor never mounts
  * it). Bump VERSION whenever public/ assets change so old caches drop. */
-const VERSION = "v2.8.0";
+const VERSION = "v2.9.0";
 const CACHE = `pcmax-${VERSION}`;
 const BASE = "/pc-max-web";
 /* Content-hashed build output. Next's default layout is /_next/static/;
