@@ -77,7 +77,7 @@ export function SocialProofClient({ stats }: SocialProofClientProps) {
             transition={{ ...springFluid, delay: i * 0.06 }}
             className="gc-stat gc-card p-6 text-center"
           >
-            <b className="block font-display text-3xl font-bold">
+            <b className="block font-display text-3xl font-bold tabular-nums">
               <AnimatedCounter
                 value={stat.value}
                 suffix={stat.suffix}

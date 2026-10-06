@@ -155,8 +155,9 @@ export function Benchmarks() {
             transition={{ ...springFluid, delay: i * 0.06 }}
             className="gc-stat gc-card p-6 text-center"
           >
-            {/* dir="ltr" keeps "+34%" / "+38%" intact inside RTL copy */}
-            <b dir="ltr" className="block font-display text-3xl font-bold">
+            {/* dir="ltr" keeps "+34%" / "+38%" intact inside RTL copy;
+                tabular-nums keeps the digits optically steady */}
+            <b dir="ltr" className="block font-display text-3xl font-bold tabular-nums">
               {stat.value}
             </b>
             <span className="mt-1 block text-[13px] text-muted-foreground">

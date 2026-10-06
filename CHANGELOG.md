@@ -4,6 +4,51 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.4.2] — 2026-10-06
+
+**The download card now shows the REAL SHA-256 of the real installer** —
+Task 35 (external UI/UX audit round: verify trust recommendations against
+the live site, implement only what is honest and missing).
+
+### Added — verifiable checksum, measured from the real artifact
+- Downloaded the actual `PC.MAX_0.4.16_x64-setup.exe` (7,727,490 bytes)
+  from the app repo's GitHub Releases and computed its SHA-256 locally:
+  `09d8ca43…d7e2b28` — no fabricated hash, ever again.
+- New **VerifyRow** under the download button: shield-labeled
+  «Verify this download / راستی‌آزمایی این دانلود», the full 64-char
+  hash (select-all code block), a Copy button with toast feedback (honest
+  fallback message when the clipboard is denied), the exact artifact
+  filename, and the PowerShell `Get-FileHash` comparison hint (EN + FA).
+- **Version-pinned by design**: the row renders ONLY while the download
+  serves exactly the release the hash was measured from — the GitHub API
+  exposes no hashes, so the moment the live resolver knows a NEWER tag the
+  row quietly disappears instead of showing a different file's hash
+  (verified end-to-end with a seeded v9.9.9 cache). The SourceRow still
+  links the release page for any version.
+- `AppRelease.sha256?` added to the resolver contract (only the
+  hand-verified KNOWN_LATEST baseline carries it); llms-full.txt's
+  "Verifiable downloads" fact now cites the measured hash + size + method.
+
+### Changed — numeric polish from the audit
+- `tabular-nums` on the social-proof stat tiles (digits stay optically
+  steady during the count-up) and the benchmark headline tiles.
+
+### Audit outcome — recommendations already satisfied by Tasks 29–34
+- Benefit-first hero + trust line + verifiable chips ✓ (v2.2.0), real
+  `<a>` nav/menu-trigger semantics ✓ (v2.2.1), header download CTA ✓,
+  user-level bilingual FAQ incl. free/rollback/offline/GPU ✓, benchmarks
+  with before/after bars + methodology + illustrative disclosure ✓,
+  contrast ≥ 4.5:1 (muted-foreground ≈ 8.2:1) ✓, mobile safe-area CTA ✓,
+  prefers-reduced-motion ✓, /fa real document + hreflang + sitemap ✓,
+  no-JS prerendered content ✓, `ignoreBuildErrors` off + strict mode ✓.
+- Explicitly NOT implemented, with reasons: VirusTotal badge (no real
+  scan exists — would be a fabricated trust claim; hash + .sig + GitHub
+  release page is the honest equivalent), "real app screenshot" hero
+  (the app repo ships no screenshots — fabricating one would fake the
+  product; Ghost stays per explicit owner request), full token/palette
+  swap (the Guardian token system already covers the audit's proposal —
+  a lateral re-skin is forbidden redesign churn).
+
 ## [2.4.1] — 2026-10-06
 
 **The red box around the logo is gone and every browser-rendered image is

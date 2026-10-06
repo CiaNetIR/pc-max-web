@@ -2,7 +2,7 @@
 
 import { useRef, useState, type FormEvent, type MouseEvent, type ToggleEvent } from "react";
 import { motion, useInView, useReducedMotion } from "framer-motion";
-import { Check, ChevronDown, Github, Loader2, Mail, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Copy, Github, Loader2, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import { useLanguage } from "@/components/pcmax/language-context";
 import { Section } from "@/components/pcmax/ui/primitives";
 import { springFluid } from "@/components/pcmax/ui/motion";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLatestAppRelease } from "@/hooks/use-app-release";
 import {
   APP_RELEASES_URL,
+  KNOWN_LATEST,
   resolveLatestAppRelease,
   resolveAppReleases,
   type AppRelease,
@@ -106,6 +107,67 @@ function SourceRow() {
       </div>
       <p className="mt-2 text-[10.5px] leading-relaxed text-muted-foreground/80">
         {t.cta.source.note}
+      </p>
+    </div>
+  );
+}
+
+/* Verify row — the REAL SHA-256 of the published installer (Task 35),
+ * computed locally from the actual release artifact on GitHub Releases.
+ * Version-pinned: rendered ONLY while the download serves exactly the
+ * release the hash was measured from — showing a different file's hash
+ * next to the button would mislead. The GitHub API exposes no hashes,
+ * so once the live resolver knows a NEWER tag the row quietly disappears
+ * (the SourceRow above still links the release page for verification). */
+function VerifyRow() {
+  const { t } = useLanguage();
+  const { toast } = useToast();
+  const { release } = useLatestAppRelease();
+
+  if (release.version !== KNOWN_LATEST.version || !KNOWN_LATEST.sha256) {
+    return null;
+  }
+  const checksum = KNOWN_LATEST.sha256;
+
+  async function onCopy() {
+    try {
+      await navigator.clipboard.writeText(checksum);
+      toast({ title: "PC MAX", description: t.cta.verify.copied });
+    } catch {
+      /* clipboard denied (permissions / http) — the code block below is
+       * select-all, so the fallback hint is honest */
+      toast({ title: "PC MAX", description: t.cta.verify.copyFailed });
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-border/70 bg-[#121216] p-3.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="type-eyebrow flex items-center gap-2 text-[11px] font-bold uppercase text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-crimson" aria-hidden="true" />
+          {t.cta.verify.label}
+        </span>
+        <button
+          type="button"
+          onClick={onCopy}
+          className="press inline-flex min-h-9 items-center gap-1.5 rounded-full border border-border px-3 py-1 text-[11px] font-bold text-foreground/85 transition-colors hover:border-crimson/40 hover:text-foreground"
+        >
+          <Copy className="h-3 w-3" aria-hidden="true" />
+          {t.cta.verify.copy}
+        </button>
+      </div>
+      {/* the artifact's own hash — select-all so the manual fallback works */}
+      <code
+        dir="ltr"
+        className="mt-2.5 block break-all rounded-lg bg-[#08080a]/60 px-3 py-2 font-mono text-[10.5px] leading-relaxed text-foreground/85 select-all"
+      >
+        {checksum}
+      </code>
+      <p className="mt-2 text-[10.5px] leading-relaxed text-muted-foreground/80">
+        {t.cta.verify.note}{" "}
+        <span dir="ltr" className="font-mono">
+          {KNOWN_LATEST.fileName}
+        </span>
       </p>
     </div>
   );
@@ -550,6 +612,7 @@ export function DownloadCtaClient() {
               <ReleaseChips />
               <p className="mt-3 text-center text-xs text-muted-foreground">{t.cta.meta}</p>
               <SourceRow />
+              <VerifyRow />
             </div>
           </div>
 

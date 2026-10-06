@@ -102,7 +102,7 @@ Frame-generation workflows plus Windows tuning, measured before and after PC MAX
 
 ## Trust facts
 
-- Verifiable downloads: every release is published on GitHub Releases (github.com/CiaNetIR/pc-max) with its installer and auto-updater signature file (.sig) — review the build before you run it
+- Verifiable downloads: every release is published on GitHub Releases (github.com/CiaNetIR/pc-max) with its installer and auto-updater signature file (.sig) — review the build before you run it. The website's download card shows the installer's SHA-256, measured from the published artifact (v0.4.16 / PC.MAX_0.4.16_x64-setup.exe / 7,727,490 bytes: 09d8ca4322162ca15c344f0f58dc4cc42eaaa5afa283cfdaece6039bdd7e2b28), verifiable locally with PowerShell's Get-FileHash
 - Zero telemetry in the desktop app: no analytics, no trackers; optimization runs fully offline (the app syncs catalogue/profiles and downloads packages only with your knowledge)
 - Fully reversible: every change ships with a snapshot and a verification step
 - Windows changes apply as a transaction with full rollback on partial failure

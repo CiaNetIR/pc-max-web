@@ -436,6 +436,17 @@ const en = {
       value: "github.com/CiaNetIR/pc-max",
       note: "The button always fetches the newest release, live from GitHub.",
     },
+    /* Checksum row — the REAL SHA-256 measured from the published
+     * installer artifact (Task 35). Rendered only while the download
+     * serves exactly that version (see VerifyRow in
+     * download-cta.client.tsx); version-pinned, never a generic claim. */
+    verify: {
+      label: "Verify this download",
+      copy: "Copy",
+      copied: "SHA-256 copied to clipboard",
+      copyFailed: "Select the checksum and copy it manually",
+      note: "Measured from the published installer — compare locally in PowerShell: Get-FileHash -Algorithm SHA256",
+    },
     waitlist: {
       title: "Get Pro early",
       desc: "One email when Pro lands. Nothing else — ever.",
@@ -921,6 +932,16 @@ const fa: Dictionary = {
       label: "انتشار رسمی",
       value: "github.com/CiaNetIR/pc-max",
       note: "دکمه همیشه جدیدترین نسخه را به‌صورت زنده از گیت‌هاب می‌گیرد.",
+    },
+    /* ردیف چک‌سام — SHA-256 واقعی، اندازه‌گیری‌شده از خودِ آرتیفکت
+     * منتشرشده (تسک ۳۵). فقط وقتی نمایش داده می‌شود که دانلود دقیقاً
+     * همان نسخه را سرو کند؛ به نسخه گره خورده، نه ادعای کلی. */
+    verify: {
+      label: "راستی‌آزمایی این دانلود",
+      copy: "کپی",
+      copied: "SHA-256 کپی شد",
+      copyFailed: "چک‌سام را انتخاب و دستی کپی کنید",
+      note: "اندازه‌گیری‌شده از نصب‌کننده‌ی منتشرشده — در پاورشل با Get-FileHash -Algorithm SHA256 مقایسه کنید",
     },
     waitlist: {
       title: "پرو را زودتر بگیرید",

@@ -43,11 +43,19 @@ export type AppRelease = {
   releasedAt: string;
   /** Plain-text release notes (trimmed). */
   notes: string;
+  /** SHA-256 of the installer artifact — REAL, measured locally from the
+   *  published release asset (Task 35). Only the hand-verified baseline
+   *  carries it: the GitHub API exposes no hashes, so live-resolved
+   *  releases leave it undefined and the UI falls back to the release
+   *  page. Consumers must treat it as pinned to THIS release's version. */
+  sha256?: string;
 };
 
 /** Hand-verified snapshot of the latest release (update on each app ship).
  * Measured live from github.com/CiaNetIR/pc-max/releases (2026-09-06):
- * tag v0.4.16, asset PC.MAX_0.4.16_x64-setup.exe, 7.37 MB. */
+ * tag v0.4.16, asset PC.MAX_0.4.16_x64-setup.exe, 7,727,490 bytes (7.37 MB).
+ * The sha256 below was computed locally from the downloaded release asset
+ * on 2026-10-06 (Task 35) — verify with Get-FileHash in PowerShell. */
 export const KNOWN_LATEST: AppRelease = {
   version: "0.4.16",
   url: "https://github.com/CiaNetIR/pc-max/releases/download/v0.4.16/PC.MAX_0.4.16_x64-setup.exe",
@@ -56,6 +64,7 @@ export const KNOWN_LATEST: AppRelease = {
   size: "7.37 MB",
   releasedAt: "2026-09-06T13:14:00.000Z",
   notes: "Windows installer for 0.4.16. The .sig is the auto-updater signature.",
+  sha256: "09d8ca4322162ca15c344f0f58dc4cc42eaaa5afa283cfdaece6039bdd7e2b28",
 };
 
 const LATEST_API = "https://api.github.com/repos/CiaNetIR/pc-max/releases/latest";
