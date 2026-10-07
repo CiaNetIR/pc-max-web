@@ -4,6 +4,53 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [2.10.0] — 2026-10-07
+
+**Exact Clone** — owner request: «میخام طبق این فایلا سایتم ساخته بشه دقیقعا
+عینشون ولی با اسم و لوگوی خودم» (build my site exactly like the uploaded
+tweakfa-site.zip files, with my own name and logo). The owner uploaded a full
+static mirror of tweakfa.com; the homepage was rebuilt as a byte-faithful
+structural port of the mirror with PC MAX branding and the crimson/black
+palette.
+
+- **tf-home.css (NEW)** — the mirror's homepage CSS ported 1:1 (inline
+  home CSS + header.css + footer.css): violet→crimson token remap
+  (#6734ff→#e50914 family), violet-tinted surfaces→neutral/crimson tints,
+  @font-face stripped (fonts already registered), TweakFa logo sprite →
+  PC MAX mark+wordmark. Class names, geometry, motion, breakpoints,
+  RTL/LTR rules byte-faithful. globals.css cleaned of the superseded
+  burger/mpanel/fcols/fbar blocks (wiring rules kept).
+- **Hero slideshow (tf/hero-slideshow.tsx, NEW)** — the hs deck carousel:
+  4 slides (app / frame gen / profiles / benchmarks) with per-slide accent
+  glow (crimson/teal/gold/cyan), 3D data-d deck arrangement, pill tab
+  indicator with 7.3s dwell progress, arrows/drag/keyboard navigation,
+  caption word-stagger swap, mobile scroll-snap, sparks + drift glows,
+  word-reveal H1/lead with emoji (😎💜 / 👇🏻🔥 — the mirror's signature).
+- **show-sec (tf/show-sec.tsx, NEW)** — product showcase: ticks + framed
+  console artwork + the mirror's #ign `.lit` one-shot conic sweep
+  (tf/lit-once.tsx) + the honest "illustrative preview" caption.
+- **uv-sec (tf/uv-sec.tsx, NEW)** — before/after: the REAL bench numbers
+  (6 game tabs, auto-dwell 5.3s, tweened values, thermometer, spinning
+  fans) with the existing honest disclosures.
+- **hp-soon / hp-calc / hp-new (NEW)** — PC MAX Pro coming-soon strip;
+  the 3 frame-gen workflow cards (real compatibility stats); guides cards
+  (explore + FAQ pointer).
+- **Navbar + Footer** — restructured to the exact tweakfa DOM (navgrp
+  dropdown groups with wirePops hover/click/focus behavior, mpanel with
+  mp-trio, fcols/fbar/global wordmark "PC MAX").
+- **Retired sections** (content absorbed, nothing invented): game-ticker,
+  what-is, multiframe, profiles, safety, benchmarks, social-proof,
+  install-flow journey, app-showcase console, SectorHud, ScrollProgress.
+  FAQ + download-cta kept (real answers, real release data).
+- **Artwork** — 6 generated dark/crimson UI illustrations (4 slides,
+  console, explore card; 32–92KB WebP each) + the mirror's emoji webps.
+- **Dictionary** — `tw` block (EN+FA) mapping real PC MAX content onto
+  TweakFa's homepage patterns.
+- **QA** — tsc 0, eslint 0; agent-browser: EN+FA desktop 1440 (carousel
+  auto-rotation, tab/accent swap, pill, dropdowns, reveals 19/19), mobile
+  390/320 (burger menu, scroll-snap, no overflow), RTL mirrored (verified
+  via bounding boxes), no console errors; VLM 8–9/10 across sections.
+
 ## [2.9.0] — 2026-10-07
 
 **TweakFa Crimson** — owner request: "open and review all the tweakfa.com

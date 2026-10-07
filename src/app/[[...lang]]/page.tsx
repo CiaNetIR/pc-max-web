@@ -1,58 +1,55 @@
 import { notFound } from "next/navigation";
 import { Navbar } from "@/components/pcmax/navbar";
-import { Hero } from "@/components/pcmax/hero/hero";
-import { AppShowcase } from "@/components/pcmax/sections/app-showcase";
-import { WhatIsPcMax } from "@/components/pcmax/sections/what-is";
-import { MultiFrame } from "@/components/pcmax/sections/multi-frame";
-import { Profiles } from "@/components/pcmax/sections/profiles";
-import { SystemSafety } from "@/components/pcmax/sections/system-safety";
-import { Benchmarks } from "@/components/pcmax/sections/benchmarks";
-import { SocialProof } from "@/components/pcmax/sections/social-proof";
-import { InstallFlow } from "@/components/pcmax/sections/install-flow";
+import { HeroSlideshow } from "@/components/pcmax/tf/hero-slideshow";
+import { ShowSec } from "@/components/pcmax/tf/show-sec";
+import { UvSec } from "@/components/pcmax/tf/uv-sec";
+import { HpSoon } from "@/components/pcmax/tf/hp-soon";
+import { HpCalc } from "@/components/pcmax/tf/hp-calc";
+import { HpNew } from "@/components/pcmax/tf/hp-new";
 import { Faq } from "@/components/pcmax/sections/faq";
 import { DownloadCta } from "@/components/pcmax/sections/download-cta";
 import { MobileCtaBar } from "@/components/pcmax/sections/mobile-cta-bar";
 import { Footer } from "@/components/pcmax/footer";
+import { RevealGate } from "@/components/pcmax/tf/reveal";
 import { AnalyticsBeacon } from "@/components/pcmax/ui/analytics-beacon";
-import { MotionProvider } from "@/components/pcmax/ui/motion";
-import { ScrollProgress } from "@/components/pcmax/scroll-progress";
-import { GameTicker } from "@/components/pcmax/game-ticker";
-import { SectorHud } from "@/components/pcmax/sector-hud";
+import type { Locale } from "@/components/pcmax/i18n/dictionary";
 
 /*
  * The optional catch-all root segment `[[...lang]]` (audit 29-a — the /fa
  * architecture): `/` renders the canonical EN document, `/fa` renders the
  * real Persian document (html lang=fa dir=rtl baked by the ROOT layout at
- * build time — the one construction where that is possible). Any other
- * segment (`/xyz`) is a branded 404, never a soft-duplicate of the home
- * page. Static export: generateStaticParams prerenders exactly these two.
+ * build time). Any other segment (`/xyz`) is a branded 404. Static export:
+ * generateStaticParams prerenders exactly these two.
  */
 export function generateStaticParams() {
   return [{ lang: [] }, { lang: ["fa"] }];
 }
 
 /*
- * Product flow (IA reorder + merge, audit 29-b — targets ~20-30% less
- * cognitive load without losing information):
+ * Task 43 "Exact Clone" — the page is now a structural port of the
+ * owner's uploaded tweakfa.com homepage mirror (tweakfa-site.zip):
  *
- *   hero (benefit-first + trust line/badges)
- *   → product showcase            [see the app BEFORE reading about it]
- *   → what PC MAX does            [pipeline + Detect/Optimize/Protect merged
- *                                  — one concept, one section]
- *   → frame generation            [the flagship capability]
- *   → profiles
- *   → safety                      [hoisted above proof — trust before claims]
- *   → benchmarks                  [evidence AFTER safety]
- *   → community / verification    [numbers you can check yourself]
- *   → install steps
- *   → FAQ
- *   → the premium download card
+ *   header (sticky blur + dropdown groups + mpanel)
+ *   → hero hs          [4-slide deck carousel: app / frame gen / profiles /
+ *                        benchmarks — pill tabs + arrows + caption swap +
+ *                        per-slide accent glow + 7.3s auto-dwell]
+ *   → show-sec         [product showcase: ticks + framed console art]
+ *   → uv-sec           [before/after: real bench numbers, 6 game tabs,
+ *                        5.3s auto-dwell]
+ *   → hp-soon          [PC MAX Pro coming-soon strip]
+ *   → hp-calc          [the 3 frame-gen workflow cards]
+ *   → hp-new           [guides: explore card + FAQ card]
+ *   → faq              [kept — real answers, details pattern]
+ *   → download-cta     [kept — real release data, shcard]
+ *   → footer           [tweakfa fcols/fbar + global wordmark]
  *
- * v2.8 "Atelier": the fixed .bgfx atmosphere layer (grid + scanlines +
- * crimson aurora), the gaming reticle cursor and the cursor-following
- * card spotlights are retired — the page paints on one flat
- * near-black canvas; sections separate via hairline rules and carry
- * pure-CSS numbered kickers (see globals.css).
+ * Retired sections (content absorbed, nothing invented): game-ticker
+ * (titles live in the uv game tabs), what-is/pipeline (hero lead + show
+ * ticks + FAQ), multiframe (hp-calc), profiles (hero slide 3 + ticks),
+ * safety (show ticks + FAQ), benchmarks (uv-sec), social-proof (FAQ +
+ * download card), install-flow journey (hp-new card), app-showcase
+ * console (show-sec art), SectorHud + ScrollProgress (no tweakfa
+ * equivalent).
  */
 export default async function Home({
   params,
@@ -63,39 +60,29 @@ export default async function Home({
   /* Unknown segments 404 (branded) — only `/` and `/fa` are real documents. */
   if (lang && lang.length > 0 && lang[0] !== "fa") notFound();
 
+  const locale: Locale = lang && lang[0] === "fa" ? "fa" : "en";
+
   return (
-    <MotionProvider>
-      <div className="relative min-h-screen overflow-x-clip">
-        <AnalyticsBeacon />
-        {/* Scroll progress — 2px solid crimson, scroll-linked (moves only
-            as the visitor scrolls — direct-manipulation feedback). */}
-        <ScrollProgress />
-        {/* Task 39 — the sector HUD: the fixed scroll menu box (lg+) that
-            tracks the current section and quick-jumps via real anchors. */}
-        <SectorHud />
-        <Navbar />
-        {/* id="main-content" — target of the layout's skip-to-content link (a11y / SXO) */}
-        <main id="main-content" className="relative z-[1]">
-          <Hero />
-          {/* recognized-titles ticker — the real library names on an
-              infinite (reduced-motion: static) marquee strip */}
-          <GameTicker />
-          <AppShowcase />
-          <WhatIsPcMax />
-          <MultiFrame />
-          <Profiles />
-          <SystemSafety />
-          <Benchmarks />
-          <SocialProof />
-          <InstallFlow />
-          <Faq />
-          <DownloadCta />
-        </main>
-        {/* Phones-only fixed conversion bar — mounted at page level so it
-            survives section state; hides itself near the download section. */}
-        <MobileCtaBar />
-        <Footer />
-      </div>
-    </MotionProvider>
+    <div className="relative min-h-screen overflow-x-clip">
+      <AnalyticsBeacon />
+      {/* tweakfa scroll-reveal engine — rv-on/.in (reduced-motion: inert) */}
+      <RevealGate />
+      <Navbar />
+      {/* id="main-content" — target of the layout's skip-to-content link */}
+      <main id="main-content">
+        <HeroSlideshow />
+        <ShowSec locale={locale} />
+        <UvSec />
+        <HpSoon locale={locale} />
+        <HpCalc />
+        <HpNew />
+        <Faq />
+        <DownloadCta />
+      </main>
+      {/* Phones-only fixed conversion bar — mounted at page level so it
+          survives section state; hides itself near the download section. */}
+      <MobileCtaBar />
+      <Footer />
+    </div>
   );
 }

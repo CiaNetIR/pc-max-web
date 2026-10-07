@@ -502,6 +502,103 @@ const en = {
       close: "Dismiss",
     },
   },
+  /* ── Task 43 "Exact Clone" — tweakfa.com homepage structure sections ──
+   * All strings map REAL PC MAX facts onto TweakFa's homepage patterns.
+   * Reuses existing keys (hero.*, bench.*, cta.editions.pro.*, install.*)
+   * wherever the content already exists — this block only adds what the
+   * new section structure needs. */
+  tw: {
+    nav: {
+      product: "Product",
+      app: "PC MAX app",
+      frame: "Frame generation",
+      profiles: "Profiles",
+      guides: "Guides",
+    },
+    slides: [
+      {
+        tab: "PC MAX",
+        name: "PC MAX",
+        line: "Windows tuning, frame generation and per-game profiles — all in one app.",
+        ctas: [
+          { label: "Download PC MAX", href: "#download", primary: true },
+          { label: "Features", href: "#show", primary: false },
+        ],
+      },
+      {
+        tab: "Frame gen",
+        name: "Frame generation",
+        line: "Three workflows — OptiScaler, AI Optical Flow and Streamline — matched to your GPU.",
+        ctas: [{ label: "See the workflows", href: "#tools", primary: true }],
+      },
+      {
+        tab: "Profiles",
+        name: "Optimization profiles",
+        line: "Named profiles for every game — from Maximum FPS to Ultra Quality.",
+        ctas: [{ label: "Explore the console", href: "#show", primary: true }],
+      },
+      {
+        tab: "Benchmarks",
+        name: "Benchmarks",
+        line: "Measured before/after numbers from our test bench — +34% on average.",
+        ctas: [{ label: "See the numbers", href: "#benchmarks", primary: true }],
+      },
+    ],
+    show: {
+      ticks: [
+        "Graphics settings and Windows tuning, per game",
+        "Snapshot before every change, one-click rollback",
+        "Frame generation matched to your GPU",
+        "No game injection, no telemetry",
+      ],
+      btn: "See how it works",
+      alt: "PC MAX desktop app console",
+    },
+    uv: {
+      title: "Before and after PC MAX",
+      fps: "Avg FPS",
+      higher: "fps higher",
+      gain: "Uplift",
+      settings: "Settings",
+      stock: "Stock",
+      default: "Default",
+      tuned: "Tuned",
+      optimized: "Optimized",
+      frameGen: "Frame generation",
+      ifCompatible: "when compatible",
+    },
+    calc: {
+      kicker: "Features",
+      title: "Frame generation",
+      cta: "Install with PC MAX",
+      stats: {
+        families: "scaler families",
+        supported: "supported",
+        rtxGenerations: "RTX generations supported",
+        requires: "hardware required",
+      },
+    },
+    news: {
+      kicker: "Guides & answers",
+      title: "From PC MAX",
+      more: "See the FAQ",
+      videoTitle: "Explore PC MAX",
+      videoChip: "Preview",
+      postsTitle: "From download to a tuned system",
+      postsDesc: "Seven verified steps — installer, account, sync, profile. A snapshot is taken before anything changes. The technical questions are answered in the FAQ.",
+      postsBtn: "Read the FAQ",
+    },
+    footerNav: {
+      products: "Products",
+      tools: "Features",
+      frame: "Frame generation",
+      profiles: "Profiles",
+      benchmarks: "Benchmarks",
+      guides: "Guides",
+      brand: "PC MAX",
+      about: "About",
+    },
+  },
   footer: {
     tagline: "Premium Windows gaming optimization.",
     product: "Product",
@@ -1024,6 +1121,99 @@ const fa: Dictionary = {
       label: "دانلود PC MAX",
       note: "رایگان · ویندوز 10 / 11 · x64",
       close: "بستن",
+    },
+  },
+  /* ── Task 43 — معادل فارسی بخش‌های ساختار صفحهٔ اصلی توییک‌فا ── */
+  tw: {
+    nav: {
+      product: "محصول",
+      app: "اپلیکیشن PC MAX",
+      frame: "فریم‌ساخت",
+      profiles: "پروفایل‌ها",
+      guides: "راهنماها",
+    },
+    slides: [
+      {
+        tab: "PC MAX",
+        name: "PC MAX",
+        line: "تنظیم ویندوز، فریم‌ساخت و پروفایل هر بازی — همه در یک اپ.",
+        ctas: [
+          { label: "دانلود PC MAX", href: "#download", primary: true },
+          { label: "قابلیت‌ها", href: "#show", primary: false },
+        ],
+      },
+      {
+        tab: "فریم‌ساخت",
+        name: "فریم‌ساخت",
+        line: "سه جریان کاری — اپتی‌اسکیلر، AI Optical Flow و Streamline — متناسب با کارت گرافیکی شما.",
+        ctas: [{ label: "دیدن جریان‌ها", href: "#tools", primary: true }],
+      },
+      {
+        tab: "پروفایل‌ها",
+        name: "پروفایل‌های بهینه‌سازی",
+        line: "پروفایل نام‌دار برای هر بازی — از Maximum FPS تا Ultra Quality.",
+        ctas: [{ label: "کاوش کنسول", href: "#show", primary: true }],
+      },
+      {
+        tab: "بنچمارک",
+        name: "بنچمارک",
+        line: "اعداد اندازه‌گیری‌شده‌ی قبل و بعد، از میز آزمون ما — میانگین +۳۴٪.",
+        ctas: [{ label: "مشاهده‌ی اعداد", href: "#benchmarks", primary: true }],
+      },
+    ],
+    show: {
+      ticks: [
+        "تنظیمات گرافیکی و بهینه‌سازی ویندوز، به‌ازای هر بازی",
+        "اسنپ‌شات پیش از هر تغییر؛ بازگشت با یک کلیک",
+        "فریم‌ساخت متناسب با کارت گرافیکی شما",
+        "بدون تزریق داخل بازی، بدون تله‌متری",
+      ],
+      btn: "نحوه‌ی کار را ببینید",
+      alt: "کنسول اپلیکیشن دسکتاپ PC MAX",
+    },
+    uv: {
+      title: "قبل و بعد از PC MAX",
+      fps: "میانگین FPS",
+      higher: "fps بیشتر",
+      gain: "بهبود",
+      settings: "تنظیمات",
+      stock: "استوک",
+      default: "پیش‌فرض",
+      tuned: "تنظیم‌شده",
+      optimized: "بهینه‌شده",
+      frameGen: "فریم‌ساخت",
+      ifCompatible: "در صورت سازگاری",
+    },
+    calc: {
+      kicker: "قابلیت‌ها",
+      title: "فریم‌ساخت",
+      cta: "با PC MAX نصب کنید",
+      stats: {
+        families: "خانواده‌ی مقیاس‌بند",
+        supported: "پشتیبانی‌شده",
+        rtxGenerations: "نسل‌های RTX پشتیبانی‌شده",
+        requires: "سخت‌افزار موردنیاز",
+      },
+    },
+    news: {
+      kicker: "راهنماها و پاسخ‌ها",
+      title: "از PC MAX",
+      more: "مشاهده‌ی سوالات",
+      videoTitle: "کاوش PC MAX",
+      videoChip: "پیش‌نمایش",
+      postsTitle: "از دانلود تا سیستم تنظیم‌شده",
+      postsDesc: "هفت گام راستی‌آزمایی‌شده — نصب‌کننده، حساب کاربری، همگام‌سازی، پروفایل. پیش از هر تغییری اسنپ‌شات گرفته می‌شود؛ سوال‌های فنی هم در بخش سوالات پاسخ داده شده‌اند.",
+      postsBtn: "مشاهده‌ی سوالات",
+    },
+    footerNav: {
+      products: "محصولات",
+      tools: "قابلیت‌ها",
+      frame: "فریم‌ساخت",
+      profiles: "پروفایل‌ها",
+      benchmarks: "بنچمارک",
+      guides: "راهنماها",
+      brand: "PC MAX",
+      about: "درباره",
     },
   },
   footer: {

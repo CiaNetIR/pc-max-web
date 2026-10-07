@@ -10,6 +10,11 @@ import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
 import { IS_STATIC_EXPORT, BASE_PATH } from "@/lib/gh-pages";
 import { Toaster } from "@/components/ui/toaster";
 import "../globals.css";
+/* Task 43 "Exact Clone" — the ported tweakfa.com homepage chrome
+ * (header/footer/homepage-section CSS, crimson remap). Imported AFTER
+ * globals.css so its definitions are authoritative for the classes it
+ * owns (hs-*, uv-*, hp-*, shp-*, mpanel, fcols…). */
+import "../tf-home.css";
 
 /* ---------------------------------------------------------------------
  * Self-hosted fonts (v3.0 "TweakFa Crimson", Task 42):

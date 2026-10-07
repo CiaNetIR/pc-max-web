@@ -4,49 +4,34 @@ import { useEffect, useRef, useState } from "react";
 import { Globe } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/components/pcmax/language-context";
-import { cn } from "@/lib/utils";
 import { asset } from "@/lib/gh-pages";
 
-/* Id of the collapsible mobile menu — pairs the trigger's aria-controls
-   with the menu container so assistive tech can associate them. */
-const MENU_ID = "pcmax-mobile-menu";
+/* Mobile menu id — pairs the burger's aria-controls with the .mpanel nav,
+ * byte-faithful to the tweakfa.com mirror (wireBurger + #mnav). */
+const MNAV_ID = "mnav";
 
-/* Sections watched by the scroll-spy (hero + the four nav targets) —
-   mirrors the `links` list below. Module-level: the observer effect can
-   keep an empty dep array and never resubscribes on re-renders. */
-const SPY_IDS = ["top", "features", "install", "benchmarks", "faq"] as const;
+/* Sections watched by the scroll-spy — the Task 43 page composition:
+ * hero(#top) → show-sec(#show) → uv-sec(#benchmarks) → hp-calc(#tools) →
+ * hp-new(#guides) → faq(#faq) → download-cta(#download). Sections that
+ * are not mounted yet are simply skipped by the observer effect, so the
+ * list stays stable while the page is being rebuilt. */
+const SPY_IDS = ["top", "show", "tools", "benchmarks", "guides", "faq", "download"] as const;
 
-/* The page's real section ids, in scroll order — the SAME eleven
- * anchors/labels the SectorHud quick-jump uses (sector-hud.tsx mirrors
- * the page.tsx composition: hero → showcase → features → multiframe →
- * profiles → safety → benchmarks → community → install → faq →
- * download). The mobile menu offers every section, not just the four
- * desktop links; names come from hud.sectors (EN+FA), never hardcoded. */
-const SECTOR_IDS = [
-  "top",
-  "showcase",
-  "features",
-  "multiframe",
-  "profiles",
-  "safety",
-  "benchmarks",
-  "community",
-  "install",
-  "faq",
-  "download",
-] as const;
-
-/* Scroll threshold (px) at which the header solidifies — globals.css
- * .gc-hdr.tight: bg rgba(8,8,10,.96) + hairline bottom edge. */
+/* Scroll threshold (px) at which the header solidifies — tf-home.css
+ * `header.tight`: bg rgba(8,8,10,.99) + hairline bottom edge. The class
+ * lives on the <header> element itself, exactly like the mirror's site.js
+ * (hdr.classList.toggle('tight', scrollY > 8)). */
 const TIGHT_AT = 8;
 
-/* Desktop takeover point. globals.css shows .burger at ≤900px and force-
- * hides .mpanel/.mnav-scrim at ≥901px, so the desktop nav links and the
- * header Download CTA return at exactly 901px to never leave a dead zone
- * (the old 1024px lg: breakpoint would collide with the CSS system). */
+/* Mobile takeover point. tf-home.css hides nav.main + .hd-act .btn-p at
+ * ≤900px and force-hides .mpanel/.mnav-scrim at ≥901px, so the open state
+ * must reset the moment the viewport grows past 900px — otherwise the
+ * html.mnav-on class outlives the (now display:none) UI. */
 const DESKTOP_QUERY = "(min-width: 901px)";
 
-const pad = (n: number) => String(n).padStart(2, "0");
+/* Pointer-capable clients open the dropdowns on hover (site.js wirePops
+ * checks matchMedia('(hover:hover)') per event, so hybrids behave). */
+const HOVER_QUERY = "(hover: hover)";
 
 /* ---------------------------- Language toggle ------------------------ */
 
@@ -54,7 +39,7 @@ function LanguageToggle({
   className,
   onActivate,
 }: {
-  /* "pill" (header ghost button) or "row" (mobile-menu .mp-row) — the
+  /* "btn btn-g" (header ghost button) or "mp-row" (mobile-menu row) — the
    * class fully owns the styling; only the markup skeleton is shared. */
   className?: string;
   /* Extra behavior after a toggle (e.g. closing the mobile panel). */
@@ -118,13 +103,23 @@ export function Navbar() {
   const [tight, setTight] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const wasOpen = useRef(false);
+  /* The two desktop dropdown groups (.navgrp) — their open/close state is
+   * driven imperatively (refs), a direct port of the mirror's wirePops.
+   * React owns only the STATIC attributes below (aria-expanded={false},
+   * the navpop `hidden` attr); since their prop values never change across
+   * re-renders, React never rewrites them, so the imperative mutations
+   * persist through every scroll-spy/locale re-render. */
+  const grpRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const grpRef = (i: number) => (el: HTMLDivElement | null) => {
+    grpRefs.current[i] = el;
+  };
 
   /* Scroll-spy (UX polish): ONE IntersectionObserver over the hero + the
-   * four nav-target sections. The highlight follows the last section that
+   * nav-target sections. The highlight follows the last section that
    * crossed the focus band and clears again at the hero. Zero scroll
    * listeners, zero layout reads; state flips only when the active
-   * section actually changes. Presentation-only — never touches the
-   * anchor/go() logic. */
+   * section actually changes. The "page" value is what tf-home.css keys
+   * its current-item styling on (nav.main a[aria-current="page"] …). */
   useEffect(() => {
     const sections = SPY_IDS.map((id) => document.getElementById(id)).filter(
       (el): el is HTMLElement => el !== null
@@ -146,9 +141,9 @@ export function Navbar() {
 
   /* Scroll-tightening (TweakFa header): ONE passive listener flips the
    * .tight class carrier at scrollY > 8 — the blurred bar solidifies and
-   * drops its hairline. The initial read covers deep links / refreshes
-   * that land mid-page; React bails out on repeated values, so this
-   * re-renders only when the threshold is crossed. */
+   * gains its hairline bottom edge. The initial read covers deep links /
+   * refreshes that land mid-page; React bails out on repeated values, so
+   * this re-renders only when the threshold is crossed. */
   useEffect(() => {
     const onScroll = () => setTight(window.scrollY > TIGHT_AT);
     onScroll();
@@ -156,12 +151,129 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* Open-state wiring (Wave A mnav system): <html class="mnav-on"> drives
+  /* Desktop dropdown engine — a faithful port of the mirror's wirePops
+   * (site.js §4.4). Mouse: opens on hover, closes after a 160ms pause so
+   * an oblique mouse path from the group head into the panel doesn't shut
+   * it mid-flight (the classic dropdown trap). Keyboard + touch: click
+   * toggles. `hidden` AND the .on class are both set on open/close —
+   * `hidden` for screen readers and the no-CSS case, the class for the
+   * animation: un-hide first, force a style flush (offsetWidth), then add
+   * .on so the transition starts from zero; on close, re-hide only after
+   * the 200ms fade-out ran. Focus leaving the group (Tab) closes it;
+   * Escape closes every group and returns focus to its head; a click
+   * anywhere outside closes all; only ONE group is open at a time. A link
+   * click inside a panel closes the group too — the mirror navigates to
+   * another page here, our in-page anchors are the SPA equivalent. */
+  useEffect(() => {
+    const grps = grpRefs.current.filter((g): g is HTMLDivElement => g !== null);
+    if (grps.length === 0) return;
+
+    let shutT = 0; /* shared hover-close delay (mirror: one timer) */
+    const hideT = new Set<number>(); /* pending 200ms delayed re-hides */
+
+    const open = (g: HTMLDivElement, on: boolean) => {
+      const b = g.querySelector<HTMLButtonElement>(".navtop");
+      const p = g.querySelector<HTMLElement>(".navpop");
+      if (!b || !p) return;
+      if (on) {
+        p.hidden = false;
+        void p.offsetWidth; /* style flush so the transition starts from zero */
+      }
+      g.classList.toggle("on", on);
+      b.setAttribute("aria-expanded", on ? "true" : "false");
+      if (!on) {
+        /* hide AFTER the close animation, or the fade is never seen */
+        const id = window.setTimeout(() => {
+          hideT.delete(id);
+          if (!g.classList.contains("on")) p.hidden = true;
+        }, 200);
+        hideT.add(id);
+      }
+    };
+    const closeAll = (except: HTMLDivElement | null) => {
+      for (const g of grps) if (g !== except) open(g, false);
+    };
+
+    const offs: Array<() => void> = [];
+    for (const g of grps) {
+      const b = g.querySelector<HTMLButtonElement>(".navtop");
+      const p = g.querySelector<HTMLElement>(".navpop");
+      if (!b) continue;
+
+      const onEnter = () => {
+        window.clearTimeout(shutT);
+        if (window.matchMedia(HOVER_QUERY).matches) {
+          closeAll(g);
+          open(g, true);
+        }
+      };
+      const onLeave = () => {
+        if (!window.matchMedia(HOVER_QUERY).matches) return;
+        window.clearTimeout(shutT);
+        shutT = window.setTimeout(() => open(g, false), 160);
+      };
+      const onBtnClick = () => {
+        const on = b.getAttribute("aria-expanded") === "true";
+        closeAll(g);
+        open(g, !on);
+      };
+      const onFocusOut = (e: FocusEvent) => {
+        const next = e.relatedTarget;
+        if (!(next instanceof Node) || !g.contains(next)) open(g, false);
+      };
+      const onPopClick = (e: Event) => {
+        if (!(e.target instanceof Element)) return;
+        const a = e.target.closest("a");
+        if (a && p && p.contains(a)) closeAll(null);
+      };
+
+      g.addEventListener("mouseenter", onEnter);
+      g.addEventListener("mouseleave", onLeave);
+      b.addEventListener("click", onBtnClick);
+      g.addEventListener("focusout", onFocusOut);
+      if (p) p.addEventListener("click", onPopClick);
+      offs.push(() => {
+        g.removeEventListener("mouseenter", onEnter);
+        g.removeEventListener("mouseleave", onLeave);
+        b.removeEventListener("click", onBtnClick);
+        g.removeEventListener("focusout", onFocusOut);
+        if (p) p.removeEventListener("click", onPopClick);
+      });
+    }
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      for (const g of grps) {
+        if (!g.classList.contains("on")) continue;
+        open(g, false);
+        const b = g.querySelector<HTMLButtonElement>(".navtop");
+        if (b) b.focus();
+      }
+    };
+    const onDocClick = (e: MouseEvent) => {
+      const target = e.target;
+      if (target instanceof Node && grps.some((g) => g.contains(target))) return;
+      closeAll(null);
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    document.addEventListener("click", onDocClick);
+    offs.push(() => {
+      document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("click", onDocClick);
+    });
+
+    return () => {
+      for (const off of offs) off();
+      window.clearTimeout(shutT);
+      for (const id of hideT) window.clearTimeout(id);
+    };
+  }, []);
+
+  /* Open-state wiring (tweakfa mnav system): <html class="mnav-on"> drives
    * everything — the panel's clip-path unfold + child stagger, the scrim
-   * fade, and the scroll lock (html overflow:hidden). The old body-lock
-   * effect (body overflow + scrollbar padding compensation) is retired in
-   * its favor. Class removed on close AND on unmount, so a hot unmount
-   * can never leave the page scroll-locked. */
+   * reveal, the scroll lock (globals: html overflow:hidden) and the
+   * mobile-cta-bar hide. Class removed on close AND on unmount, so a hot
+   * unmount can never leave the page scroll-locked. */
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("mnav-on", open);
@@ -170,11 +282,10 @@ export function Navbar() {
 
   /* Mobile menu a11y: Escape closes it (focus returns to the burger via
    * the effect below) and growing the viewport past 900px — where CSS
-   * force-hides the panel and scrim — closes it too, so the html class
-   * never outlives the visible UI. Listeners registered only while open.
-   * No focus trap (Wave A contract): the scrim dims the page and every
-   * close path (link, lang row, CTA, scrim tap, Escape) works from the
-   * panel itself. */
+   * force-hides the panel and scrim — closes it too. Listeners are
+   * registered only while open. No focus trap (tweakfa contract): the
+   * scrim dims the page and every close path (link, lang row, CTA, scrim
+   * tap, Escape) works from the panel itself. */
   useEffect(() => {
     if (!open) return;
     const mql = window.matchMedia(DESKTOP_QUERY);
@@ -208,156 +319,345 @@ export function Navbar() {
 
   const closeMenu = () => setOpen(false);
 
-  /* Section 44 — simple nav: Features · How it works · Benchmarks · FAQ.
-   *
-   * Semantic anchors (audit 29-a D7 fix): every nav target is a real
-   * <a href="#…"> — crawlable in-page links, middle-click / copy-link /
-   * no-JS all work. The smooth scroll + its prefers-reduced-motion
-   * override come from CSS (html scroll-behavior) and the offset from the
-   * sections' scroll-mt-24 — no JS needed anywhere. The mobile menu links
-   * keep a single onClick to close the panel; the native anchor navigation
-   * still runs (hash + scroll), so Back works like on desktop. */
-  const links = [
-    { id: "features", label: t.nav.features },
-    { id: "install", label: t.nav.install },
-    { id: "benchmarks", label: t.nav.benchmarks },
-    { id: "faq", label: t.nav.faq },
-  ];
-
-  /* Mobile-menu rows — hud.sectors must stay 1:1 with the page ids (same
-   * dictionary guard the SectorHud applies); on drift the section list is
-   * skipped rather than showing mismatched labels. */
-  const names = t.hud.sectors;
-  const sectorsAligned = names.length === SECTOR_IDS.length;
-
+  /* The tweakfa.com header tree, byte-faithful in classes and geometry:
+   * sticky blurred #hdr > .wrap.hd (brand | nav.main | .hd-act) with the
+   * .mpanel absolutely tucked UNDER the header (inside it — the mirror
+   * does the same), and the .mnav-scrim as the header's SIBLING (the
+   * header's backdrop-filter makes it a containing block for fixed
+   * descendants, so a "fixed" scrim must never live inside). All styling
+   * comes from tf-home.css; the only Tailwind classes below replicate
+   * values the ported CSS already sets (31px logo mark, full-width CTA). */
   return (
-    /* TweakFa header: sticky blurred bar (.gc-hdr) that tightens past 8px
-     * of scroll. The scrim must live OUTSIDE this element — the header's
-     * backdrop-filter makes it a containing block for fixed descendants —
-     * so this component renders <header> + scrim as siblings. */
     <>
-      <header className={cn("gc-hdr sticky top-0 z-[60]", tight && "tight")}>
-        <nav
-          aria-label="PC MAX"
-          className="mx-auto flex h-[61px] max-w-6xl items-center gap-7 px-4 sm:px-6 lg:px-8"
-        >
+      <header id="hdr" className={tight ? "tight" : undefined}>
+        <div className="wrap hd">
           {/* brand — real link to #top (CSS scroll-behavior handles smooth
-              scrolling + its own reduced-motion override); the visible
-              "PC MAX" wordmark is the accessible name, the logo is decorative */}
-          <a href="#top" className="flex shrink-0 items-center gap-2.5">
-            {/* Circular transparent WebP emblem (Task 34): no tile, no glow —
-              the ring art floats directly on the bar, nothing frames it. */}
-            <Image
-              src={asset("/brand/pcmax-logo-96.webp")}
-              alt=""
-              width={36}
-              height={36}
-              priority
-              className="h-9 w-9 shrink-0 object-contain"
-            />
-            <span className="font-display text-[17px] font-bold text-foreground">
-              PC&nbsp;<span className="text-crimson">MAX</span>
+              scrolling + its own reduced-motion override). .logo-fa owns
+              the 31px mark + 19.5px/800 wordmark row; its role="img" makes
+              the inner text presentational, aria-label carries the name. */}
+          <a className="brand" href="#top" aria-label="PC MAX">
+            <span className="logo-fa" role="img" aria-label="PC MAX">
+              <Image
+                src={asset("/brand/pcmax-logo-96.webp")}
+                width={31}
+                height={31}
+                alt=""
+                priority
+                className="h-[31px] w-[31px] rounded-lg object-contain"
+              />
+              <span>PC&nbsp;MAX</span>
             </span>
           </a>
 
-          {/* desktop links — TweakFa .gc-nav-link owns size/weight/color/
-              hover/current states; the padding only grows the hit area.
-              901px breakpoint mirrors the CSS that hides the burger. */}
-          <ul className="hidden items-center gap-8 min-[901px]:flex">
-            {links.map((link) => {
-              const isActive = active === link.id;
-              return (
-                <li key={link.id}>
-                  <a
-                    href={`#${link.id}`}
-                    aria-current={isActive ? "true" : undefined}
-                    className="gc-nav-link rounded-full px-1 py-2"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+          {/* desktop nav (hidden ≤900px by tf-home.css) — two dropdown
+              groups + one direct link, mirroring tweakfa's
+              Phoenix/Calculators/Blog tree with PC MAX's IA:
+              Product → the app; Features → the three feature jumps;
+              FAQ direct. aria-current="page" is the value tf-home.css
+              styles the current item with. */}
+          <nav className="main" aria-label="PC MAX">
+            <div className="navgrp" data-grp="" ref={grpRef(0)}>
+              <button
+                type="button"
+                className="navtop"
+                aria-expanded={false}
+                aria-controls="pop0"
+              >
+                {t.tw.nav.product}
+                <svg
+                  className="chev"
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <div className="navpop" id="pop0" hidden>
+                <a
+                  href="#show"
+                  aria-current={active === "show" ? "page" : undefined}
+                >
+                  <i
+                    className="dot"
+                    style={{ ["--dc" as any]: "var(--gc-violet-rgb)" }}
+                    aria-hidden="true"
+                  />
+                  <span>{t.tw.nav.app}</span>
+                </a>
+              </div>
+            </div>
 
-          {/* actions — compact 40px header CTAs (.gc-btn-sm modifiers; the
-              geometry lives in the classes, so no utility padding/height) */}
-          <div className="ms-auto flex items-center gap-2.5">
-            <LanguageToggle className="gc-btn-ghost gc-btn-sm inline-flex items-center justify-center gap-1.5" />
-            {/* real anchor — crawlable download CTA; the primary button
-                moves into the mobile panel below 901px (TweakFa hides the
-                header CTA exactly where the burger appears) */}
-            <a
-              href="#download"
-              className="gc-btn-primary gc-btn-sm hidden items-center justify-center min-[901px]:inline-flex"
-            >
-              {t.nav.download}
+            <div className="navgrp" data-grp="" ref={grpRef(1)}>
+              <button
+                type="button"
+                className="navtop"
+                aria-expanded={false}
+                aria-controls="pop1"
+              >
+                {t.nav.features}
+                <svg
+                  className="chev"
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              <div className="navpop" id="pop1" hidden>
+                <a
+                  href="#tools"
+                  aria-current={active === "tools" ? "page" : undefined}
+                >
+                  <i
+                    className="dot"
+                    style={{ ["--dc" as any]: "var(--gc-success-rgb)" }}
+                    aria-hidden="true"
+                  />
+                  <span>{t.tw.nav.frame}</span>
+                </a>
+                <a
+                  href="#benchmarks"
+                  aria-current={active === "benchmarks" ? "page" : undefined}
+                >
+                  <i
+                    className="dot"
+                    style={{ ["--dc" as any]: "var(--gc-success-rgb)" }}
+                    aria-hidden="true"
+                  />
+                  <span>{t.nav.benchmarks}</span>
+                </a>
+                <a
+                  href="#guides"
+                  aria-current={active === "guides" ? "page" : undefined}
+                >
+                  <i
+                    className="dot"
+                    style={{ ["--dc" as any]: "var(--gc-success-rgb)" }}
+                    aria-hidden="true"
+                  />
+                  <span>{t.tw.nav.guides}</span>
+                </a>
+              </div>
+            </div>
+
+            <a href="#faq" aria-current={active === "faq" ? "page" : undefined}>
+              {t.nav.faq}
             </a>
-            {/* burger — three CSS bars morphing to X (globals .burger);
-                the label swaps to the existing hud.close string on open */}
+          </nav>
+
+          {/* actions — tweakfa's .hd-act/.hd-acct pair: the ghost language
+              toggle + the primary Download CTA inside the .hd-acct wrapper
+              (the mirror's sign-in/download slot). tf-home.css sizes every
+              .btn in here at 40px and auto-hides .btn-p below 901px. */}
+          <div className="hd-act">
+            <span className="hd-acct">
+              <LanguageToggle className="btn btn-g" />
+              <a href="#download" className="btn btn-p">
+                {t.nav.download}
+              </a>
+            </span>
+            {/* burger — three CSS bars morphing to X (tf-home .burger,
+                keyed on aria-expanded); the label swaps to hud.close */}
             <button
               type="button"
               ref={triggerRef}
+              className="burger"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              aria-controls={MENU_ID}
+              aria-controls={MNAV_ID}
               aria-label={open ? t.hud.close : t.nav.menu}
-              className="burger press"
             >
               <span aria-hidden="true" />
               <span aria-hidden="true" />
               <span aria-hidden="true" />
             </button>
           </div>
-        </nav>
+        </div>
 
-        {/* mobile menu — TweakFa .mpanel: absolute under the header, the
-            clip-path unfold + child stagger + scrim + scroll lock all ride
-            on html.mnav-on (this component's open state). `inert` keeps
-            the hidden panel out of the tab order and a11y tree. Rows are
-            the SAME eleven #anchors the SectorHud jumps to; the numbering
-            mirrors the HUD exactly (hero blank, content 01–10). */}
-        <div id={MENU_ID} className="mpanel" inert={!open}>
-          <span className="mp-lb">{t.hud.label}</span>
-          {sectorsAligned && (
-            <ul>
-              {SECTOR_IDS.map((id, i) => (
-                <li key={id}>
-                  <a
-                    href={`#${id}`}
-                    onClick={closeMenu}
-                    aria-current={active === id ? "true" : undefined}
-                    className="mp-row press"
-                  >
-                    <span
-                      dir="ltr"
-                      aria-hidden="true"
-                      className="gc-sector-n w-6 shrink-0 text-center"
-                    >
-                      {i === 0 ? "" : pad(i)}
-                    </span>
-                    <span className="min-w-0 flex-1">{names[i]}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-          <LanguageToggle className="mp-row press" onActivate={closeMenu} />
+        {/* mobile menu — tweakfa .mpanel, absolute UNDER the header, inside
+            it exactly like the mirror. The clip-path unfold + child stagger
+            + scrim + scroll lock all ride on html.mnav-on; `hidden` keeps
+            the closed panel out of the a11y tree (tf-home's display:block
+            intentionally overrides the UA sheet — clip-path is the visual
+            gate) and `inert` keeps it out of the tab order. */}
+        <nav
+          className="mpanel"
+          id={MNAV_ID}
+          aria-label={t.nav.menu}
+          tabIndex={-1}
+          hidden={!open}
+          inert={!open}
+        >
+          <span className="mp-lb">{t.tw.nav.product}</span>
+          <a
+            className="mp-row"
+            href="#show"
+            onClick={closeMenu}
+            aria-current={active === "show" ? "page" : undefined}
+          >
+            <span
+              className="mp-tile"
+              style={{ ["--dc" as any]: "var(--gc-violet-rgb)" }}
+            >
+              {/* tweakfa's shield mark — the mirror's product-row tile */}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+            </span>
+            <span className="mp-nm">{t.tw.nav.app}</span>
+            <svg
+              className="mp-chev"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m14 6-6 6 6 6" />
+            </svg>
+          </a>
+
+          <span className="mp-lb">{t.nav.features}</span>
+          {/* the calculators trio → PC MAX's three feature jumps; icons
+              copied from the mirror's mpanel (rect tool / perf line / doc) */}
+          <div className="mp-trio">
+            <a
+              href="#tools"
+              onClick={closeMenu}
+              aria-current={active === "tools" ? "page" : undefined}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="5" y="3" width="14" height="18" rx="2.5" />
+                <rect x="8" y="6" width="8" height="3.5" rx="1" />
+                <path d="M8.5 13.5h.01M12 13.5h.01M15.5 13.5h.01M8.5 17h.01M12 17h.01M15.5 17h.01" />
+              </svg>
+              <span>{t.tw.nav.frame}</span>
+            </a>
+            <a
+              href="#benchmarks"
+              onClick={closeMenu}
+              aria-current={active === "benchmarks" ? "page" : undefined}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 12h4l2-7 4 14 3-9 1.5 2H22" />
+              </svg>
+              <span>{t.nav.benchmarks}</span>
+            </a>
+            <a
+              href="#guides"
+              onClick={closeMenu}
+              aria-current={active === "guides" ? "page" : undefined}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M4 4.5h16v13H8l-4 3.5z" />
+                <path d="M8 9h8M8 13h5" />
+              </svg>
+              <span>{t.tw.nav.guides}</span>
+            </a>
+          </div>
+
+          {/* FAQ row — the mirror's consult chat-bubble tile (the closest
+              "help" glyph in its mpanel) on the product-family accent */}
+          <a
+            className="mp-row"
+            href="#faq"
+            onClick={closeMenu}
+            aria-current={active === "faq" ? "page" : undefined}
+          >
+            <span
+              className="mp-tile"
+              style={{ ["--dc" as any]: "var(--gc-violet-rgb)" }}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 3c4.7 0 8.5 3.1 8.5 7s-3.8 7-8.5 7c-.9 0-1.8-.1-2.6-.3L4.5 19l1-3.6C4.1 14.1 3.5 12.6 3.5 10c0-3.9 3.8-7 8.5-7Z" />
+                <path d="M9 10h.01M12 10h.01M15 10h.01" />
+              </svg>
+            </span>
+            <span className="mp-nm">{t.nav.faq}</span>
+          </a>
+
+          {/* language row + the mpanel Download CTA (full-width primary,
+              riding .mpanel>*'s child stagger like every row above) */}
+          <LanguageToggle className="mp-row" onActivate={closeMenu} />
           <a
             href="#download"
             onClick={closeMenu}
-            className="gc-btn-primary gc-btn-sm mt-3 inline-flex w-full items-center justify-center"
+            className="btn btn-p mt-3 w-full"
           >
             {t.nav.download}
           </a>
-        </div>
+        </nav>
       </header>
 
       {/* mobile-nav scrim — header's SIBLING, never a child (backdrop-
-          filter would pin a "fixed" scrim inside the header). Pointer
-          events + visibility are CSS-gated by html.mnav-on; keyboard users
-          have Escape, so the div itself stays aria-hidden. */}
-      <div className="mnav-scrim" aria-hidden="true" onClick={closeMenu} />
+          filter would pin a "fixed" scrim inside the header). Visibility
+          is CSS-gated: tf-home shows .mnav-scrim:not([hidden]) at ≤900px,
+          so the hidden attribute is the toggle — exactly the mirror's
+          wireBurger (s.hidden = !open). Keyboard users have Escape, so
+          the div itself stays aria-hidden. */}
+      <div
+        className="mnav-scrim"
+        hidden={!open}
+        aria-hidden="true"
+        onClick={closeMenu}
+      />
     </>
   );
 }
