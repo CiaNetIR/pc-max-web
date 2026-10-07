@@ -10,11 +10,14 @@ import { dictionary, type Locale } from "@/components/pcmax/i18n/dictionary";
 import { IS_STATIC_EXPORT, BASE_PATH } from "@/lib/gh-pages";
 import { Toaster } from "@/components/ui/toaster";
 import "../globals.css";
-/* Task 43 "Exact Clone" — the ported tweakfa.com homepage chrome
- * (header/footer/homepage-section CSS, crimson remap). Imported AFTER
- * globals.css so its definitions are authoritative for the classes it
- * owns (hs-*, uv-*, hp-*, shp-*, mpanel, fcols…). */
-import "../tf-home.css";
+/* Task 44 "Premium Product" — the new premium software-product design
+ * layer (pm-* namespace, product-centric hero, showcase console,
+ * frame-gen selector, benchmarks, navbar/footer v2). Exclusive
+ * namespaces: no collisions with globals.css, which keeps serving the
+ * carried-over FAQ / download-cta / mobile-cta-bar components and the
+ * shared token ramp. The Task-43 tweakfa clone layer (tf-home.css) is
+ * retired with the clone sections. */
+import "../premium.css";
 
 /* ---------------------------------------------------------------------
  * Self-hosted fonts (v3.0 "TweakFa Crimson", Task 42):

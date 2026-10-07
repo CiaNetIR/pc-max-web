@@ -599,6 +599,71 @@ const en = {
       about: "About",
     },
   },
+  pm: {
+    /* ── Task 44 "Premium Product" — interface-chrome strings for the
+     * DOM-built product panels (hero stage + showcase tabs) and the new
+     * interactive sections. These label an explicitly-marked illustrative
+     * preview; every factual claim is documented elsewhere on this page
+     * (pipeline / features / safety / FAQ). No metrics ride on them. ── */
+    hero: {
+      /* background panel — System Overview. Rows restate real product
+       * behaviors: Rust-engine GPU detection (pipeline.nodes), the
+       * server-synced catalogue (library.desc), snapshot-before-change
+       * (safety.backup). */
+      sysTitle: "System Overview",
+      sysSynced: "Synced",
+      sysGpu: "GPU",
+      sysGpuValue: "Detected by the Rust engine",
+      sysCatalogue: "Game catalogue",
+      sysCatalogueValue: "Synced from the server",
+      sysSnapshot: "Snapshot",
+      sysSnapshotValue: "Taken before every change",
+      /* middle panel — Game Profile */
+      profTitle: "Game Profile",
+      profChip: "Per-game",
+      profTarget: "Target FPS",
+      profApply: "Apply profile",
+      profNote: "Snapshot first",
+      /* foreground panel — Optimization complete */
+      optTitle: "Optimization complete",
+      optRollback: "Rollback any time",
+      optTelemetry: "Zero telemetry",
+      /* stage chrome — the honest preview framing (hero.stage pattern) */
+      preview: "Interface preview",
+      illustrative: "Illustrative — not live data",
+    },
+    show: {
+      /* two tab labels the legacy showcase.tabs block lacks; dashboard /
+       * windows / settings reuse t.showcase.tabs */
+      tabs: {
+        frame: "Frame Generation",
+        profiles: "Game Profiles",
+      },
+      search: "Search games…",
+      activity: "Recent activity",
+      activityItems: {
+        applied: "Profile applied",
+        snapshot: "Snapshot saved",
+        synced: "Catalogue synced",
+      },
+      /* real feature: versioned profile updates flagged “New optimization”
+       * (features.groups[0].items) */
+      badgeNew: "New optimization",
+      /* real profile names (features.groups[1].items — Maximum FPS,
+       * Balanced, High Quality, Ultra Quality); Latin brand terms in FA. */
+      profileNames: ["Maximum FPS", "Balanced", "High Quality", "Ultra Quality"],
+      versions: "Versioned updates",
+    },
+    fg: {
+      choose: "Choose a workflow",
+      installWith: "Install with PC MAX",
+      gpuAware: "The installer only offers what your hardware supports.",
+    },
+    bench: {
+      pick: "Pick a title",
+      fps: "fps",
+    },
+  },
   footer: {
     tagline: "Premium Windows gaming optimization.",
     product: "Product",
@@ -1214,6 +1279,55 @@ const fa: Dictionary = {
       guides: "راهنماها",
       brand: "PC MAX",
       about: "درباره",
+    },
+  },
+  pm: {
+    /* ── Task 44 — معادل فارسی رشته‌های رابط نمایشی؛ ادعاها همه در همین
+     * صفحه مستند هستند (pipeline / features / safety / FAQ). ── */
+    hero: {
+      sysTitle: "نمای سیستم",
+      sysSynced: "همگام",
+      sysGpu: "GPU",
+      sysGpuValue: "تشخیص محلی با موتور Rust",
+      sysCatalogue: "کتالوگ بازی‌ها",
+      sysCatalogueValue: "همگام از سرور",
+      sysSnapshot: "اسنپ‌شات",
+      sysSnapshotValue: "پیش از هر تغییر",
+      profTitle: "پروفایل بازی",
+      profChip: "به‌ازای هر بازی",
+      profTarget: "Target FPS",
+      profApply: "اعمال پروفایل",
+      profNote: "ابتدا اسنپ‌شات",
+      optTitle: "بهینه‌سازی کامل شد",
+      optRollback: "بازگشت در هر زمان",
+      optTelemetry: "بدون تله‌متری",
+      preview: "پیش‌نمایش رابط",
+      illustrative: "نمایشی — داده‌ی زنده نیست",
+    },
+    show: {
+      tabs: {
+        frame: "فریم‌ساخت",
+        profiles: "پروفایل بازی‌ها",
+      },
+      search: "جست‌وجوی بازی…",
+      activity: "فعالیت اخیر",
+      activityItems: {
+        applied: "پروفایل اعمال شد",
+        snapshot: "اسنپ‌شات ذخیره شد",
+        synced: "کاتالوگ همگام شد",
+      },
+      badgeNew: "بهینه‌سازی جدید",
+      profileNames: ["Maximum FPS", "Balanced", "High Quality", "Ultra Quality"],
+      versions: "به‌روزرسانی نسخه‌دار",
+    },
+    fg: {
+      choose: "یک جریان کاری را انتخاب کنید",
+      installWith: "نصب با PC MAX",
+      gpuAware: "نصب‌کننده فقط چیزی را پیشنهاد می‌دهد که سخت‌افزار شما پشتیبانی کند.",
+    },
+    bench: {
+      pick: "یک بازی را انتخاب کنید",
+      fps: "fps",
     },
   },
   footer: {

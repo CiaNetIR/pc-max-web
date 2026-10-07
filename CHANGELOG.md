@@ -4,6 +4,73 @@ All notable changes to **PC MAX Web** — the official PC MAX website — are do
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## [3.0.0] — 2026-10-07
+
+**Premium Product** — the owner's comprehensive redesign brief: lift the
+site from "a good landing page" to a **premium software product website**
+(Premium · Modern · Technical · Precise · Trustworthy · Product-focused ·
+Cinematic · Minimal, without gaming-template noise). The Task-43 tweakfa
+clone layer is retired; an original PC MAX design language takes over.
+
+- **premium.css (NEW, ~1.4k lines)** — the premium design layer: motion
+  tokens (--pm-ease + 160/240/320/650ms scale), graphite/charcoal
+  surfaces with inset hairline rings, ONE controlled crimson accent,
+  the "frame progression" motif (three ascending bars — the PC MAX
+  signature, repeated in kickers/separators/footer), the rv2
+  scroll-reveal engine (IO, progressive-enhancement, reduced-motion
+  inert), and full RTL via logical properties throughout.
+- **Hero (REBUILT — the headline change)** — product-centric split
+  composition: 3-line value prop ("More FPS. / Better frames. / Full
+  control." with the crimson punch line) + trust chips + platform line,
+  beside a LAYERED interface mock built from real DOM panels — System
+  Overview inspector floating over the Game Profile surface (4 real
+  profile names, "New optimization" badge, Windows-convention apply
+  row), Optimization Complete toast floating over the bottom corner.
+  Entrance: fx-on gated word-reveal sweep + depth entrance ≤0.9s; idle:
+  desynced ±4-5px floats, dot pulse ring, GPU detection scan (all
+  transform/opacity). Geometry QA'd to never cover functional content.
+  Mobile: copy column flattens (display:contents order) so the product
+  visual sits between CTAs and trust chips above the fold; sys panel
+  compacts to header+GPU row ≤480px.
+- **Showcase (NEW)** — the console: 5-tab product window (Dashboard /
+  Frame Generation / Game Profiles / Optimized Windows / Settings) with
+  morph-pill tab indicator (physical offset math, RTL-safe), decorative
+  icon rail, keyed panel sweep, DOM-built previews from real dictionary
+  data; labelled "Interface preview" per the honest-preview pattern.
+- **FrameGen (NEW)** — the three frame-generation workflows (OptiScaler /
+  AI Optical Flow / Streamline) as an interactive radiogroup selector +
+  single detail panel (badges, bullets, technical details, guarded
+  compat) + a documented-fact stat strip (3 families / DX12 / RTX 20+ /
+  RTX 40/50).
+- **Benchmarks (NEW)** — game selector (6 real titles) → animated
+  before/after readout (rAF count-up, instant under reduced-motion) +
+  proportional bars + computed uplift chips + the measured +34%
+  headline with gamesNote + methodology rendered beside it.
+- **Safety (NEW)** — editorial split: hardening rows + real test counts
+  (235/151/48/36) + the snapshot→apply→rollback→restore timeline.
+- **Install strip (NEW)** — 7 verified steps + CTA tile (clean 2×4 grid).
+- **Navbar v2 (NEW)** — premium sticky header: brand | Product/Features/
+  Benchmarks/FAQ | lang toggle + Download; tight-on-scroll, scroll-spy
+  (aria-current), burger→fullscreen mnav ≤900px (scroll lock, Escape,
+  focus return, safe-area).
+- **Footer v2 (NEW)** — minimal premium: brand+tagline+platform chips,
+  3 link columns, Radix legal dialogs ported, motif back-to-top.
+- **Retired** — tf-home.css + the tweakfa clone sections (hero-slideshow,
+  show-sec, uv-sec, hp-soon, hp-calc, hp-new, clone navbar/footer);
+  content absorbed (benchmarks→#benchmarks, workflows→#tools, Pro→
+  download edition picker, guides→FAQ). Files left on disk, unimported.
+- **Kept untouched** — FAQ + DownloadCta + MobileCtaBar (globals.css
+  keeps serving them), the [[...lang]] / + /fa architecture, fonts,
+  SEO/JSON-LD, i18n dictionary (extended with the pm interface-chrome
+  block, EN+FA), skip-link, error pages, analytics, SW (cache bumped).
+- **QA** — tsc 0 / eslint 0 (whole project); agent-browser E2E EN+FA:
+  all 8 sections, tab morph + panel swaps, radiogroup selection,
+  benchmark retargeting (68→94 … 118→144), navbar tight + scroll-spy,
+  mobile menu open/close/lock, 1440/800/390/320 all overflow-free,
+  zero console errors; VLM reviews (3 iterations) — final scores EN
+  9/8/9/9, FA 8/7/8/8; measured-geometry RTL audit (hero/footer
+  mirroring verified via bounding boxes).
+
 ## [2.10.0] — 2026-10-07
 
 **Exact Clone** — owner request: «میخام طبق این فایلا سایتم ساخته بشه دقیقعا

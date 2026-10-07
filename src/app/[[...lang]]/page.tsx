@@ -1,17 +1,18 @@
 import { notFound } from "next/navigation";
-import { Navbar } from "@/components/pcmax/navbar";
-import { HeroSlideshow } from "@/components/pcmax/tf/hero-slideshow";
-import { ShowSec } from "@/components/pcmax/tf/show-sec";
-import { UvSec } from "@/components/pcmax/tf/uv-sec";
-import { HpSoon } from "@/components/pcmax/tf/hp-soon";
-import { HpCalc } from "@/components/pcmax/tf/hp-calc";
-import { HpNew } from "@/components/pcmax/tf/hp-new";
+import { Navbar } from "@/components/pcmax/pm/navbar";
+import { Footer } from "@/components/pcmax/pm/footer";
+import { Hero } from "@/components/pcmax/pm/hero";
+import { Showcase } from "@/components/pcmax/pm/showcase";
+import { FrameGen } from "@/components/pcmax/pm/framegen";
+import { Benchmarks } from "@/components/pcmax/pm/benchmarks";
+import { Safety } from "@/components/pcmax/pm/safety";
+import { InstallStrip } from "@/components/pcmax/pm/install-strip";
+import { RevealGate2 } from "@/components/pcmax/pm/reveal";
 import { Faq } from "@/components/pcmax/sections/faq";
 import { DownloadCta } from "@/components/pcmax/sections/download-cta";
 import { MobileCtaBar } from "@/components/pcmax/sections/mobile-cta-bar";
-import { Footer } from "@/components/pcmax/footer";
-import { RevealGate } from "@/components/pcmax/tf/reveal";
 import { AnalyticsBeacon } from "@/components/pcmax/ui/analytics-beacon";
+import { Motif } from "@/components/pcmax/pm/motif";
 import type { Locale } from "@/components/pcmax/i18n/dictionary";
 
 /*
@@ -26,30 +27,34 @@ export function generateStaticParams() {
 }
 
 /*
- * Task 43 "Exact Clone" — the page is now a structural port of the
- * owner's uploaded tweakfa.com homepage mirror (tweakfa-site.zip):
+ * Task 44 "Premium Product" — the homepage composition:
  *
- *   header (sticky blur + dropdown groups + mpanel)
- *   → hero hs          [4-slide deck carousel: app / frame gen / profiles /
- *                        benchmarks — pill tabs + arrows + caption swap +
- *                        per-slide accent glow + 7.3s auto-dwell]
- *   → show-sec         [product showcase: ticks + framed console art]
- *   → uv-sec           [before/after: real bench numbers, 6 game tabs,
- *                        5.3s auto-dwell]
- *   → hp-soon          [PC MAX Pro coming-soon strip]
- *   → hp-calc          [the 3 frame-gen workflow cards]
- *   → hp-new           [guides: explore card + FAQ card]
- *   → faq              [kept — real answers, details pattern]
- *   → download-cta     [kept — real release data, shcard]
- *   → footer           [tweakfa fcols/fbar + global wordmark]
+ *   header            [premium navbar: brand | product/features/benchmarks/
+ *                      faq | lang + download — tight on scroll, mnav ≤900px]
+ *   → hero #top       [product-centric hero: 3-line value prop + trust
+ *                      chips + layered interface mock (sys inspector /
+ *                      game profile surface / completion toast)]
+ *   → showcase #show  [the console: 5-tab product window (dashboard /
+ *                      frame gen / profiles / windows / settings) with
+ *                      morph-pill tab strip — DOM-built, labelled preview]
+ *   → framegen #tools [the 3 frame-generation workflows as an interactive
+ *                      radiogroup selector + documented-fact stat strip]
+ *   → benchmarks      [game selector → before/after readout + animated
+ *     #benchmarks      bars + measured +34% headline + honest notes]
+ *   → safety #safety  [editorial split: the transaction story timeline +
+ *                      real test counts + hardening rows]
+ *   → install         [7 verified steps + CTA tile, compact strip]
+ *     #install
+ *   → faq             [kept — real answers, native details pattern]
+ *   → download-cta    [kept — real release data, verify row, waitlist]
+ *   → footer          [premium minimal: brand/links/legal dialogs/bar]
  *
- * Retired sections (content absorbed, nothing invented): game-ticker
- * (titles live in the uv game tabs), what-is/pipeline (hero lead + show
- * ticks + FAQ), multiframe (hp-calc), profiles (hero slide 3 + ticks),
- * safety (show ticks + FAQ), benchmarks (uv-sec), social-proof (FAQ +
- * download card), install-flow journey (hp-new card), app-showcase
- * console (show-sec art), SectorHud + ScrollProgress (no tweakfa
- * equivalent).
+ * Retired in 44 (content absorbed, nothing invented): the Task-43 tweakfa
+ * clone layer (hero-slideshow / show-sec / uv-sec / hp-soon / hp-calc /
+ * hp-new + tf-home.css) — benchmarks data now lives in the interactive
+ * #benchmarks section, frame-gen workflows in #tools, Pro/premium in the
+ * download card's edition picker, guides in the FAQ. FAQ + DownloadCta +
+ * MobileCtaBar are carried over untouched (globals.css keeps serving them).
  */
 export default async function Home({
   params,
@@ -61,21 +66,26 @@ export default async function Home({
   if (lang && lang.length > 0 && lang[0] !== "fa") notFound();
 
   const locale: Locale = lang && lang[0] === "fa" ? "fa" : "en";
+  void locale; // sections read the locale from the language context
 
   return (
     <div className="relative min-h-screen overflow-x-clip">
       <AnalyticsBeacon />
-      {/* tweakfa scroll-reveal engine — rv-on/.in (reduced-motion: inert) */}
-      <RevealGate />
+      {/* Task 44 premium reveal engine — rv2/.in (reduced-motion: inert) */}
+      <RevealGate2 />
       <Navbar />
       {/* id="main-content" — target of the layout's skip-to-content link */}
       <main id="main-content">
-        <HeroSlideshow />
-        <ShowSec locale={locale} />
-        <UvSec />
-        <HpSoon locale={locale} />
-        <HpCalc />
-        <HpNew />
+        <Hero />
+        <Showcase />
+        <FrameGen />
+        <Benchmarks />
+        <Safety />
+        <InstallStrip />
+        {/* motif divider at the pm→legacy boundary (install → FAQ) */}
+        <div className="pm-sect-in pm-div" aria-hidden="true">
+          <Motif size={12} />
+        </div>
         <Faq />
         <DownloadCta />
       </main>
