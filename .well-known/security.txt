@@ -1,0 +1,6 @@
+Contact: mailto:support@pcmax.io
+Contact: mailto:bugs@pcmax.io
+Expires: 2027-09-13T23:59:59.000Z
+Preferred-Languages: en, fa
+Canonical: https://cianetir.github.io/pc-max-web/.well-known/security.txt
+Policy: https://cianetir.github.io/pc-max-web/#footer

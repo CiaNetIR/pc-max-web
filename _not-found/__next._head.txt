@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[97367,["/pc-max-web/_next/static/chunks/ff1a16fafef87110.js","/pc-max-web/_next/static/chunks/d2be314c3ece3fbe.js"],"ViewportBoundary"]
+3:I[97367,["/pc-max-web/_next/static/chunks/ff1a16fafef87110.js","/pc-max-web/_next/static/chunks/d2be314c3ece3fbe.js"],"MetadataBoundary"]
+4:"$Sreact.suspense"
+5:I[27201,["/pc-max-web/_next/static/chunks/ff1a16fafef87110.js","/pc-max-web/_next/static/chunks/d2be314c3ece3fbe.js"],"IconMark"]
+0:{"buildId":"iTyIgeGDK2lhsc5TgHydl","rsc":["$","$1","h",{"children":[["$","meta",null,{"name":"robots","content":"noindex"}],["$","$L2",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L3",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","link","0",{"rel":"manifest","href":"/pc-max-web/manifest.webmanifest"}],["$","link","1",{"rel":"icon","href":"/pc-max-web/icon.png?icon.88322667.png","sizes":"512x512","type":"image/png"}],["$","link","2",{"rel":"icon","href":"/pc-max-web/icon.svg?icon.6eb32d9d.svg","sizes":"any","type":"image/svg+xml"}],["$","link","3",{"rel":"apple-touch-icon","href":"/pc-max-web/apple-icon.png?apple-icon.5aa35ca7.png","sizes":"180x180","type":"image/png"}],["$","$L5","4",{}]]}]}]}],null]}],"loading":null,"isPartial":false}

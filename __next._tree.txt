@@ -1,0 +1,4 @@
+:HL["/pc-max-web/_next/static/chunks/e189680ab1ca272e.css","style"]
+:HL["/pc-max-web/fonts/Poppins-SemiBold.latin.woff2","font",{"crossOrigin":"anonymous","type":"font/woff2"}]
+:HL["/pc-max-web/fonts/Poppins-Bold.latin.woff2","font",{"crossOrigin":"anonymous","type":"font/woff2"}]
+0:{"buildId":"iTyIgeGDK2lhsc5TgHydl","tree":{"name":"","paramType":null,"paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"lang","paramType":"oc","paramKey":"","hasRuntimePrefetch":false,"slots":{"children":{"name":"__PAGE__","paramType":null,"paramKey":"__PAGE__","hasRuntimePrefetch":false,"slots":null,"isRootLayout":false}},"isRootLayout":true}},"isRootLayout":false},"staleTime":300}

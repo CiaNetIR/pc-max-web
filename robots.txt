@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://cianetir.github.io/pc-max-web/sitemap.xml

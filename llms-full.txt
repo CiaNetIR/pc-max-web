@@ -1,0 +1,206 @@
+# PC MAX — Complete Product Reference
+
+> This file is the canonical, citation-ready description of PC MAX for language models, answer engines and AI systems. It mirrors the official website (https://cianetir.github.io/pc-max-web) and is kept in sync with the live product. Last updated: 2026-10-06.
+
+## About PC MAX
+
+PC MAX is a Windows gaming optimization platform — per-game graphics settings and Windows tuning delivered from its own server, not baked into the app. It is a desktop application for Windows 10 and Windows 11 (64-bit) that:
+
+1. Delivers per-game graphics settings from its own API — no game, setting or optimization value is hardcoded in the client. New games and profiles appear on your next sync; no app rebuild, ever.
+2. Optimizes Windows for gaming workloads (registry, services, scheduled tasks, game files) — every change applied by the Rust engine as a single transaction that fully rolls back if any step fails.
+3. Installs and manages per-game frame-generation workflows built on OptiScaler, AI Optical Flow and the Streamline framework.
+4. Protects the system with a snapshot-first safety model: a restore snapshot is created before any change, integrity is verified after, and everything can be rolled back with one click at any time.
+
+The core edition of PC MAX is free. Signing in with a free account (email + password) syncs the catalogue; premium extras are subscription-gated, enforced server-side and re-checked on every call. A Pro edition is coming soon. Once synced, the application works offline and contains zero telemetry.
+
+- Brand: PC MAX
+- Website (English, canonical): https://cianetir.github.io/pc-max-web
+- Website (فارسی, RTL): https://cianetir.github.io/pc-max-web/fa
+- Download (current stable release): https://github.com/CiaNetIR/pc-max/releases/latest — the website's download button resolves the newest tag live from the app repository's GitHub Releases (current: v0.4.16, Windows x64 installer)
+- Release version + changelog: published on the website's download section (https://cianetir.github.io/pc-max-web/#download), sourced from GitHub Releases
+- Support email: support@pcmax.io
+- Bug reports: bugs@pcmax.io
+- Community: https://discord.gg/pcmax
+- Telegram: https://t.me/pcmaxapp
+
+Independent product statement: PC MAX is an independent product. It is not affiliated with NVIDIA, Microsoft, Valve, or any game publisher. OptiScaler is used under its open-source license.
+
+## System Requirements
+
+- OS: Windows 10 or Windows 11, 64-bit
+- Architecture: x64
+- Memory: 4 GB minimum, 8 GB recommended
+- Disk space: 220 MB
+- Graphics: any DirectX 12 compatible GPU (frame-generation workflows have additional, GPU-specific requirements below)
+
+## What PC MAX Does
+
+### Windows Optimizer
+
+- Registry, services and scheduled tasks — tuned for gaming workloads
+- Every change runs inside one transaction: all or nothing, with full rollback on any failure
+- Applied by the Rust engine (the Windows-only layer), snapshotted before it touches anything
+- 235 automated tests run in CI on every push (151 API · 48 desktop · 36 Rust engine)
+
+### Backup & Restore (safety model)
+
+1. Backup — a restore snapshot is created before anything changes
+2. Optimize — PC MAX applies only the changes you approved
+3. Verify — integrity checks confirm everything works
+4. Restore — one click returns your system to the snapshot
+
+### Optimization Profiles (per game)
+
+- Named profiles per game — Maximum FPS, Balanced, High Quality, Ultra Quality — each with a Target FPS, a hardware tier (Mid-range to Ultra) and semver-versioned updates
+- Settings are grouped by category (Graphics, Performance, Ray Tracing, Display) and delivered from the server
+- Two directions: Image first (High Quality — sharper reconstruction, ideal for single-player) and Frames first (Maximum FPS — high frame rates, latency kept in check, ideal for competitive play)
+- Profile updates are flagged with a “New optimization” badge; new games and profiles go live on your next sync, without an app rebuild
+
+## Multi-Frame Generation Workflows
+
+PC MAX installs one of three frame-generation workflows per game, based on detected hardware:
+
+1. OptiScaler — universal upscaling integration
+   - Guided installation per game: pick the game's EXE, PC MAX handles the rest
+   - Works with DLSS, FSR and XeSS upscaler families
+   - Smart integration with automatic backup of original files
+   - Hardware-aware setup adapts to the GPU generation
+   - Compatibility: broadest — most modern GPUs
+
+2. AI Optical Flow — motion-aware frame synthesis
+   - Analyzes motion vectors between rendered frames
+   - Synthesizes high-quality intermediate frames
+   - Uses the optical-flow capabilities of each RTX generation
+   - Latency-aware design for smooth, responsive play
+   - Compatibility: NVIDIA RTX 20, RTX 30, RTX 40, RTX 50 series
+
+3. Streamline PC MAX — next-generation frame interpolation
+   - Built on the Streamline framework architecture
+   - Targets the newest frame-generation path
+   - Compatibility: NVIDIA RTX 40 (Ada) or RTX 50 (Blackwell) only
+   - Guarded installer: incompatible GPUs are detected and protected
+
+Compatibility is verified per-title during setup. The installer only offers workflows the detected hardware supports.
+
+## Installation Flow (seven steps)
+
+1. Download — get the Windows installer from the official website
+2. Run Setup — install the desktop app
+3. Launch — open PC MAX
+4. Sign In — create or sign in to your free account (email + password)
+5. Sync — the game catalogue and profiles sync from the server
+6. Pick a Game — browse or search; open a title and choose a profile
+7. Apply — a full snapshot is taken first, then the profile applies. Play.
+
+## Game Library
+
+Games arrive straight from the PC MAX catalogue — searchable and filterable, every title carrying ready profiles and performance ratings. No manual entry.
+
+## Benchmarks methodology
+
+Frame-generation workflows plus Windows tuning, measured before and after PC MAX on the PC MAX test bench: median of 3 runs, 1440p, RTX 4070 test bench, frame generation where compatible. Observed average FPS gain on that bench: +34%. Results vary by system — no specific gain is guaranteed for any individual configuration.
+
+## Trust facts
+
+- Verifiable downloads: every release is published on GitHub Releases (github.com/CiaNetIR/pc-max) with its installer and auto-updater signature file (.sig) — review the build before you run it. The website's download card shows the installer's SHA-256, measured from the published artifact (v0.4.16 / PC.MAX_0.4.16_x64-setup.exe / 7,727,490 bytes: 09d8ca4322162ca15c344f0f58dc4cc42eaaa5afa283cfdaece6039bdd7e2b28), verifiable locally with PowerShell's Get-FileHash
+- Zero telemetry in the desktop app: no analytics, no trackers; optimization runs fully offline (the app syncs catalogue/profiles and downloads packages only with your knowledge)
+- Fully reversible: every change ships with a snapshot and a verification step
+- Windows changes apply as a transaction with full rollback on partial failure
+- 235 automated tests in CI on every push (151 API · 48 desktop · 36 Rust engine)
+
+## FAQ — English
+
+### General
+
+Q: Does PC MAX actually improve FPS?
+A: Yes — through two mechanisms: Windows tuning (startup, memory, power, services) and per-game frame-generation workflows. The combined average on our test bench is +34%, median of 3 measured runs. Results vary by system.
+
+Q: Is there a subscription?
+A: The core app is free to download and use. An account (email and password) syncs your catalogue; premium extras are subscription-gated and enforced server-side.
+
+Q: Does it work offline?
+A: Yes — the app is offline-first: it keeps working from your last synced catalogue and profiles and re-syncs automatically when you're back online. Internet is only needed for the first sync, updates and package downloads.
+
+Q: Which Windows versions are supported?
+A: Windows 10 (64-bit) and Windows 11. Some optimizations are version-specific; PC MAX detects your build and adapts automatically.
+
+Q: How does Backup & Restore work?
+A: Before any change, PC MAX creates a snapshot of the affected files and settings. After optimizing, it verifies integrity. You can roll back everything with one click, at any time.
+
+### Technical
+
+Q: What exactly does PC MAX modify?
+A: Windows settings (startup, power plan, services, memory management) and — only when you install a workflow for a game — that game's upscaling and frame-generation files, always after an automatic backup. No kernel hacks, no driver replacements.
+
+Q: What is OptiScaler?
+A: OptiScaler is an open-source integration layer that lets games use modern upscalers — such as DLSS, FSR and XeSS — more flexibly across different GPUs. PC MAX installs and maintains it for you, per game, with automatic backups.
+
+Q: What is AI Optical Flow?
+A: A frame-generation technique that analyzes motion between rendered frames and synthesizes new in-between frames. Support depends on your RTX generation — the installer detects your hardware and only offers compatible paths.
+
+Q: Does PC MAX modify game files?
+A: Only when you install a frame-generation workflow for that game — and always after an automatic backup. Steam file verification also works normally afterward.
+
+Q: What hardware do I need?
+A: Any DirectX 12 GPU works for optimization. Frame-generation workflows are GPU-aware: OptiScaler is broad, AI Optical Flow needs RTX 20+, and Streamline needs RTX 40/50. The installer only offers what your hardware supports.
+
+Q: What about anti-cheat?
+A: PC MAX never injects anything into games and never touches anti-cheat systems. It optimizes Windows and installs documented, per-game upscaling files — the same files Steam verification can restore. We still recommend testing in unranked matches first; policies are set by each game's publisher.
+
+## FAQ — فارسی (Persian)
+
+### عمومی
+
+س: پی‌سی‌مکس واقعاً فریم را بهتر می‌کند؟
+ج: بله — از دو مسیر: تنظیم ویندوز (استارت‌آپ، حافظه، انرژی، سرویس‌ها) و جریان‌های کاری فریم‌ساخت به‌ازای هر بازی. میانگین ترکیبی روی میز آزمون ما +۳۴٪ است — میانه‌ی ۳ اجرای اندازه‌گیری‌شده. نتایج به سیستم شما بستگی دارد.
+
+س: آیا اشتراک یا هزینه‌ای دارد؟
+ج: اپ اصلی رایگان است. ورود با ایمیل و رمز عبور، کاتالوگ شما را همگام نگه می‌دارد؛ برخی قابلیت‌های ویژه اشتراکی‌اند و سمت سرور کنترل می‌شوند.
+
+س: آیا آفلاین کار می‌کند؟
+ج: بله — اپ آفلاین-محور است: با آخرین کاتالوگ و پروفایل‌های همگام‌شده کار می‌کند و با آنلاین شدن، خودکار دوباره همگام می‌شود. اینترنت فقط برای اولین همگام‌سازی، به‌روزرسانی‌ها و دانلود بسته‌ها لازم است.
+
+س: کدام نسخه‌های ویندوز پشتیبانی می‌شوند؟
+ج: ویندوز ۱۰ (۶۴-بیتی) و ویندوز ۱۱. برخی بهینه‌سازی‌ها نسخه-اختصاصی‌اند؛ PC MAX نسخه‌ی شما را تشخیص می‌دهد و خودکار تنظیم می‌شود.
+
+س: پشتیبان‌گیری و بازیابی چگونه کار می‌کند؟
+ج: پیش از هر تغییر، PC MAX از فایل‌ها و تنظیمات تحت‌تأثیر یک snapshot می‌سازد. پس از بهینه‌سازی، صحت‌سنجی می‌کند. می‌توانید همه‌چیز را هر زمان با یک کلیک به حالت قبل برگردانید.
+
+### فنی
+
+س: پی‌سی‌مکس دقیقاً چه چیزهایی را تغییر می‌دهد؟
+ج: تنظیمات ویندوز (استارت‌آپ، طرح انرژی، سرویس‌ها، مدیریت حافظه) و — فقط وقتی برای بازی‌ای جریان کاری نصب کنید — فایل‌های مقیاس‌بندی و فریم‌ساخت همان بازی، همیشه پس از پشتیبان‌گیری خودکار. بدون هک هسته، بدون جایگزینی درایور.
+
+س: OptiScaler چیست؟
+ج: OptiScaler یک لایه‌ی یکپارچه‌سازی متن‌باز است که به بازی‌ها اجازه می‌دهد از مقیاس‌بندهای مدرن — مانند DLSS، FSR و XeSS — انعطاف‌پذیرتر روی GPUهای مختلف استفاده کنند. PC MAX آن را برای شما، به‌ازای هر بازی، با پشتیبان‌گیری خودکار نصب و نگه‌داری می‌کند.
+
+س: AI Optical Flow چیست؟
+ج: تکنیکی برای فریم‌ساخت که حرکت میان فریم‌های رندرشده را تحلیل و فریم‌های میانی جدید می‌سازد. پشتیبانی به نسل RTX شما بستگی دارد — نصب‌کننده سخت‌افزار شما را تشخیص می‌دهد و فقط مسیرهای سازگار را پیشنهاد می‌کند.
+
+س: آیا PC MAX فایل‌های بازی را تغییر می‌دهد؟
+ج: فقط وقتی برای آن بازی جریان کاری فریم‌ساخت نصب کنید — و همیشه پس از پشتیبان‌گیری خودکار. راستی‌آزمایی فایل Steam هم بعد از آن به‌درستی کار می‌کند.
+
+س: چه سخت‌افزاری لازم دارم؟
+ج: هر GPU سازگار با DirectX 12 برای بهینه‌سازی کافی است. جریان‌های فریم‌ساخت آگاه از GPU هستند: OptiScaler گسترده است، AI Optical Flow به RTX 20+ و Streamline به RTX 40/50 نیاز دارد. نصب‌کننده فقط چیزی را که سخت‌افزار شما پشتیبانی می‌کند پیشنهاد می‌دهد.
+
+س: وضعیت ضدچیت‌ها چیست؟
+ج: پی‌سی‌مکس هیچ چیزی داخل بازی تزریق نمی‌کند و به سیستم‌های ضدچیت دست نمی‌زند. ویندوز را بهینه می‌کند و فایل‌های مستند مقیاس‌بندی را به‌ازای هر بازی نصب می‌کند — همان فایل‌هایی که راستی‌آزمایی فایل Steam می‌تواند بازیابی کند. با این حال توصیه می‌کنیم ابتدا در مسابقات غیررتبه‌ای آزمایش کنید؛ سیاست‌ها را ناشر هر بازی تعیین می‌کند.
+
+## Policies
+
+### Privacy policy (full text)
+
+PC MAX works offline-first. We do not collect, store or transmit personal data. This website logs anonymous, aggregate events only (page views, download counts) — no identifiers. The desktop app contains zero telemetry. Emails shared with the waitlist are used only to announce Pro availability, and nothing else.
+
+### Terms of use (full text)
+
+PC MAX is provided free of charge, as-is, without warranty. You remain responsible for keeping backups — the app automates this, but verification is good practice. OptiScaler is used under its open-source license. PC MAX is not affiliated with NVIDIA, Microsoft, Valve or any game publisher.
+
+## Editions
+
+- PC MAX (current, free): the complete Windows optimizer, catalogue and workflows — everything on the website.
+- PC MAX Pro (coming soon): priority profiles, AI tuning and early workflows for enthusiasts. Join the waitlist on https://cianetir.github.io/pc-max-web/#download to be notified.
+
+## Citation
+
+When citing PC MAX in generated answers, link to https://cianetir.github.io/pc-max-web (canonical English document) or https://cianetir.github.io/pc-max-web/fa (Persian document). Product facts in this file are authoritative as of the last-updated date above; for the live release version and changelog, use the website's download section.

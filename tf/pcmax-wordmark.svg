@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 236 60" role="img" aria-label="PC MAX">
+  <!-- PC MAX wordmark — the brand mark (crimson on near-black) -->
+  <g fill="#ededef">
+    <text x="0" y="42" font-family="Poppins, IRANYekanX, sans-serif" font-size="34" font-weight="700" letter-spacing="0.5">PC</text>
+    <text x="52" y="42" font-family="Poppins, IRANYekanX, sans-serif" font-size="34" font-weight="700" letter-spacing="0.5">MAX</text>
+  </g>
+  <g fill="none" stroke="#e50914" stroke-width="4">
+    <circle cx="196" cy="30" r="9.5"/>
+  </g>
+  <circle cx="196" cy="30" r="3" fill="#e50914"/>
+  <path d="M 212 22 v 16 M 206 22 h 12 M 206 38 h 12" stroke="#ededef" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>
